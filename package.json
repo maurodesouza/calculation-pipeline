@@ -1,0 +1,13 @@
+{
+  "name": "calculation-pipeline",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "compose:up": "docker-compose -f ./docker-compose.yml up -d",
+    "compose:down": "docker-compose -f ./docker-compose.yml down -v"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.4"
+}
