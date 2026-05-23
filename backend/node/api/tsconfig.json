@@ -11,6 +11,8 @@
     "moduleResolution": "node",
     "target": "esnext",
     "types": ["node"],
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
