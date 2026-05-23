@@ -12,3 +12,4 @@ export { RequiredOperationError } from "./required-operation-error";
 export { InvalidOperationError } from "./invalid-operation-error";
 export { InvalidStatusError } from "./invalid-status-error";
 export { InvalidStateTransitionError } from "./invalid-state-transition-error";
+export { PipelineNotFoundError } from "./pipeline-not-found-error";
