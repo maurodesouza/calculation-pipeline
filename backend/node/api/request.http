@@ -1,0 +1,11 @@
+POST http://localhost:3000/pipelines
+Content-Type: application/json
+
+{
+  "name": "Outro teste",
+  "description": "Outro teste"
+}
+
+###
+
+GET http://localhost:3000/pipelines/de715b65-1fe4-4096-9b93-06e2d8158029
