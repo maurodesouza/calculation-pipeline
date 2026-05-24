@@ -24,7 +24,7 @@ CREATE TABLE cp.steps (
     operation VARCHAR(255) NOT NULL,
     by NUMERIC NOT NULL,
 
-    next_step_id UUID REFERENCES cp.steps(id),
+    next_step_id UUID,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
