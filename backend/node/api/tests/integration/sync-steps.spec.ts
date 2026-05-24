@@ -153,6 +153,7 @@ describe("SyncStepsUseCase Integration", () => {
 
 		const id1 = UUID.create().getValue();
 		const id2 = UUID.create().getValue();
+		const id3 = UUID.create().getValue();
 
 		const input = {
 			pipelineId: pipeline!.getId(),
@@ -164,7 +165,7 @@ describe("SyncStepsUseCase Integration", () => {
 					nextStepId: id2,
 				},
 				{
-					id: id2,
+					id: id3,
 					operation: "multiply",
 					by: 2,
 				},
