@@ -35,7 +35,7 @@ describe("SyncStepsUseCase Integration", () => {
 		await pgAdapter.close();
 	});
 
-	it.only("should sync steps successfully", async () => {
+	it("should sync steps successfully", async () => {
 		const [pipeline, createError] = Pipeline.create({
 			name: "Test Pipeline",
 			description: "A test pipeline",
