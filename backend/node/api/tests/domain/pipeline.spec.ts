@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { Pipeline } from '../../src/domain/entities/pipeline';
+import { Step } from '../../src/domain/entities/step';
 import { UUID } from '../../src/domain/value-objects/uuid';
 import { InvalidUuidError } from '../../src/domain/errors/invalid-uuid-error';
 import { RequiredUuidError } from '../../src/domain/errors/required-uuid-error';
+import { InvalidStateTransitionError } from '../../src/domain/errors';
 
 function expectSuccess<T>(
 	result: [T | undefined, Error | undefined],
@@ -93,6 +95,173 @@ describe('Pipeline', () => {
 
 				expect(error).toBeInstanceOf(InvalidUuidError);
 			}
+		});
+	});
+
+	describe('validateStepChain', () => {
+		it('should not return error for valid chains', () => {
+			const pipelineId = UUID.create().getValue()
+			const id1 = UUID.create().getValue()
+			const id2 = UUID.create().getValue()
+			const id3 = UUID.create().getValue()
+			const id4 = UUID.create().getValue()
+
+			const step1 = expectSuccess(Step.create({
+				id: id1,
+				pipelineId,
+				operation: "sum",
+				by: 10,
+				nextStepId: id2,
+			}));
+
+			const step2 = expectSuccess(Step.create({
+				id: id2,
+				pipelineId,
+				operation: "multiply",
+				by: 2,
+				nextStepId: id3,
+			}));
+
+			const step3 = expectSuccess(Step.create({
+				id: id3,
+				pipelineId,
+				operation: "multiply",
+				by: 2,
+			}));
+
+			const uniqueStep = expectSuccess(Step.create({
+				id: id4,
+				pipelineId,
+				operation: "multiply",
+				by: 2,
+			}));
+
+			{
+				const [, error] = Pipeline.validateStepChain([step1!, step2!, step3!]);
+				expect(error).toBeUndefined();
+			}
+			{
+				const [, error] = Pipeline.validateStepChain([uniqueStep]);
+				expect(error).toBeUndefined();
+			}
+			{
+				const [, error] = Pipeline.validateStepChain([]);
+				expect(error).toBeUndefined();
+			}
+		});
+
+		it('should return error for invalid chains', () => {
+			const pipelineId = UUID.create().getValue()
+			const id1 = UUID.create().getValue()
+			const id2 = UUID.create().getValue()
+			const id3 = UUID.create().getValue()
+			const id4 = UUID.create().getValue()
+			const id5 = UUID.create().getValue()
+
+			const step1 = expectSuccess(Step.create({
+				id: id1,
+				pipelineId,
+				operation: "sum",
+				by: 10,
+				nextStepId: id2,
+			}))
+
+			const step2 = expectSuccess(Step.create({
+				id: id2,
+				pipelineId,
+				operation: "multiply",
+				by: 2,
+				nextStepId: id3,
+			}))
+
+			const step3 = expectSuccess(Step.create({
+				id: id3,
+				pipelineId,
+				operation: "sum",
+				by: 10,
+				nextStepId: id4,
+			}))
+
+
+			{
+				const [, error] = Pipeline.validateStepChain([step1, step2, step3]);
+				expect(error).toBeDefined();
+				expect(error).toBeInstanceOf(InvalidStateTransitionError);
+			}
+			{
+				const [, error] = Pipeline.validateStepChain([step1, step3]);
+				expect(error).toBeDefined();
+				expect(error).toBeInstanceOf(InvalidStateTransitionError);
+			}
+		});
+	});
+
+	describe('setSteps', () => {
+		it('should set steps and update initialStepId', () => {
+			const pipelineId = UUID.create().getValue()
+			const id1 = UUID.create().getValue()
+			const id2 = UUID.create().getValue()
+			const id3 = UUID.create().getValue()
+
+			const step1 = expectSuccess(Step.create({
+				id: id1,
+				pipelineId,
+				operation: "sum",
+				by: 10,
+				nextStepId: id2,
+			}));
+
+			const step2 = expectSuccess(Step.create({
+				id: id2,
+				pipelineId,
+				operation: "multiply",
+				by: 2,
+				nextStepId: id3,
+			}));
+
+			const step3 = expectSuccess(Step.create({
+				id: id3,
+				pipelineId,
+				operation: "multiply",
+				by: 2,
+			}));
+
+			const pipeline = expectSuccess(Pipeline.create({}));
+
+			const [, error] = pipeline.setSteps([step1!, step2!, step3!]);
+			expect(error).toBeUndefined();
+			expect(pipeline.getInitialStepId()).toBe(id1);
+		});
+
+		it('should return error when chain is invalid', () => {
+			const pipelineId = UUID.create().getValue()
+			const id1 = UUID.create().getValue()
+			const id2 = UUID.create().getValue()
+			const id3 = UUID.create().getValue()
+
+			const step1 = expectSuccess(Step.create({
+				id: id1,
+				pipelineId,
+				operation: "sum",
+				by: 10,
+				nextStepId: id2,
+			}));
+
+			const step2 = expectSuccess(Step.create({
+				id: id2,
+				pipelineId,
+				operation: "multiply",
+				by: 2,
+				nextStepId: id3,
+			}));
+
+			const pipeline = expectSuccess(Pipeline.create({}));
+
+			const [, error] = pipeline.setSteps([step1!, step2!]);
+
+			expect(error).toBeDefined();
+			expect(error).toBeInstanceOf(InvalidStateTransitionError);
+			expect(pipeline.getInitialStepId()).toBeUndefined()
 		});
 	});
 });

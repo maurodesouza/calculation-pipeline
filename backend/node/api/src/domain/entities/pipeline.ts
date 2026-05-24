@@ -1,4 +1,16 @@
 import { UUID } from "../value-objects/uuid";
+import { Step } from "./step";
+import { InvalidStateTransitionError } from "../errors";
+import { StepInconsistencyError } from "../errors";
+
+export type StepInput = {
+	id: string;
+	name?: string;
+	description?: string;
+	operation: string;
+	by: number;
+	nextStepId?: string;
+};
 
 type CreatePayload = {
 	name?: string;
@@ -11,6 +23,7 @@ type RestorePayload = {
 	name?: string;
 	description?: string;
 	initialStepId?: string;
+	steps?: Step[];
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -20,6 +33,7 @@ type ConstructorPayload = {
 	name?: string;
 	description?: string;
 	initialStepId?: UUID;
+	steps: Step[];
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -30,6 +44,7 @@ export class Pipeline {
 	private name?: string;
 	private description?: string;
 	private initialStepId?: UUID;
+	private steps: Step[];
 	private createdAt: Date;
 	private updatedAt: Date;
 
@@ -40,6 +55,7 @@ export class Pipeline {
 		this.name = payload.name;
 		this.description = payload.description;
 		this.initialStepId = payload.initialStepId;
+		this.steps = payload.steps || [];
 		this.createdAt = payload.createdAt;
 		this.updatedAt = payload.updatedAt;
 	}
@@ -55,6 +71,7 @@ export class Pipeline {
 			...payload,
 			id,
 			initialStepId: stepId,
+			steps: [],
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -77,9 +94,85 @@ export class Pipeline {
 				...payload,
 				id,
 				initialStepId,
+				steps: payload.steps || [],
 			}),
 			undefined
 		];
+	}
+
+	static validateStepChain(steps: Step[]): [undefined, undefined] | [undefined, Error] {
+		for (let i = 0; i < steps.length; i++) {
+			const currentStep = steps[i]!;
+			const isLastStep = i === steps.length - 1;
+
+			if (isLastStep) {
+				if (currentStep.getNextStepId()) {
+					return [undefined, new InvalidStateTransitionError('step', 'undefined', 'last step should not have nextStepId')];
+				}
+				continue;
+			}
+
+			const nextStep = steps[i + 1]!;
+
+			if (currentStep.getNextStepId() !== nextStep.getId()) {
+				return [undefined, new InvalidStateTransitionError('step', currentStep.getNextStepId() || 'undefined', nextStep.getId())];
+			}
+		}
+
+		return [undefined, undefined];
+	}
+
+	static restoreSteps(pipeline: Pipeline, stepInputs: StepInput[]): [Step[], undefined] | [undefined, Error] {
+		const existingStepIds = new Set(pipeline.getSteps().map((s) => s.getId()));
+		const chain: Step[] = [];
+		const pipelineId = pipeline.getId();
+
+		for (const stepInput of stepInputs) {
+			if (existingStepIds.has(stepInput.id)) {
+				const existingStep = pipeline.getSteps().find((s) => s.getId() === stepInput.id);
+				if (!existingStep) return [undefined, new StepInconsistencyError(stepInput.id)];
+
+				const [step, restoreError] = Step.restore({
+					...stepInput,
+					pipelineId,
+					createdAt: existingStep.getCreatedAt(),
+					updatedAt: new Date(),
+				});
+				if (restoreError) return [undefined, restoreError];
+				chain.push(step);
+			} else {
+				const [step, createError] = Step.create({
+					...stepInput,
+					pipelineId,
+				});
+				if (createError) return [undefined, createError];
+				chain.push(step);
+			}
+		}
+
+		return [chain, undefined];
+	}
+
+	setInitialStepId(initialStepId?: string): [undefined, undefined] | [undefined, Error] {
+		if (initialStepId) {
+			const [id, error] = UUID.restore(initialStepId);
+			if (error) return [undefined, error];
+			this.initialStepId = id;
+		} else {
+			this.initialStepId = undefined;
+		}
+		this.updatedAt = new Date();
+		return [undefined, undefined];
+	}
+
+	setSteps(steps: Step[]): [undefined, undefined] | [undefined, Error] {
+		const [, validationError] = Pipeline.validateStepChain(steps);
+		if (validationError) return [undefined, validationError];
+
+		this.steps = steps;
+		this.initialStepId = steps[0] ? UUID.restore(steps[0].getId())[0] : undefined;
+		this.updatedAt = new Date();
+		return [undefined, undefined];
 	}
 
 	getId() {
@@ -104,5 +197,9 @@ export class Pipeline {
 
 	getUpdatedAt() {
 		return this.updatedAt;
+	}
+
+	getSteps() {
+		return this.steps;
 	}
 }
