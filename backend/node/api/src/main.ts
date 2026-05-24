@@ -2,10 +2,12 @@ import { PGPromiseAdapter } from "./infra/database/pg-promise-adapter";
 import { Container } from "./infra/DI/container";
 import { HttpAdapter } from "./infra/http/http-adapter";
 import { PipelineRepositoryDAO } from "./infra/repository/pipeline";
+import { RunRepositoryDAO } from "./infra/repository/run";
 import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
 import { CreatePipelineUseCase } from "./application/use-cases/create-pipeline";
 import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
 import { SyncStepsUseCase } from "./application/use-cases/sync-steps";
+import { CreateRunUseCase } from "./application/use-cases/create-run";
 import { HTTPInterfaces } from "./interfaces/http";
 
 const PORT = 3000
@@ -20,6 +22,10 @@ async function api() {
 		queue.connect()
 	]);
 
+	await Promise.all([
+		queue.setup("api.randomize", "randomizer", { type: "direct", routingKey: "run.created" }),
+		queue.setup("api.events", "processor.run.created", { type: "direct", routingKey: "run.created" })
+	]);
 
 	const instance = Container.getInstance();
 
@@ -27,11 +33,12 @@ async function api() {
 	instance.register("sql-connection", pgPromiseAdapter);
 	instance.register("queue", queue);
 	instance.register("pipeline-repository", new PipelineRepositoryDAO());
-	instance.register("step-repository", new StepRepositoryDAO());
+	instance.register("run-repository", new RunRepositoryDAO());
 
 	instance.register("create-pipeline-use-case", new CreatePipelineUseCase());
 	instance.register("get-pipeline-use-case", new GetPipelineUseCase());
 	instance.register("sync-steps-use-case", new SyncStepsUseCase());
+	instance.register("create-run-use-case", new CreateRunUseCase());
 
 	HTTPInterfaces.initialize();
 
