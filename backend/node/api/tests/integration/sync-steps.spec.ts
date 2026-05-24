@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { SyncStepsUseCase } from "../../src/application/use-cases/sync-steps";
 import { PipelineRepositoryDAO } from "../../src/infra/repository/pipeline";
-import { StepRepositoryDAO } from "../../src/infra/repository/step";
 import { PGPromiseAdapter } from "../../src/infra/database/pg-promise-adapter";
 import { Container } from "../../src/infra/DI/container";
 import { Pipeline } from "../../src/domain/entities/pipeline";
@@ -12,7 +11,6 @@ import { UUID } from "../../src/domain/value-objects/uuid";
 describe("SyncStepsUseCase Integration", () => {
 	let pgAdapter: PGPromiseAdapter;
 	let pipelineRepository: PipelineRepositoryDAO;
-	let stepRepository: StepRepositoryDAO;
 	let syncStepsUseCase: SyncStepsUseCase;
 
 	beforeEach(async () => {
@@ -21,13 +19,11 @@ describe("SyncStepsUseCase Integration", () => {
 		await pgAdapter.connect();
 
 		pipelineRepository = new PipelineRepositoryDAO();
-		stepRepository = new StepRepositoryDAO();
 		syncStepsUseCase = new SyncStepsUseCase();
 
 		const container = Container.getInstance();
 		container.register("sql-connection", pgAdapter);
 		container.register("pipeline-repository", pipelineRepository);
-		container.register("step-repository", stepRepository);
 		container.register("sync-steps-use-case", syncStepsUseCase);
 	});
 
@@ -74,9 +70,11 @@ describe("SyncStepsUseCase Integration", () => {
 		expect(result1?.created).toBe(2);
 
 		// Verify initial state
-		const [steps1, fetchError1] = await stepRepository.getByPipelineId(pipeline!.getId());
-		expect(fetchError1).toBeUndefined();
-		expect(steps1?.length).toBe(2);
+
+		const [pipeline1, getError1] = await pipelineRepository.getById(pipeline!.getId());
+		expect(getError1).toBeUndefined();
+		expect(pipeline1?.getSteps().length).toBe(2);
+
 
 		// Second sync - update step 1, delete step 2, create step 3
 		const input2 = {
@@ -105,19 +103,22 @@ describe("SyncStepsUseCase Integration", () => {
 		expect(result2?.created).toBe(1);
 
 		// Verify final state
-		const [steps2, fetchError2] = await stepRepository.getByPipelineId(pipeline!.getId());
-		expect(fetchError2).toBeUndefined();
-		expect(steps2?.length).toBe(2);
+		const [pipeline2, getError2] = await pipelineRepository.getById(pipeline!.getId());
+		expect(getError2).toBeUndefined();
+		expect(pipeline2?.getSteps().length).toBe(2);
 
-		const step1 = steps2?.find((s) => s.getId() === id1);
+		const steps = pipeline2?.getSteps();
+		expect(steps).toBeDefined();
+
+		const step1 = steps?.find((s) => s.getId() === id1);
 		expect(step1?.getName()).toBe("Step 1 Updated");
 		expect(step1?.getBy()).toBe(20);
 
-		const step3 = steps2?.find((s) => s.getId() === id3);
+		const step3 = steps?.find((s) => s.getId() === id3);
 		expect(step3?.getName()).toBe("Step 3");
 		expect(step3?.getOperation()).toBe("divide");
 
-		const step2 = steps2?.find((s) => s.getId() === id2);
+		const step2 = steps?.find((s) => s.getId() === id2);
 		expect(step2).toBeUndefined();
 	});
 
