@@ -2,10 +2,59 @@ POST http://localhost:3000/pipelines
 Content-Type: application/json
 
 {
-  "name": "Outro teste",
-  "description": "Outro teste"
+  "name": "Minha pipeline",
+  "description": "Minha primeira pipeline"
 }
 
 ###
 
 GET http://localhost:3000/pipelines/de715b65-1fe4-4096-9b93-06e2d8158029
+
+###
+
+PUT http://localhost:3000/pipelines/25ace5ea-b3b3-4068-9b1f-e851a80eaacf/steps
+Content-Type: application/json
+
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440100",
+    "name": "Step 1",
+    "description": "First step",
+    "operation": "multiply",
+    "by": 10,
+    "nextStepId": "550e8400-e29b-41d4-a716-446655440200"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440200",
+    "name": "Step 2",
+    "description": "Second step",
+    "operation": "divide",
+    "by": 2,
+    "nextStepId": "550e8400-e29b-41d4-a716-446655440300"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440300",
+    "name": "Step 3",
+    "description": "Third step",
+    "operation": "subtract",
+    "by": 25,
+    "nextStepId": "550e8400-e29b-41d4-a716-446655440400"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440400",
+    "name": "Step 4",
+    "description": "Fourth step",
+    "operation": "sum",
+    "by": 5
+  }
+]
+
+###
+
+POST http://localhost:3000/runs
+Content-Type: application/json
+
+{
+	"pipelineId": "25ace5ea-b3b3-4068-9b1f-e851a80eaacf",
+	"payload": 10
+}
