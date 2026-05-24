@@ -5,6 +5,7 @@ import { PipelineRepositoryDAO } from "./infra/repository/pipeline";
 import { StepRepositoryDAO } from "./infra/repository/step";
 import { CreatePipelineUseCase } from "./application/use-cases/create-pipeline";
 import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
+import { SyncStepsUseCase } from "./application/use-cases/sync-steps";
 import { HTTPInterfaces } from "./interfaces/http";
 
 const PORT = 3000
@@ -24,6 +25,7 @@ function api() {
 
 	instance.register("create-pipeline-use-case", new CreatePipelineUseCase());
 	instance.register("get-pipeline-use-case", new GetPipelineUseCase());
+	instance.register("sync-steps-use-case", new SyncStepsUseCase());
 
 	HTTPInterfaces.initialize();
 

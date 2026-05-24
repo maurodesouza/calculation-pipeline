@@ -13,4 +13,5 @@ export { InvalidOperationError } from "./invalid-operation-error";
 export { InvalidStatusError } from "./invalid-status-error";
 export { InvalidStateTransitionError } from "./invalid-state-transition-error";
 export { PipelineNotFoundError } from "./pipeline-not-found-error";
+export { StepNotFoundError } from "./step-not-found-error";
 export { StepInconsistencyError } from "./step-inconsistency-error";

@@ -1,6 +1,7 @@
 import { HTTPServer } from "../../application/http/http-server";
 import { CreatePipelineUseCase } from "../../application/use-cases/create-pipeline";
 import { GetPipelineUseCase } from "../../application/use-cases/get-pipeline";
+import { SyncStepsUseCase } from "../../application/use-cases/sync-steps";
 import { inject } from "../../infra/DI/container";
 
 export class PipelineController {
@@ -12,6 +13,9 @@ export class PipelineController {
 
 	@inject("get-pipeline-use-case")
 	declare private readonly getPipelineUseCase: GetPipelineUseCase
+
+	@inject("sync-steps-use-case")
+	declare private readonly syncStepsUseCase: SyncStepsUseCase
 
 	constructor() {
 		this.httpServer.route("post", "/pipelines", async (body) => {
@@ -26,6 +30,16 @@ export class PipelineController {
 			if (error) return [undefined, error]
 
 			return [{ data: pipeline, status: 200 }, undefined]
+		})
+
+		this.httpServer.route("put", "/pipelines/:id/steps", async (body, params) => {
+			const [result, error] = await this.syncStepsUseCase.execute({
+				pipelineId: params.id,
+				steps: body,
+			})
+			if (error) return [undefined, error]
+
+			return [{ data: result, status: 200 }, undefined]
 		})
 	}
 }
