@@ -9,8 +9,6 @@ export class Container {
 			throw new Error(`[container]: dependency ${key} not found`)
 		}
 
-		console.log("chegou aqui???")
-
 		return this.dependencies.get(key)
 	}
 
@@ -28,16 +26,8 @@ export class Container {
 
 export function inject(name: string) {
 	return function (target: any, propertyKey: string) {
-		console.log('inject name', name)
-		console.log('inject propertyKey', propertyKey)
-		console.log('inject target', target)
-
-		// console.log('inject dep', Container.getInstance().get(name))
-
 		target[propertyKey] = new Proxy({}, {
 			get: function (_, property) {
-				console.log('inject proxy get: property', property)
-
 				return Container.getInstance().get(name)[property]
 			}
 		})
