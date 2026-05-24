@@ -15,10 +15,10 @@ export class PipelineController {
 
 	constructor() {
 		this.httpServer.route("post", "/pipelines", async (body) => {
-			const [, error] = await this.createPipelineUseCase.execute(body)
+			const [id, error] = await this.createPipelineUseCase.execute(body)
 			if (error) return [undefined, error]
 
-			return [{ status: 204 }, undefined]
+			return [{ data: { id }, status: 201 }, undefined]
 		})
 
 		this.httpServer.route("get", "/pipelines/:id", async (_, params) => {

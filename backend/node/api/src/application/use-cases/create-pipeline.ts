@@ -12,13 +12,13 @@ export class CreatePipelineUseCase {
 	@inject("pipeline-repository")
 	declare private readonly pipelineRepository: PipelineRepository
 
-	async execute(input: Input): Promise<[undefined, undefined] | [undefined, Error]> {
+	async execute(input: Input): Promise<[string, undefined] | [undefined, Error]> {
 		const [pipeline, error] = Pipeline.create(input)
 		if (error) return [undefined, error]
 
 		const [, saveError] = await this.pipelineRepository.save(pipeline)
 		if (saveError) return [undefined, saveError]
 
-		return [undefined, undefined]
+		return [pipeline.getId(), undefined]
 	}
 }
