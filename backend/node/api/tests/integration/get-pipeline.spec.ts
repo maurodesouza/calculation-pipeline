@@ -58,7 +58,7 @@ describe("get pipeline use-case integration", () => {
 		expect(pipelineFromDb?.description).toBe(createInput.description);
 	});
 
-	it.only("should return error when pipeline not found", async () => {
+	it("should return error when pipeline not found", async () => {
 		const [, error] = await getPipelineUseCase.execute(UUID.create().getValue());
 		expect(error).toBeDefined();
 		expect(error).toBeInstanceOf(NotFoundError);
