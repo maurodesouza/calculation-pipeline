@@ -73,6 +73,32 @@ describe('Step', () => {
 			expect(step!.getNextStepId()).toBe(nextStepId);
 		});
 
+		it('should create a step with the provided id', () => {
+			const id = UUID.create().getValue();
+			const pipelineId = UUID.create().getValue();
+
+			const step = expectSuccess(Step.create({
+				id,
+				pipelineId,
+				operation: 'sum',
+				by: 10,
+			}));
+
+			expect(step.getId()).toBe(id);
+		});
+
+		it('should return error when id is invalid', () => {
+			const [step, error] = Step.create({
+				id: 'invalid-uuid',
+				pipelineId: UUID.create().getValue(),
+				operation: 'sum',
+				by: 10,
+			});
+
+			expect(step).toBeUndefined();
+			expect(error).toBeInstanceOf(InvalidUuidError);
+		});
+
 		it('should return error when pipeline id is invalid', () => {
 			{
 				const [step, error] = Step.create({

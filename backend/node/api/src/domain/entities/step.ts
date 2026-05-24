@@ -4,6 +4,7 @@ import { RequiredOperationError } from "../errors/required-operation-error";
 import { InvalidOperationError } from "../errors/invalid-operation-error";
 
 type CreatePayload = {
+	id?: string;
 	name?: string;
 	pipelineId: string;
 	description?: string;
@@ -40,6 +41,7 @@ const VALID_OPERATIONS = ["sum", "subtract", "multiply", "divide"];
 
 export class Step {
 	private id: UUID;
+	private pipelineId: UUID;
 	private name?: string;
 	private description?: string;
 	private nextStepId?: UUID;
@@ -52,6 +54,7 @@ export class Step {
 		payload: ConstructorPayload
 	) {
 		this.id = payload.id;
+		this.pipelineId = payload.pipelineId;
 		this.name = payload.name;
 		this.description = payload.description;
 		this.nextStepId = payload.nextStepId;
@@ -63,7 +66,9 @@ export class Step {
 
 	static create(payload: CreatePayload): [Step, undefined] | [undefined, Error] {
 		const now = new Date();
-		const id = UUID.create();
+
+		const [id, idError] = payload.id ? UUID.restore(payload.id) : [UUID.create(), undefined];
+		if (idError) return [undefined, idError];
 
 		if (!payload.pipelineId) {
 			return [undefined, new RequiredPipelineIdError('step')];
@@ -131,6 +136,10 @@ export class Step {
 
 	getId() {
 		return this.id.getValue();
+	}
+
+	getPipelineId() {
+		return this.pipelineId.getValue();
 	}
 
 	getName() {
