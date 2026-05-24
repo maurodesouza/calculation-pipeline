@@ -135,8 +135,6 @@ describe("SyncStepsUseCase Integration", () => {
 
 		const [, error] = await syncStepsUseCase.execute(input);
 
-		console.log("error", error)
-
 		expect(error).toBeDefined();
 		expect(error).toBeInstanceOf(NotFoundError);
 	});

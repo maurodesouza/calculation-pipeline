@@ -34,11 +34,6 @@ export class HttpAdapter implements HTTPServer {
 
 
 		for (const route of this.routes) {
-			console.log('method', method)
-			console.log('route.method', route.method)
-			console.log('path', path)
-
-
 			if (route.method === method.toLocaleLowerCase() && this.matchRoute(route.url, path)) {
 				const pathParams = this.parsePathParams(route.url, path);
 				const body = await this.parseBody(request);
