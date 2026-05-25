@@ -4,6 +4,7 @@ import { CreateRunUseCase } from "./application/use-cases/create-run";
 import { FailRunUseCase } from "./application/use-cases/fail-run";
 import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
 import { InitializeRunUseCase } from "./application/use-cases/initialize-run";
+import { ListPipelinesUseCase } from "./application/use-cases/list-pipelines";
 import { SyncStepsUseCase } from "./application/use-cases/sync-steps";
 import { Container } from "./infra/DI/container";
 import { PGPromiseAdapter } from "./infra/database/pg-promise-adapter";
@@ -57,6 +58,7 @@ async function api() {
 
 	instance.register("create-pipeline-use-case", new CreatePipelineUseCase());
 	instance.register("get-pipeline-use-case", new GetPipelineUseCase());
+	instance.register("list-pipelines-use-case", new ListPipelinesUseCase());
 	instance.register("sync-steps-use-case", new SyncStepsUseCase());
 	instance.register("create-run-use-case", new CreateRunUseCase());
 	instance.register("initialize-run-use-case", new InitializeRunUseCase());

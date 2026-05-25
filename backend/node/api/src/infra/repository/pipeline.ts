@@ -18,6 +18,17 @@ export interface PipelineRepository {
 		| [{ created: number; updated: number; deleted: number }, undefined]
 		| [undefined, Error]
 	>;
+	list(filters: {
+		limit: number;
+		offset: number;
+		name?: string;
+		id?: string;
+		sortBy: "created_at" | "updated_at";
+	}): Promise<[Pipeline[], undefined] | [undefined, Error]>;
+	count(filters: {
+		name?: string;
+		id?: string;
+	}): Promise<[number, undefined] | [undefined, Error]>;
 }
 
 export class PipelineRepositoryDAO implements PipelineRepository {
@@ -237,5 +248,103 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 		);
 		if (error) return [undefined, error];
 		return [undefined, undefined];
+	}
+
+	async list(filters: {
+		limit: number;
+		offset: number;
+		name?: string;
+		id?: string;
+		sortBy: "created_at" | "updated_at";
+	}): Promise<[Pipeline[], undefined] | [undefined, Error]> {
+		const { limit, offset, name, id, sortBy } = filters;
+
+		let query = "SELECT * FROM cp.pipelines";
+		const conditions: string[] = [];
+		const params: (string | number)[] = [];
+		let paramIndex = 1;
+
+		if (name) {
+			conditions.push(`name ILIKE $${paramIndex}`);
+			params.push(`%${name}%`);
+			paramIndex++;
+		}
+
+		if (id) {
+			conditions.push(`id ILIKE $${paramIndex}`);
+			params.push(`%${id}%`);
+			paramIndex++;
+		}
+
+		if (conditions.length > 0) {
+			query += ` WHERE ${conditions.join(" AND ")}`;
+		}
+
+		query += ` ORDER BY ${sortBy} DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+		params.push(limit, offset);
+
+		const [result, error] = await this.sql.query(query, params);
+
+		if (error) return [undefined, error];
+
+		if (!result || result.length === 0) {
+			return [[], undefined];
+		}
+
+		const pipelines: Pipeline[] = [];
+		for (const row of result) {
+			const [steps, stepsError] = await this.getSteps(row.id);
+			if (stepsError) return [undefined, stepsError];
+
+			const [pipeline, restoreError] = Pipeline.restore({
+				id: row.id,
+				name: row.name,
+				description: row.description,
+				initialStepId: row.initial_step_id,
+				steps,
+				createdAt: row.created_at,
+				updatedAt: row.updated_at,
+			});
+
+			if (restoreError) return [undefined, restoreError];
+			pipelines.push(pipeline);
+		}
+
+		return [pipelines, undefined];
+	}
+
+	async count(filters: {
+		name?: string;
+		id?: string;
+	}): Promise<[number, undefined] | [undefined, Error]> {
+		const { name, id } = filters;
+
+		let query = "SELECT COUNT(*) as total FROM cp.pipelines";
+		const conditions: string[] = [];
+		const params: string[] = [];
+		let paramIndex = 1;
+
+		if (name) {
+			conditions.push(`name ILIKE $${paramIndex}`);
+			params.push(`%${name}%`);
+			paramIndex++;
+		}
+
+		if (id) {
+			conditions.push(`id ILIKE $${paramIndex}`);
+			params.push(`%${id}%`);
+			paramIndex++;
+		}
+
+		if (conditions.length > 0) {
+			query += ` WHERE ${conditions.join(" AND ")}`;
+		}
+
+		const [result, error] = await this.sql.query(query, params);
+
+		if (error) return [undefined, error];
+
+		const total = result[0]?.total || 0;
+		return [total, undefined];
 	}
 }
