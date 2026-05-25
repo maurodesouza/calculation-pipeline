@@ -31,6 +31,11 @@ async function main() {
 		queue.setup("processor.events", "multiply.execution.requested", { type: "direct", routingKey: "execution.multiplication-requested" }),
 		queue.setup("processor.events", "divide.execution.requested", { type: "direct", routingKey: "execution.division-requested" }),
 		queue.setup("processor.events", "api.unknown-execution.requested", { type: "direct", routingKey: "execution.unknown-requested" }),
+
+		queue.setup("multiply.events", "processor.execution.finished", { type: "direct", routingKey: "execution.finished" }),
+		queue.setup("sum.events", "processor.execution.finished", { type: "direct", routingKey: "execution.finished" }),
+		queue.setup("divide.events", "processor.execution.finished", { type: "direct", routingKey: "execution.finished" }),
+		queue.setup("subtract.events", "processor.execution.finished", { type: "direct", routingKey: "execution.finished" }),
 	])
 
 	const instance = Container.getInstance()
@@ -40,7 +45,7 @@ async function main() {
 
 	Queue.initialize()
 
-	console.log("🚀 processor is running")
+	console.log("🚀 processor service is running...")
 }
 
 main()
