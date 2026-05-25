@@ -2,8 +2,8 @@ import { Event } from "./event";
 
 type EventPayload = {
 	runId: string;
-	error: string
-}
+	error: string;
+};
 
 export class RunFailedEvent extends Event<EventPayload> {
 	constructor(private readonly data: EventPayload) {
@@ -11,6 +11,6 @@ export class RunFailedEvent extends Event<EventPayload> {
 	}
 
 	getPayload(): EventPayload {
-		return this.data
+		return this.data;
 	}
 }

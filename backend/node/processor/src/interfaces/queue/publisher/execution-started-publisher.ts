@@ -1,21 +1,23 @@
-import { inject } from "../../../infra/DI/container";
 import { RunStartedEvent } from "../../../domain/events/run-started";
+import { inject } from "../../../infra/DI/container";
 
 export class ExecutionStartedPublisher {
 	@inject("queue")
-	declare private readonly queue: any
+	private declare readonly queue: any;
 
 	@inject("processor")
-	declare private readonly processor: any
+	private declare readonly processor: any;
 
 	constructor() {
-		this.initialize()
+		this.initialize();
 	}
 
 	private initialize() {
 		this.processor.register(RunStartedEvent, async (event: RunStartedEvent) => {
-			const payload = event.getPayload()
-			await this.queue.publish("processor.randomize", payload, { routingKey: "execution.started" })
-		})
+			const payload = event.getPayload();
+			await this.queue.publish("processor.randomize", payload, {
+				routingKey: "execution.started",
+			});
+		});
 	}
 }

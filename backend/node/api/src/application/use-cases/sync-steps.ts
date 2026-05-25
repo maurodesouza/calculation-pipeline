@@ -1,6 +1,7 @@
-import { Pipeline, StepInput } from "../../domain/entities/pipeline";
-import { PipelineRepository } from "../../infra/repository/pipeline";
+import type { StepInput } from "../../domain/entities/pipeline";
+import { Pipeline } from "../../domain/entities/pipeline";
 import { inject } from "../../infra/DI/container";
+import type { PipelineRepository } from "../../infra/repository/pipeline";
 
 type Input = {
 	pipelineId: string;
@@ -15,10 +16,14 @@ type Output = {
 
 export class SyncStepsUseCase {
 	@inject("pipeline-repository")
-	declare private readonly pipelineRepository: PipelineRepository;
+	private declare readonly pipelineRepository: PipelineRepository;
 
-	async execute(input: Input): Promise<[Output, undefined] | [undefined, Error]> {
-		const [pipeline, pipelineError] = await this.pipelineRepository.getById(input.pipelineId);
+	async execute(
+		input: Input,
+	): Promise<[Output, undefined] | [undefined, Error]> {
+		const [pipeline, pipelineError] = await this.pipelineRepository.getById(
+			input.pipelineId,
+		);
 		if (pipelineError) return [undefined, pipelineError];
 
 		const [chain, restoreError] = Pipeline.restoreSteps(pipeline, input.steps);

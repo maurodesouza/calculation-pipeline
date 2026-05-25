@@ -5,5 +5,5 @@ export abstract class Event<T = any> {
 		return this.eventName;
 	}
 
-	abstract getPayload(): T
+	abstract getPayload(): T;
 }

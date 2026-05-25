@@ -1,3 +1,5 @@
+import type { Queue } from "../../../application/queue/queue";
+import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
 type ExecutionFinishedPayload = {
@@ -8,19 +10,22 @@ type ExecutionFinishedPayload = {
 
 export class ExecutionFinishedConsumer {
 	@inject("queue")
-	declare private readonly queue: any
+	private declare readonly queue: Queue;
 
 	@inject("processor")
-	declare private readonly processor: any
+	private declare readonly processor: Processor;
 
 	constructor() {
-		this.initialize()
+		this.initialize();
 	}
 
 	private initialize() {
-		this.queue.consume("processor.execution.finished", async (message: ExecutionFinishedPayload) => {
-			const { runId, result, error } = message
-			this.processor.executed(runId, { result, error })
-		})
+		this.queue.consume(
+			"processor.execution.finished",
+			async (message: ExecutionFinishedPayload) => {
+				const { runId, result, error } = message;
+				this.processor.executed(runId, { result, error });
+			},
+		);
 	}
 }

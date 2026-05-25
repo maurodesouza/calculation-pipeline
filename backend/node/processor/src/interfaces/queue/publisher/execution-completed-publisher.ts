@@ -1,21 +1,26 @@
-import { inject } from "../../../infra/DI/container";
 import { RunCompletedEvent } from "../../../domain/events/run-completed";
+import { inject } from "../../../infra/DI/container";
 
 export class ExecutionCompletedPublisher {
 	@inject("queue")
-	declare private readonly queue: any
+	private declare readonly queue: any;
 
 	@inject("processor")
-	declare private readonly processor: any
+	private declare readonly processor: any;
 
 	constructor() {
-		this.initialize()
+		this.initialize();
 	}
 
 	private initialize() {
-		this.processor.register(RunCompletedEvent, async (event: RunCompletedEvent) => {
-			const payload = event.getPayload()
-			await this.queue.publish("processor.randomize", payload, { routingKey: "execution.completed" })
-		})
+		this.processor.register(
+			RunCompletedEvent,
+			async (event: RunCompletedEvent) => {
+				const payload = event.getPayload();
+				await this.queue.publish("processor.randomize", payload, {
+					routingKey: "execution.completed",
+				});
+			},
+		);
 	}
 }

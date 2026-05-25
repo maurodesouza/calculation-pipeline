@@ -1,7 +1,7 @@
-import { UUID } from "../value-objects/uuid";
-import { RequiredPipelineIdError } from "../errors/required-pipeline-id-error";
-import { RequiredOperationError } from "../errors/required-operation-error";
 import { InvalidOperationError } from "../errors/invalid-operation-error";
+import { RequiredOperationError } from "../errors/required-operation-error";
+import { RequiredPipelineIdError } from "../errors/required-pipeline-id-error";
+import { UUID } from "../value-objects/uuid";
 
 type CreatePayload = {
 	id?: string;
@@ -50,9 +50,7 @@ export class Step {
 	private createdAt: Date;
 	private updatedAt: Date;
 
-	private constructor(
-		payload: ConstructorPayload
-	) {
+	private constructor(payload: ConstructorPayload) {
 		this.id = payload.id;
 		this.pipelineId = payload.pipelineId;
 		this.name = payload.name;
@@ -64,14 +62,18 @@ export class Step {
 		this.updatedAt = payload.updatedAt;
 	}
 
-	static create(payload: CreatePayload): [Step, undefined] | [undefined, Error] {
+	static create(
+		payload: CreatePayload,
+	): [Step, undefined] | [undefined, Error] {
 		const now = new Date();
 
-		const [id, idError] = payload.id ? UUID.restore(payload.id) : [UUID.create(), undefined];
+		const [id, idError] = payload.id
+			? UUID.restore(payload.id)
+			: [UUID.create(), undefined];
 		if (idError) return [undefined, idError];
 
 		if (!payload.pipelineId) {
-			return [undefined, new RequiredPipelineIdError('step')];
+			return [undefined, new RequiredPipelineIdError("step")];
 		}
 
 		const operationValidation = Step.validateOperation(payload.operation);
@@ -80,7 +82,9 @@ export class Step {
 		const [pipelineId, pipelineIdError] = UUID.restore(payload.pipelineId);
 		if (!!pipelineIdError) return [undefined, pipelineIdError];
 
-		const [stepId, stepIdError] = payload.nextStepId ? UUID.restore(payload.nextStepId) : [undefined, undefined];
+		const [stepId, stepIdError] = payload.nextStepId
+			? UUID.restore(payload.nextStepId)
+			: [undefined, undefined];
 		if (!!stepIdError) return [undefined, stepIdError];
 
 		const objPayload: ConstructorPayload = {
@@ -92,20 +96,21 @@ export class Step {
 			updatedAt: now,
 		};
 
-		return [
-			new Step(objPayload),
-			undefined
-		];
+		return [new Step(objPayload), undefined];
 	}
 
-	static restore(payload: RestorePayload): [Step, undefined] | [undefined, Error] {
+	static restore(
+		payload: RestorePayload,
+	): [Step, undefined] | [undefined, Error] {
 		const [id, idError] = UUID.restore(payload.id);
 		if (!!idError) return [undefined, idError];
 
 		const [pipelineId, pipelineIdError] = UUID.restore(payload.pipelineId);
 		if (!!pipelineIdError) return [undefined, pipelineIdError];
 
-		const [nextStepId, nextStepIdError] = payload.nextStepId ? UUID.restore(payload.nextStepId) : [undefined, undefined];
+		const [nextStepId, nextStepIdError] = payload.nextStepId
+			? UUID.restore(payload.nextStepId)
+			: [undefined, undefined];
 		if (!!nextStepIdError) return [undefined, nextStepIdError];
 
 		const operationValidation = Step.validateOperation(payload.operation);
@@ -118,17 +123,17 @@ export class Step {
 				pipelineId,
 				nextStepId,
 			}),
-			undefined
+			undefined,
 		];
 	}
 
 	private static validateOperation(operation: string): Error | undefined {
 		if (!operation) {
-			return new RequiredOperationError('step');
+			return new RequiredOperationError("step");
 		}
 
 		if (!VALID_OPERATIONS.includes(operation)) {
-			return new InvalidOperationError('step', operation, VALID_OPERATIONS);
+			return new InvalidOperationError("step", operation, VALID_OPERATIONS);
 		}
 
 		return undefined;

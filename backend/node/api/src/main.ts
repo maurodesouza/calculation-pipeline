@@ -1,38 +1,50 @@
-import { PGPromiseAdapter } from "./infra/database/pg-promise-adapter";
+import { CompleteRunUseCase } from "./application/use-cases/complete-run";
+import { CreatePipelineUseCase } from "./application/use-cases/create-pipeline";
+import { CreateRunUseCase } from "./application/use-cases/create-run";
+import { FailRunUseCase } from "./application/use-cases/fail-run";
+import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
+import { InitializeRunUseCase } from "./application/use-cases/initialize-run";
+import { SyncStepsUseCase } from "./application/use-cases/sync-steps";
 import { Container } from "./infra/DI/container";
+import { PGPromiseAdapter } from "./infra/database/pg-promise-adapter";
 import { HttpAdapter } from "./infra/http/http-adapter";
+import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
 import { PipelineRepositoryDAO } from "./infra/repository/pipeline";
 import { RunRepositoryDAO } from "./infra/repository/run";
-import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
-import { CreatePipelineUseCase } from "./application/use-cases/create-pipeline";
-import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
-import { SyncStepsUseCase } from "./application/use-cases/sync-steps";
-import { CreateRunUseCase } from "./application/use-cases/create-run";
-import { InitializeRunUseCase } from "./application/use-cases/initialize-run";
-import { CompleteRunUseCase } from "./application/use-cases/complete-run";
-import { FailRunUseCase } from "./application/use-cases/fail-run";
 import { HTTPInterface } from "./interfaces/http";
 import { QueueInterface } from "./interfaces/queue";
 
-const PORT = 3000
+const PORT = 3000;
 
 async function api() {
 	const httpServer = new HttpAdapter();
 	const pgPromiseAdapter = new PGPromiseAdapter();
 	const queue = new RabbitMQAdapter();
 
-	await Promise.all([
-		pgPromiseAdapter.connect(),
-		queue.connect()
-	]);
+	await Promise.all([pgPromiseAdapter.connect(), queue.connect()]);
 
 	await Promise.all([
-		queue.setup("api.randomize", "randomizer", { type: "direct", routingKey: "run.created" }),
-		queue.setup("api.events", "processor.run.created", { type: "direct", routingKey: "run.created" }),
+		queue.setup("api.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.created",
+		}),
+		queue.setup("api.events", "processor.run.created", {
+			type: "direct",
+			routingKey: "run.created",
+		}),
 
-		queue.setup("processor.events", "api.execution.started", { type: "direct", routingKey: "execution.started" }),
-		queue.setup("processor.events", "api.execution.failed", { type: "direct", routingKey: "execution.failed" }),
-		queue.setup("processor.events", "api.execution.completed", { type: "direct", routingKey: "execution.completed" })
+		queue.setup("processor.events", "api.execution.started", {
+			type: "direct",
+			routingKey: "execution.started",
+		}),
+		queue.setup("processor.events", "api.execution.failed", {
+			type: "direct",
+			routingKey: "execution.failed",
+		}),
+		queue.setup("processor.events", "api.execution.completed", {
+			type: "direct",
+			routingKey: "execution.completed",
+		}),
 	]);
 
 	const instance = Container.getInstance();
@@ -57,4 +69,4 @@ async function api() {
 	httpServer.listen(PORT);
 }
 
-api()
+api();

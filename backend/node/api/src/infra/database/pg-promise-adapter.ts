@@ -1,10 +1,8 @@
-import { SQLDatabaseConnection } from "../../application/database/sql-database-connection";
 import pgPromise from "pg-promise";
+import type { SQLDatabaseConnection } from "../../application/database/sql-database-connection";
 
 export class PGPromiseAdapter implements SQLDatabaseConnection {
 	connection: pgPromise.IDatabase<{}, any> | undefined;
-
-	constructor() {}
 
 	async connect(): Promise<void> {
 		const pgp = pgPromise();
@@ -13,7 +11,10 @@ export class PGPromiseAdapter implements SQLDatabaseConnection {
 		console.info("[pg-promise-adapter]: connected successfully to database");
 	}
 
-	async query<T = any>(query: string, params: any[]): Promise<[T[], undefined] | [undefined, Error]> {
+	async query<T = any>(
+		query: string,
+		params: any[],
+	): Promise<[T[], undefined] | [undefined, Error]> {
 		this.validateConnection();
 		try {
 			const result = await this.connection!.query(query, params);
@@ -30,7 +31,9 @@ export class PGPromiseAdapter implements SQLDatabaseConnection {
 		console.info("[pg-promise-adapter]: disconnected from database");
 	}
 
-	async transaction<T>(callback: () => Promise<T>): Promise<[T, undefined] | [undefined, Error]> {
+	async transaction<T>(
+		callback: () => Promise<T>,
+	): Promise<[T, undefined] | [undefined, Error]> {
 		this.validateConnection();
 		try {
 			const result = await this.connection!.tx(async (t) => {
@@ -54,7 +57,9 @@ export class PGPromiseAdapter implements SQLDatabaseConnection {
 
 	private validateConnection() {
 		if (!this.connection) {
-			throw new Error("[pg-promise-adapter]: database connection not established");
+			throw new Error(
+				"[pg-promise-adapter]: database connection not established",
+			);
 		}
 	}
 }

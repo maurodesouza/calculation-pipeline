@@ -1,9 +1,9 @@
-import { QueueConsumers } from "./consumer"
-import { QueuePublishers } from "./publisher"
+import { QueueConsumers } from "./consumer";
+import { QueuePublishers } from "./publisher";
 
-export class Queue {
-    static initialize() {
-        QueueConsumers.initialize()
-        QueuePublishers.initialize()
-    }
-}
+export const Queue = {
+	initialize() {
+		QueueConsumers.initialize();
+		QueuePublishers.initialize();
+	},
+};

@@ -1,12 +1,16 @@
-import { HTTPServer, Callback, Method } from "../../application/http/http-server";
-import * as http from 'node:http';
+import * as http from "node:http";
+import type {
+	Callback,
+	HTTPServer,
+	Method,
+} from "../../application/http/http-server";
 import { HttpErrorMapper } from "./error-mapper";
 
 type Route = {
-    method: Method;
-    url: string;
-    callback: Callback<any, any, any, any>;
-}
+	method: Method;
+	url: string;
+	callback: Callback<any, any, any, any>;
+};
 
 export class HttpAdapter implements HTTPServer {
 	private server: http.Server;
@@ -16,11 +20,18 @@ export class HttpAdapter implements HTTPServer {
 		this.server = http.createServer(this.handle.bind(this));
 	}
 
-    route<R = any, T = any, P = any, Q = any>(method: Method, url: string, callback: Callback<R, T, P, Q>): void {
+	route<R = any, T = any, P = any, Q = any>(
+		method: Method,
+		url: string,
+		callback: Callback<R, T, P, Q>,
+	): void {
 		this.routes.push({ method, url, callback });
-    }
+	}
 
-	private async handle(request: http.IncomingMessage, response: http.ServerResponse) {
+	private async handle(
+		request: http.IncomingMessage,
+		response: http.ServerResponse,
+	) {
 		if (!request.url || !request.method) {
 			response.writeHead(400);
 			response.end();
@@ -32,15 +43,21 @@ export class HttpAdapter implements HTTPServer {
 		const path = url.pathname;
 		const method = request.method as Method;
 
-
 		for (const route of this.routes) {
-			if (route.method === method.toLocaleLowerCase() && this.matchRoute(route.url, path)) {
+			if (
+				route.method === method.toLocaleLowerCase() &&
+				this.matchRoute(route.url, path)
+			) {
 				const pathParams = this.parsePathParams(route.url, path);
 				const body = await this.parseBody(request);
 				const queryParams = Object.fromEntries(url.searchParams.entries());
 
 				try {
-					const [result, error] = await route.callback(body, pathParams, queryParams);
+					const [result, error] = await route.callback(
+						body,
+						pathParams,
+						queryParams,
+					);
 
 					if (error) {
 						response.writeHead(HttpErrorMapper.toStatus(error));
@@ -49,18 +66,18 @@ export class HttpAdapter implements HTTPServer {
 					}
 
 					response.writeHead(result.status);
-					response.end(result.data ? JSON.stringify(result.data) : '');
+					response.end(result.data ? JSON.stringify(result.data) : "");
 					return;
 				} catch (error) {
 					response.writeHead(500);
 
-					const errorMessage = (error as Error).message || 'Unknown error';
+					const errorMessage = (error as Error).message || "Unknown error";
 
-					response.end(JSON.stringify({ error: `internal server error: ${errorMessage}` }));
+					response.end(
+						JSON.stringify({ error: `internal server error: ${errorMessage}` }),
+					);
 					return;
 				}
-
-
 			}
 		}
 
@@ -69,8 +86,8 @@ export class HttpAdapter implements HTTPServer {
 	}
 
 	private matchRoute(pattern: string, path: string): boolean {
-		const patternParts = pattern.split('/');
-		const pathParts = path.split('/');
+		const patternParts = pattern.split("/");
+		const pathParts = path.split("/");
 
 		if (patternParts.length !== pathParts.length) return false;
 
@@ -78,7 +95,7 @@ export class HttpAdapter implements HTTPServer {
 			const patternPart = patternParts[i];
 			const pathPart = pathParts[i];
 
-			if (patternPart && patternPart.startsWith(':')) {
+			if (patternPart?.startsWith(":")) {
 				continue;
 			}
 
@@ -89,8 +106,8 @@ export class HttpAdapter implements HTTPServer {
 	}
 
 	private parsePathParams(path: string, url: string) {
-		const pathParts = path.split('/');
-		const urlParts = url.split('/');
+		const pathParts = path.split("/");
+		const urlParts = url.split("/");
 
 		if (pathParts.length !== urlParts.length) return {};
 
@@ -100,7 +117,7 @@ export class HttpAdapter implements HTTPServer {
 			const pathPart = pathParts[i];
 			const urlPart = urlParts[i];
 
-			if (pathPart && pathPart.startsWith(":")) {
+			if (pathPart?.startsWith(":")) {
 				params[pathPart.slice(1)] = urlPart;
 				continue;
 			}
@@ -111,16 +128,15 @@ export class HttpAdapter implements HTTPServer {
 		return params;
 	}
 
-
 	private parseBody(request: http.IncomingMessage) {
 		return new Promise((resolve, reject) => {
-			let body = '';
+			let body = "";
 
-			request.on('data', (chunk) => {
+			request.on("data", (chunk) => {
 				body += chunk.toString();
 			});
 
-			request.on('end', () => {
+			request.on("end", () => {
 				try {
 					resolve(body ? JSON.parse(body) : {});
 				} catch (err) {
@@ -128,16 +144,15 @@ export class HttpAdapter implements HTTPServer {
 				}
 			});
 
-			request.on('error', (error) => {
+			request.on("error", (error) => {
 				reject(error);
 			});
 		});
 	}
 
-
-    listen(port: number): void {
-        this.server.listen(port).on('listening', () => {
-            console.log(`server running on port ${port}`);
-        });
-    }
+	listen(port: number): void {
+		this.server.listen(port).on("listening", () => {
+			console.log(`server running on port ${port}`);
+		});
+	}
 }

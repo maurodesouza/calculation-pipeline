@@ -1,5 +1,5 @@
-import { PipelineRepository } from "../../infra/repository/pipeline";
 import { inject } from "../../infra/DI/container";
+import type { PipelineRepository } from "../../infra/repository/pipeline";
 
 type Input = string;
 
@@ -14,9 +14,11 @@ type Output = {
 
 export class GetPipelineUseCase {
 	@inject("pipeline-repository")
-	declare private readonly pipelineRepository: PipelineRepository;
+	private declare readonly pipelineRepository: PipelineRepository;
 
-	async execute(input: Input): Promise<[Output, undefined] | [undefined, Error]> {
+	async execute(
+		input: Input,
+	): Promise<[Output, undefined] | [undefined, Error]> {
 		const [pipeline, error] = await this.pipelineRepository.getById(input);
 		if (error) return [undefined, error];
 

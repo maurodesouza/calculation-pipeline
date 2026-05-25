@@ -1,3 +1,5 @@
+import type { Queue } from "../../../application/queue/queue";
+import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
 type RunCreatedPayload = {
@@ -13,19 +15,22 @@ type RunCreatedPayload = {
 
 export class RunCreatedConsumer {
 	@inject("queue")
-	declare private readonly queue: any
+	private declare readonly queue: Queue;
 
 	@inject("processor")
-	declare private readonly processor: any
+	private declare readonly processor: Processor;
 
 	constructor() {
-		this.initialize()
+		this.initialize();
 	}
 
 	private initialize() {
-		this.queue.consume("processor.run.created", async (message: RunCreatedPayload) => {
-			const { runId, payload, steps } = message
-			this.processor.initialize(runId, payload, steps)
-		})
+		this.queue.consume(
+			"processor.run.created",
+			async (message: RunCreatedPayload) => {
+				const { runId, payload, steps } = message;
+				this.processor.initialize(runId, payload, steps);
+			},
+		);
 	}
 }

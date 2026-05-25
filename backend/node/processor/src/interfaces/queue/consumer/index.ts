@@ -1,9 +1,9 @@
-import { RunCreatedConsumer } from "./run-created-consumer";
 import { ExecutionFinishedConsumer } from "./execution-finished-consumer";
+import { RunCreatedConsumer } from "./run-created-consumer";
 
-export class QueueConsumers {
-    static initialize() {
-		new RunCreatedConsumer()
-		new ExecutionFinishedConsumer()
-	}
-}
+export const QueueConsumers = {
+	initialize() {
+		new RunCreatedConsumer();
+		new ExecutionFinishedConsumer();
+	},
+};

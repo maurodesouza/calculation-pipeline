@@ -1,7 +1,7 @@
-import { UUID } from "../value-objects/uuid";
-import { RequiredPipelineIdError } from "../errors/required-pipeline-id-error";
-import { InvalidStatusError } from "../errors/invalid-status-error";
 import { InvalidStateTransitionError } from "../errors/invalid-state-transition-error";
+import { InvalidStatusError } from "../errors/invalid-status-error";
+import { RequiredPipelineIdError } from "../errors/required-pipeline-id-error";
+import { UUID } from "../value-objects/uuid";
 
 enum RUNS_STATUS {
 	PENDING = "pending",
@@ -13,7 +13,7 @@ enum RUNS_STATUS {
 type CreatePayload = {
 	pipelineId: string;
 	payload: number;
-}
+};
 
 type RestorePayload = {
 	id: string;
@@ -47,9 +47,7 @@ export class Run {
 	private createdAt: Date;
 	private updatedAt: Date;
 
-	private constructor(
-		payload: ConstructorPayload
-	) {
+	private constructor(payload: ConstructorPayload) {
 		this.id = payload.id;
 		this.pipelineId = payload.pipelineId;
 		this.payload = payload.payload;
@@ -65,7 +63,7 @@ export class Run {
 		const id = UUID.create();
 
 		if (!payload.pipelineId) {
-			return [undefined, new RequiredPipelineIdError('run')];
+			return [undefined, new RequiredPipelineIdError("run")];
 		}
 
 		const [pipelineId, pipelineIdError] = UUID.restore(payload.pipelineId);
@@ -80,13 +78,12 @@ export class Run {
 			updatedAt: now,
 		};
 
-		return [
-			new Run(objPayload),
-			undefined
-		];
+		return [new Run(objPayload), undefined];
 	}
 
-	static restore(payload: RestorePayload): [Run, undefined] | [undefined, Error] {
+	static restore(
+		payload: RestorePayload,
+	): [Run, undefined] | [undefined, Error] {
 		const [id, idError] = UUID.restore(payload.id);
 		if (!!idError) return [undefined, idError];
 
@@ -94,7 +91,14 @@ export class Run {
 		if (!!pipelineIdError) return [undefined, pipelineIdError];
 
 		if (!Run.validateStatus(payload.status)) {
-			return [undefined, new InvalidStatusError('run', payload.status, Object.values(RUNS_STATUS))];
+			return [
+				undefined,
+				new InvalidStatusError(
+					"run",
+					payload.status,
+					Object.values(RUNS_STATUS),
+				),
+			];
 		}
 
 		return [
@@ -104,13 +108,16 @@ export class Run {
 				pipelineId,
 				status: payload.status as RUNS_STATUS,
 			}),
-			undefined
+			undefined,
 		];
 	}
 
 	initialize(): [true, undefined] | [false, Error] {
 		if (this.status !== RUNS_STATUS.PENDING) {
-			return [false, new InvalidStateTransitionError('run', this.status, 'pending')];
+			return [
+				false,
+				new InvalidStateTransitionError("run", this.status, "pending"),
+			];
 		}
 
 		this.status = RUNS_STATUS.RUNNING;
@@ -121,7 +128,10 @@ export class Run {
 
 	complete(result: number): [true, undefined] | [false, Error] {
 		if (this.status !== RUNS_STATUS.RUNNING) {
-			return [false, new InvalidStateTransitionError('run', this.status, 'running')];
+			return [
+				false,
+				new InvalidStateTransitionError("run", this.status, "running"),
+			];
 		}
 
 		this.status = RUNS_STATUS.COMPLETED;
@@ -133,7 +143,10 @@ export class Run {
 
 	fail(error: string): [true, undefined] | [false, Error] {
 		if (this.status !== RUNS_STATUS.RUNNING) {
-			return [false, new InvalidStateTransitionError('run', this.status, 'running')];
+			return [
+				false,
+				new InvalidStateTransitionError("run", this.status, "running"),
+			];
 		}
 
 		this.status = RUNS_STATUS.FAILED;

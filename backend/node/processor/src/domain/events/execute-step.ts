@@ -6,7 +6,7 @@ type EventPayload = {
 	operation: string;
 	value: number;
 	by: number;
-}
+};
 
 export class ExecuteStepEvent extends Event<EventPayload> {
 	constructor(private readonly data: EventPayload) {
@@ -14,6 +14,6 @@ export class ExecuteStepEvent extends Event<EventPayload> {
 	}
 
 	getPayload(): EventPayload {
-		return this.data
+		return this.data;
 	}
 }

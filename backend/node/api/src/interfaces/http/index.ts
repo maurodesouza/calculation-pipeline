@@ -1,9 +1,9 @@
 import { PipelineController } from "./pipeline-controller";
 import { RunController } from "./run-controller";
 
-export class HTTPInterface {
-    static initialize() {
-        new PipelineController()
-        new RunController()
-    }
-}
+export const HTTPInterface = {
+	initialize() {
+		new PipelineController();
+		new RunController();
+	},
+};

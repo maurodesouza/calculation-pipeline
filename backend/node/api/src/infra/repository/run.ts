@@ -1,17 +1,21 @@
+import type { SQLDatabaseConnection } from "../../application/database/sql-database-connection";
 import { Run } from "../../domain/entities/run";
-import { SQLDatabaseConnection } from "../../application/database/sql-database-connection";
 import { inject } from "../DI/container";
 
 export interface RunRepository {
 	save(run: Run): Promise<[undefined, undefined] | [undefined, Error]>;
-	getById(id: string): Promise<[Run | undefined, undefined] | [undefined, Error]>;
-	getByPipelineId(pipelineId: string): Promise<[Run[], undefined] | [undefined, Error]>;
+	getById(
+		id: string,
+	): Promise<[Run | undefined, undefined] | [undefined, Error]>;
+	getByPipelineId(
+		pipelineId: string,
+	): Promise<[Run[], undefined] | [undefined, Error]>;
 	update(run: Run): Promise<[undefined, undefined] | [undefined, Error]>;
 }
 
 export class RunRepositoryDAO implements RunRepository {
 	@inject("sql-connection")
-	declare private readonly connection: SQLDatabaseConnection;
+	private declare readonly connection: SQLDatabaseConnection;
 
 	async save(run: Run): Promise<[undefined, undefined] | [undefined, Error]> {
 		const query = `
@@ -36,7 +40,9 @@ export class RunRepositoryDAO implements RunRepository {
 		return [undefined, undefined];
 	}
 
-	async getById(id: string): Promise<[Run | undefined, undefined] | [undefined, Error]> {
+	async getById(
+		id: string,
+	): Promise<[Run | undefined, undefined] | [undefined, Error]> {
 		const query = `
 			SELECT id, pipeline_id, payload, result, status, error, created_at, updated_at
 			FROM cp.runs
@@ -65,7 +71,9 @@ export class RunRepositoryDAO implements RunRepository {
 		return [run, undefined];
 	}
 
-	async getByPipelineId(pipelineId: string): Promise<[Run[], undefined] | [undefined, Error]> {
+	async getByPipelineId(
+		pipelineId: string,
+	): Promise<[Run[], undefined] | [undefined, Error]> {
 		const query = `
 			SELECT id, pipeline_id, payload, result, status, error, created_at, updated_at
 			FROM cp.runs
@@ -92,7 +100,7 @@ export class RunRepositoryDAO implements RunRepository {
 			});
 
 			if (restoreError) return [undefined, restoreError];
-			runs.push(run!);
+			runs.push(run);
 		}
 
 		return [runs, undefined];

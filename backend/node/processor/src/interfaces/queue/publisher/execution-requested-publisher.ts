@@ -1,37 +1,42 @@
-import { inject } from "../../../infra/DI/container";
 import { ExecuteStepEvent } from "../../../domain/events/execute-step";
+import { inject } from "../../../infra/DI/container";
 
 export class ExecutionRequestedPublisher {
 	@inject("queue")
-	declare private readonly queue: any
+	private declare readonly queue: any;
 
 	@inject("processor")
-	declare private readonly processor: any
+	private declare readonly processor: any;
 
 	constructor() {
-		this.initialize()
+		this.initialize();
 	}
 
 	private initialize() {
-		this.processor.register(ExecuteStepEvent, async (event: ExecuteStepEvent) => {
-			const payload = event.getPayload()
-			const routingKey = this.getRoutingKey(payload.operation)
-			await this.queue.publish("processor.randomize", payload, { routingKey })
-		})
+		this.processor.register(
+			ExecuteStepEvent,
+			async (event: ExecuteStepEvent) => {
+				const payload = event.getPayload();
+				const routingKey = this.getRoutingKey(payload.operation);
+				await this.queue.publish("processor.randomize", payload, {
+					routingKey,
+				});
+			},
+		);
 	}
 
 	private getRoutingKey(operation: string): string {
 		switch (operation) {
 			case "sum":
-				return "execution.sum-requested"
+				return "execution.sum-requested";
 			case "subtract":
-				return "execution.subtraction-requested"
+				return "execution.subtraction-requested";
 			case "multiply":
-				return "execution.multiplication-requested"
+				return "execution.multiplication-requested";
 			case "divide":
-				return "execution.division-requested"
+				return "execution.division-requested";
 			default:
-				return "execution.unknown-requested"
+				return "execution.unknown-requested";
 		}
 	}
 }

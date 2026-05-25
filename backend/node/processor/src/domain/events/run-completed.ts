@@ -2,8 +2,8 @@ import { Event } from "./event";
 
 type EventPayload = {
 	runId: string;
-	result: number
-}
+	result: number;
+};
 
 export class RunCompletedEvent extends Event<EventPayload> {
 	constructor(private readonly data: EventPayload) {
@@ -11,6 +11,6 @@ export class RunCompletedEvent extends Event<EventPayload> {
 	}
 
 	getPayload(): EventPayload {
-		return this.data
+		return this.data;
 	}
 }

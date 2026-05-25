@@ -1,11 +1,11 @@
-import { ExecutionStartedConsumer } from "./execution-started-consumer";
-import { ExecutionFailedConsumer } from "./execution-failed-consumer";
 import { ExecutionCompletedConsumer } from "./execution-completed-consumer";
+import { ExecutionFailedConsumer } from "./execution-failed-consumer";
+import { ExecutionStartedConsumer } from "./execution-started-consumer";
 
-export class QueueConsumers {
-    static initialize() {
-		new ExecutionStartedConsumer()
-		new ExecutionFailedConsumer()
-		new ExecutionCompletedConsumer()
-	}
-}
+export const QueueConsumers = {
+	initialize() {
+		new ExecutionStartedConsumer();
+		new ExecutionFailedConsumer();
+		new ExecutionCompletedConsumer();
+	},
+};
