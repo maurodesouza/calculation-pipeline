@@ -4,7 +4,9 @@
   "description": "",
   "scripts": {
     "compose:up": "docker-compose -f ./docker-compose.yml up -d",
-    "compose:down": "docker-compose -f ./docker-compose.yml down -v"
+    "compose:down": "docker-compose -f ./docker-compose.yml down -v",
+    "lint": "biome check .",
+    "format": "biome format --write ."
   },
   "keywords": [],
   "author": "",
