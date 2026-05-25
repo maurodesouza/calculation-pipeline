@@ -5,7 +5,17 @@ async function main() {
 	await queue.connect()
 
 	await Promise.all([
-		queue.setup("api.randomize", "randomizer", { type: "direct", routingKey: "run.created" })
+		queue.setup("api.randomize", "randomizer", { type: "direct", routingKey: "run.created" }),
+
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.started" }),
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.failed" }),
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.completed" }),
+
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.sum-requested" }),
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.subtraction-requested" }),
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.multiplication-requested" }),
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.division-requested" }),
+		queue.setup("processor.randomize", "randomizer", { type: "direct", routingKey: "execution.unknown-requested" }),
 	])
 
 	queue.consume("randomizer", async (message: any, info) => {
