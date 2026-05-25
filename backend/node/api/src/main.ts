@@ -8,7 +8,11 @@ import { CreatePipelineUseCase } from "./application/use-cases/create-pipeline";
 import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
 import { SyncStepsUseCase } from "./application/use-cases/sync-steps";
 import { CreateRunUseCase } from "./application/use-cases/create-run";
-import { HTTPInterfaces } from "./interfaces/http";
+import { InitializeRunUseCase } from "./application/use-cases/initialize-run";
+import { CompleteRunUseCase } from "./application/use-cases/complete-run";
+import { FailRunUseCase } from "./application/use-cases/fail-run";
+import { HTTPInterface } from "./interfaces/http";
+import { QueueInterface } from "./interfaces/queue";
 
 const PORT = 3000
 
@@ -24,7 +28,11 @@ async function api() {
 
 	await Promise.all([
 		queue.setup("api.randomize", "randomizer", { type: "direct", routingKey: "run.created" }),
-		queue.setup("api.events", "processor.run.created", { type: "direct", routingKey: "run.created" })
+		queue.setup("api.events", "processor.run.created", { type: "direct", routingKey: "run.created" }),
+
+		queue.setup("processor.events", "api.execution.started", { type: "direct", routingKey: "execution.started" }),
+		queue.setup("processor.events", "api.execution.failed", { type: "direct", routingKey: "execution.failed" }),
+		queue.setup("processor.events", "api.execution.completed", { type: "direct", routingKey: "execution.completed" })
 	]);
 
 	const instance = Container.getInstance();
@@ -39,8 +47,12 @@ async function api() {
 	instance.register("get-pipeline-use-case", new GetPipelineUseCase());
 	instance.register("sync-steps-use-case", new SyncStepsUseCase());
 	instance.register("create-run-use-case", new CreateRunUseCase());
+	instance.register("initialize-run-use-case", new InitializeRunUseCase());
+	instance.register("complete-run-use-case", new CompleteRunUseCase());
+	instance.register("fail-run-use-case", new FailRunUseCase());
 
-	HTTPInterfaces.initialize();
+	HTTPInterface.initialize();
+	QueueInterface.initialize();
 
 	httpServer.listen(PORT);
 }
