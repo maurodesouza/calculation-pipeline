@@ -38,6 +38,22 @@ export class HttpAdapter implements HTTPServer {
 			return;
 		}
 
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader(
+			"Access-Control-Allow-Methods",
+			"GET, POST, PUT, DELETE, OPTIONS",
+		);
+		response.setHeader(
+			"Access-Control-Allow-Headers",
+			"Content-Type, Authorization",
+		);
+
+		if (request.method === "OPTIONS") {
+			response.writeHead(204);
+			response.end();
+			return;
+		}
+
 		const url = new URL(request.url, `http://${request.headers.host}`);
 
 		const path = url.pathname;
