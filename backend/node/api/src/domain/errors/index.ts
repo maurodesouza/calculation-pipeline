@@ -15,3 +15,4 @@ export { InvalidStateTransitionError } from "./invalid-state-transition-error";
 export { PipelineNotFoundError } from "./pipeline-not-found-error";
 export { StepNotFoundError } from "./step-not-found-error";
 export { StepInconsistencyError } from "./step-inconsistency-error";
+export { RunNotFoundError } from "./run-not-found-error";
