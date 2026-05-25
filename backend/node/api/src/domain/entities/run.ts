@@ -108,9 +108,15 @@ export class Run {
 		];
 	}
 
-	initialize() {
+	initialize(): [true, undefined] | [false, Error] {
+		if (this.status !== RUNS_STATUS.PENDING) {
+			return [false, new InvalidStateTransitionError('run', this.status, 'pending')];
+		}
+
 		this.status = RUNS_STATUS.RUNNING;
 		this.updatedAt = new Date();
+
+		return [true, undefined];
 	}
 
 	complete(result: number): [true, undefined] | [false, Error] {

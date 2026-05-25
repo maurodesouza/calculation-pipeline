@@ -135,8 +135,25 @@ describe('Run', () => {
 			const run = expectSuccess(Run.create(input));
 
 			expect(run.getStatus()).toBe('pending');
-			run.initialize();
+			const [success, error] = run.initialize();
+			expect(error).toBeUndefined();
+			expect(success).toBe(true);
 			expect(run.getStatus()).toBe('running');
+		});
+
+		it('should not initialize when not pending', () => {
+			const input = {
+				pipelineId: VALID_INPUT.pipelineId,
+				payload: VALID_INPUT.payload,
+			};
+
+			const run = expectSuccess(Run.create(input));
+
+			run.initialize();
+			const [success, error] = run.initialize();
+
+			expect(success).toBeFalsy();
+			expect(error).toBeInstanceOf(InvalidStateTransitionError);
 		});
 
 		it('should complete run with result', () => {
@@ -147,7 +164,8 @@ describe('Run', () => {
 
 			const run = expectSuccess(Run.create(input));
 
-			run.initialize();
+			const [, initError] = run.initialize();
+			expect(initError).toBeUndefined();
 			const [success, error] = run.complete(200);
 			expect(error).toBeUndefined();
 			expect(success).toBe(true);
@@ -164,7 +182,8 @@ describe('Run', () => {
 			const run = expectSuccess(Run.create(input));
 			const error = 'Test error';
 
-			run.initialize();
+			const [, initError] = run.initialize();
+			expect(initError).toBeUndefined();
 			const [success, errorResult] = run.fail(error);
 			expect(errorResult).toBeUndefined();
 			expect(success).toBe(true);
