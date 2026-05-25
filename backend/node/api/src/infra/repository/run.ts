@@ -6,6 +6,7 @@ export interface RunRepository {
 	save(run: Run): Promise<[undefined, undefined] | [undefined, Error]>;
 	getById(id: string): Promise<[Run | undefined, undefined] | [undefined, Error]>;
 	getByPipelineId(pipelineId: string): Promise<[Run[], undefined] | [undefined, Error]>;
+	update(run: Run): Promise<[undefined, undefined] | [undefined, Error]>;
 }
 
 export class RunRepositoryDAO implements RunRepository {
@@ -95,5 +96,26 @@ export class RunRepositoryDAO implements RunRepository {
 		}
 
 		return [runs, undefined];
+	}
+
+	async update(run: Run): Promise<[undefined, undefined] | [undefined, Error]> {
+		const query = `
+			UPDATE cp.runs
+			SET result = $1, status = $2, error = $3, updated_at = $4
+			WHERE id = $5
+		`;
+
+		const values = [
+			run.getResult() || null,
+			run.getStatus(),
+			run.getError() || null,
+			run.getUpdatedAt(),
+			run.getId(),
+		];
+
+		const [, error] = await this.connection.query(query, values);
+		if (error) return [undefined, error];
+
+		return [undefined, undefined];
 	}
 }
