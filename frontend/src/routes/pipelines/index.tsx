@@ -6,6 +6,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { Clickable } from "#/components/ui/clickable";
 import { Pagination } from "#/components/ui/pagination";
 import { Table } from "#/components/ui/table";
 import { Text } from "#/components/ui/text";
@@ -102,6 +103,8 @@ function PipelineList() {
 											<Table.Cell key={cell.id}>{render}</Table.Cell>
 										)}
 									/>
+
+									<Table.RowLink to={`/pipelines/${row.original.id}`} />
 								</Table.Row>
 							)}
 						/>

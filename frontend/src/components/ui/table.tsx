@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
 	type Cell as CellType,
 	flexRender,
@@ -8,7 +9,6 @@ import {
 } from "@tanstack/react-table";
 import type React from "react";
 import { createContext, useContext } from "react";
-
 import { twx } from "#/utils/tailwind";
 
 type TableContextValue<TData> = {
@@ -150,7 +150,10 @@ function Row<TData>(props: RowProps<TData>) {
 	const { row, ...rest } = props;
 	return (
 		<RowContext.Provider value={{ row }}>
-			<tr className="hover:bg-background-support transition-colors" {...rest} />
+			<tr
+				className="hover:bg-background-support transition-colors relative"
+				{...rest}
+			/>
 		</RowContext.Provider>
 	);
 }
@@ -180,6 +183,8 @@ function Cells(props: CellsProps) {
 
 const Cell = twx.td`px-md py-xs text-sm text-foreground`;
 
+const RowLink = twx(Link)`absolute inset-0 visibility-hidden`;
+
 function Empty(props: React.PropsWithChildren) {
 	const { table } = useTableContext();
 
@@ -202,5 +207,6 @@ export const Table = {
 	Row,
 	Cells,
 	Cell,
+	RowLink,
 	Empty,
 };
