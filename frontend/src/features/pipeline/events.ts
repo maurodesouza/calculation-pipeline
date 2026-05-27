@@ -13,6 +13,9 @@ export enum PipelineEvents {
 
 	SAVE_PIPELINE = "pipelines.save",
 	UPDATE_NAME = "pipelines.update.name",
+
+	RUN_PANEL_OPEN = "pipelines.run.panel.open",
+	RUN_PANEL_CLOSE = "pipelines.run.panel.close",
 }
 
 declare module "#/events/index" {
@@ -26,6 +29,13 @@ declare module "#/events/index" {
 			panel: {
 				show: (panel: Renderable) => void;
 				clear: () => void;
+			};
+
+			run: {
+				panel: {
+					open: () => void;
+					close: () => void;
+				};
 			};
 
 			canvas: {

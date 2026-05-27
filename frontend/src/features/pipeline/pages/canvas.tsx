@@ -1,6 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
 import { useRef } from "react";
-
 import { Page } from "#/components/ui/page";
 import { Panel } from "#/components/ui/panel";
 import { Separator } from "#/components/ui/separator";
@@ -9,6 +8,7 @@ import { Canvas } from "../components/canvas";
 import { Handles } from "../components/handles";
 import { Header } from "../components/header";
 import { StepsPanel } from "../components/panels/steps";
+import { RunPanel } from "../components/run";
 import { getPipelineQueryOptions } from "../lib/react-query/get-pipeline-query-options";
 import { createPipelineStore, PipelineStoreProvider } from "../store";
 
@@ -50,7 +50,12 @@ function PipelineCanvas() {
 							context="pipelines"
 							initialPanel={<StepsPanel />}
 						/>
-						<Canvas />
+						<div className="h-full w-full flex flex-col">
+							<div className="flex-1">
+								<Canvas />
+							</div>
+							<RunPanel />
+						</div>
 					</div>
 				</div>
 
