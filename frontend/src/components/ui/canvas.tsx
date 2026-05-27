@@ -108,7 +108,7 @@ const iconVariants = tv({
 		variant: {
 			brand: "tone palette-brand",
 			success: "tone palette-success",
-			error: "tone palette-error",
+			danger: "tone palette-danger",
 			warning: "tone palette-warning",
 		},
 	},
