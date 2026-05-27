@@ -5,7 +5,7 @@ import { tv, type VariantProps } from "tailwind-variants";
 import { twx } from "#/utils/tailwind";
 
 const buttonVariants = tv({
-	base: "flex items-center gap-xs rounded-md hover:no-underline!",
+	base: "flex items-center gap-xs rounded-md hover:no-underline! shrink-0",
 	variants: {
 		tone: {
 			default: "bg-background-support text-foreground",
@@ -40,6 +40,11 @@ const buttonVariants = tv({
 			default: "px-md py-xs",
 		},
 
+		full: {
+			true: "w-full shrink justify-center",
+			false: "",
+		},
+
 		disabled: {
 			true: "cursor-not-allowed! opacity-50 **:cursor-not-allowed!",
 			false: "",
@@ -50,6 +55,8 @@ const buttonVariants = tv({
 		size: "default",
 		tone: "default",
 		variant: "solid",
+		full: false,
+		disabled: false,
 	},
 });
 
