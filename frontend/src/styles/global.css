@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./themes/index.css";
 
+@import "@xyflow/react/dist/style.css";
 
 .tone {
   --tone-contrast-100: var(--tone-100);
