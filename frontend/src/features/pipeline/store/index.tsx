@@ -2,6 +2,8 @@ import type { Store } from "@tanstack/react-store";
 import { createStore, createStoreContext } from "@tanstack/react-store";
 import type { Edge, Node } from "@xyflow/react";
 import { json } from "#/utils/json";
+import { random } from "#/utils/random";
+import type { Pipeline } from "../types/pipeline";
 
 type Canvas = {
 	nodes: Node[];
@@ -30,18 +32,21 @@ const INITIAL_CANVAS_STATE = {
 	edges: [],
 };
 
-export function createPipelineStore(pipeline?: Record<string, unknown>) {
+export function createPipelineStore(pipeline?: Pipeline) {
 	const canvas = json.safeParser<Canvas>(
-		pipeline?.canvas as string,
+		pipeline?.canvas || "",
 		INITIAL_CANVAS_STATE,
 	);
+
+	const id = pipeline?.id || "new";
+	const name = pipeline?.name || `new-pipeline-${random.id(5)}`;
 
 	return createStore({
 		rawPipeline: pipeline || {},
 
-		id: (pipeline?.id as string) || "new",
-		name: (pipeline?.name as string) || "",
-		description: (pipeline?.description as string) || "",
+		id,
+		name,
+		description: pipeline?.description || "",
 
 		nodes: canvas?.nodes || [],
 		edges: canvas?.edges || [],
