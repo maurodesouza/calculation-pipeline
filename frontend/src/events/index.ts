@@ -3,6 +3,7 @@ import "./global";
 
 export interface Events {
 	on<T = any>(eventName: string, callback: (payload: T) => void): () => void;
+	emit<T = any>(eventName: string, payload?: T): void;
 	[key: string]: unknown;
 }
 
@@ -14,6 +15,12 @@ function createProxy(path: string[] = []): unknown {
 			if (prop === "on") {
 				return (eventName: string, callback: (payload?: unknown) => void) => {
 					return eventBus.on(eventName, callback);
+				};
+			}
+
+			if (prop === "emit") {
+				return (eventName: string, payload?: unknown) => {
+					return eventBus.emit(eventName, payload);
 				};
 			}
 
