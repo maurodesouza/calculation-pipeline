@@ -1,6 +1,6 @@
 import { Divide, Minus, Plus, X } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
-import { Sidebar } from "#/components/ui/sidebar";
+import { Panel } from "#/components/ui/panel";
 import { Text } from "#/components/ui/text";
 
 const steps = [
@@ -23,12 +23,13 @@ export function StepsPanel() {
 	}
 
 	return (
-		<Sidebar.Container>
-			<Sidebar.Header>
+		<>
+			<Panel.Header>
 				<Text.Heading>Steps</Text.Heading>
-			</Sidebar.Header>
-			<Sidebar.Content>
-				<Sidebar.Scrollable className="grid grid-cols-2 gap-md">
+			</Panel.Header>
+
+			<Panel.Body>
+				<Panel.Scrollable className="grid grid-cols-2 gap-md items-start content-start">
 					{steps.map((step) => {
 						const Icon = step.icon;
 						return (
@@ -49,8 +50,8 @@ export function StepsPanel() {
 							</Canvas.Node.Container>
 						);
 					})}
-				</Sidebar.Scrollable>
-			</Sidebar.Content>
-		</Sidebar.Container>
+				</Panel.Scrollable>
+			</Panel.Body>
+		</>
 	);
 }

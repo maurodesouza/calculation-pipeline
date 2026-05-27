@@ -2,6 +2,7 @@ import { createRoute } from "@tanstack/react-router";
 import { useRef } from "react";
 
 import { Page } from "#/components/ui/page";
+import { Panel } from "#/components/ui/panel";
 import { Route as RootRoute } from "#/routes/__root";
 import { Canvas } from "../components/canvas";
 import { Handles } from "../components/handles";
@@ -34,7 +35,10 @@ function PipelineCanvas() {
 		<Page.Container>
 			<PipelineStoreProvider value={{ store: storeRef.current }}>
 				<div className="flex w-full h-full">
-					<StepsPanel />
+					<Panel.Template.Full
+						context="pipelines"
+						initialPanel={<StepsPanel />}
+					/>
 
 					<div className="flex-1 flex flex-col">
 						<Header.Container>
