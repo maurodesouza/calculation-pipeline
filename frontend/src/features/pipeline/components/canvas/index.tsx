@@ -5,6 +5,7 @@ import { Canvas as CanvasUI } from "#/components/ui/canvas";
 import { events } from "#/events";
 import { usePipelineContext } from "#/features/pipeline/store";
 import { random } from "#/utils/random";
+import { edgeTypes } from "./edges";
 import { nodeTypes } from "./nodes";
 
 export function Canvas() {
@@ -61,6 +62,7 @@ export function Canvas() {
 					nodes={nodes}
 					edges={edges}
 					nodeTypes={nodeTypes}
+					edgeTypes={edgeTypes}
 					onNodesChange={(event) => events.pipelines.canvas.nodes.change(event)}
 					onEdgesChange={(event) => events.pipelines.canvas.edges.change(event)}
 					onConnect={(event) => events.pipelines.canvas.edges.connect(event)}
