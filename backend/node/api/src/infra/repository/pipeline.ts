@@ -96,7 +96,10 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 			name: row.name,
 			description: row.description,
 			initialStepId: row.initial_step_id,
-			canvas: row.canvas,
+			canvas:
+				typeof row.canvas === "object"
+					? JSON.stringify(row.canvas)
+					: row.canvas,
 			steps,
 			createdAt: row.created_at,
 			updatedAt: row.updated_at,
@@ -304,7 +307,10 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 				name: row.name,
 				description: row.description,
 				initialStepId: row.initial_step_id,
-				canvas: row.canvas,
+				canvas:
+					typeof row.canvas === "object"
+						? JSON.stringify(row.canvas)
+						: row.canvas,
 				steps,
 				createdAt: row.created_at,
 				updatedAt: row.updated_at,
