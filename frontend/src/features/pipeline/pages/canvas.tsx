@@ -17,7 +17,7 @@ export const PipelineCanvasRoute = createRoute({
 	loader: async ({ context: { queryClient }, params: { id } }) => {
 		if (id === "new") return null;
 
-		return await queryClient.ensureQueryData(getPipelineQueryOptions(id));
+		return await queryClient.fetchQuery(getPipelineQueryOptions(id));
 	},
 });
 
