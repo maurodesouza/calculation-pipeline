@@ -1,10 +1,10 @@
 import { useSelector } from "@tanstack/react-store";
 import type { Node, ReactFlowInstance } from "@xyflow/react";
 import { useCallback, useRef } from "react";
-import { v4 as uuid } from "uuid";
 import { Canvas as CanvasUI } from "#/components/ui/canvas";
 import { events } from "#/events";
 import { usePipelineContext } from "#/features/pipeline/store";
+import { random } from "#/utils/random";
 import { nodeTypes } from "./nodes";
 
 export function Canvas() {
@@ -33,7 +33,7 @@ export function Canvas() {
 		});
 
 		const newNode = {
-			id: uuid(),
+			id: random.uuid(),
 			type: "operation",
 			position,
 			data: { props: payload },
