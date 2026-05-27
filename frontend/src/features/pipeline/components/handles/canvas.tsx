@@ -69,6 +69,7 @@ export function CanvasHandle() {
 		});
 
 		console.log("result", result);
+		queryClient.invalidateQueries(getPipelinesQueryOptions());
 
 		if (state.id === "new") {
 			navigate({
@@ -78,7 +79,7 @@ export function CanvasHandle() {
 				} as never,
 			});
 
-			queryClient.invalidateQueries(getPipelinesQueryOptions());
+			return;
 		}
 
 		queryClient.invalidateQueries(getPipelineQueryOptions(state.id));
