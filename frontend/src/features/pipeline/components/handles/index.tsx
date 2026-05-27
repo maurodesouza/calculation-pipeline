@@ -1,5 +1,11 @@
 import { CanvasHandle } from "./canvas";
+import { PipelineHandle } from "./pipeline";
 
 export function Handles() {
-	return <CanvasHandle />;
+	return (
+		<>
+			<PipelineHandle />
+			<CanvasHandle />
+		</>
+	);
 }

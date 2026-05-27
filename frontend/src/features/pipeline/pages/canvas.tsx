@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Page } from "#/components/ui/page";
 import { Route as RootRoute } from "#/routes/__root";
 import { Canvas } from "../components/canvas";
-import { CanvasHandle } from "../components/handles/canvas";
+import { Handles } from "../components/handles";
 import { Header } from "../components/header";
 import { StepsPanel } from "../components/panels/steps";
 import { getPipelineQueryOptions } from "../lib/react-query/get-pipeline-query-options";
@@ -42,7 +42,7 @@ function PipelineCanvas() {
 					</div>
 				</div>
 
-				<CanvasHandle />
+				<Handles />
 			</PipelineStoreProvider>
 		</Page.Container>
 	);

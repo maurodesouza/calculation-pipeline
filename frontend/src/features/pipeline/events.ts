@@ -8,12 +8,16 @@ export enum PipelineEvents {
 	CANVAS_EDGES_CHANGE = "pipelines.canvas.edges.change",
 
 	SAVE_PIPELINE = "pipelines.save",
+	UPDATE_NAME = "pipelines.update.name",
 }
 
 declare module "#/events/index" {
 	interface Events {
 		pipelines: {
 			save: () => void;
+			update: {
+				name: (name: string) => void;
+			};
 
 			canvas: {
 				nodes: {

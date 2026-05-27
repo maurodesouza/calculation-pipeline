@@ -1,27 +1,20 @@
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import {
 	addEdge,
+	applyEdgeChanges,
 	applyNodeChanges,
 	type Connection,
+	type EdgeChange,
 	type Node,
 	type NodeChange,
 } from "@xyflow/react";
 import { useCallback, useEffect } from "react";
 import { events } from "#/events";
 import { PipelineEvents } from "#/features/pipeline/events";
-import { queryClient } from "#/integrations/tanstack-query/root-provider";
 import { array } from "#/utils/array";
-import { getPipelineQueryOptions } from "../../lib/react-query/get-pipeline-query-options";
-import { getPipelinesQueryOptions } from "../../lib/react-query/get-pipelines-query-options";
-import { savePipelineMutationOptions } from "../../lib/react-query/save-pipeline-mutation-options";
 import { usePipelineContext } from "../../store";
 
 export function CanvasHandle() {
 	const { store } = usePipelineContext();
-	const navigate = useNavigate({ from: "/pipelines/$id" as never });
-
-	const savePipelineMutation = useMutation(savePipelineMutationOptions());
 
 	const onAddNode = useCallback(
 		(node: Node | Node[]) => {
@@ -55,34 +48,15 @@ export function CanvasHandle() {
 		[store],
 	);
 
-	const createPipeline = useCallback(async () => {
-		const state = store.get();
-
-		const result = await savePipelineMutation.mutateAsync({
-			id: state.id,
-			name: state.name,
-			description: state.description,
-			canvas: JSON.stringify({
-				nodes: state.nodes,
-				edges: state.edges,
-			}),
-		});
-
-		queryClient.invalidateQueries(getPipelinesQueryOptions());
-
-		if (state.id === "new") {
-			navigate({
-				to: "/pipelines/$id" as never,
-				params: {
-					id: result.id,
-				} as never,
-			});
-
-			return;
-		}
-
-		queryClient.invalidateQueries(getPipelineQueryOptions(state.id));
-	}, [savePipelineMutation, store, navigate]);
+	const onChangeEdges = useCallback(
+		(changes: EdgeChange[]) => {
+			store.setState((state) => ({
+				...state,
+				edges: applyEdgeChanges(changes, state.edges),
+			}));
+		},
+		[store],
+	);
 
 	useEffect(() => {
 		const unsubscribe1 = events.on(PipelineEvents.CANVAS_NODES_ADD, onAddNode);
@@ -94,10 +68,9 @@ export function CanvasHandle() {
 			PipelineEvents.CANVAS_EDGES_CONNECT,
 			onEdgeConnect,
 		);
-
 		const unsubscribe4 = events.on(
-			PipelineEvents.SAVE_PIPELINE,
-			createPipeline,
+			PipelineEvents.CANVAS_EDGES_CHANGE,
+			onChangeEdges,
 		);
 
 		return () => {
@@ -106,7 +79,7 @@ export function CanvasHandle() {
 			unsubscribe3();
 			unsubscribe4();
 		};
-	}, [onAddNode, onChangeNodes, onEdgeConnect, createPipeline]);
+	}, [onAddNode, onChangeNodes, onEdgeConnect, onChangeEdges]);
 
 	return null;
 }
