@@ -1,21 +1,11 @@
-import { useIsMutating } from "@tanstack/react-query";
-import { Clickable } from "#/components/ui/clickable";
-import { events } from "#/events/index";
-import { savePipelineMutationOptions } from "../../lib/react-query/save-pipeline-mutation-options";
+import { twx } from "#/utils/tailwind";
+import { NameInput } from "./name-input";
+import { SaveButton } from "./save-button";
 
-export function Header() {
-	const isSaving = useIsMutating(savePipelineMutationOptions()) > 0;
+const Container = twx.header`base-1 p-md w-full flex justify-between border-b border-ring-inner bg-background-base`;
 
-	return (
-		<header className="p-md w-full flex justify-end border-b border-ring-inner">
-			<Clickable.Button
-				tone="success"
-				variant="solid"
-				disabled={isSaving}
-				onClick={() => events.pipelines.save()}
-			>
-				{isSaving ? "Saving..." : "Save"}
-			</Clickable.Button>
-		</header>
-	);
-}
+export const Header = {
+	Container,
+	NameInput,
+	SaveButton,
+};

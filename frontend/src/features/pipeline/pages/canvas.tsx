@@ -37,7 +37,10 @@ function PipelineCanvas() {
 					<StepsPanel />
 
 					<div className="flex-1 flex flex-col">
-						<Header />
+						<Header.Container>
+							<Header.NameInput />
+							<Header.SaveButton />
+						</Header.Container>
 						<Canvas />
 					</div>
 				</div>
