@@ -68,7 +68,6 @@ export function CanvasHandle() {
 			}),
 		});
 
-		console.log("result", result);
 		queryClient.invalidateQueries(getPipelinesQueryOptions());
 
 		if (state.id === "new") {

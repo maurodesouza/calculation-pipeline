@@ -21,8 +21,6 @@ function createProxy(path: string[] = []): unknown {
 		},
 
 		apply(_target, _thisArg, args: unknown[]) {
-			console.log("path", path);
-
 			const eventName = path.join(".");
 			eventBus.emit(eventName, args[0]);
 		},
