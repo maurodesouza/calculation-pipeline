@@ -5,6 +5,7 @@ import { Canvas as CanvasUI } from "#/components/ui/canvas";
 import { events } from "#/events";
 import { usePipelineContext } from "#/features/pipeline/store";
 import { random } from "#/utils/random";
+import { StepsPanel } from "../panels/steps";
 import { edgeTypes } from "./edges";
 import { nodeTypes } from "./nodes";
 
@@ -69,6 +70,7 @@ export function Canvas() {
 					onDrop={onDrop}
 					onDragStart={onDragStart}
 					onDragOver={onDragOver}
+					onPaneClick={() => events.pipelines.panel.show(() => <StepsPanel />)}
 				>
 					<CanvasUI.Background />
 				</CanvasUI.Flow>
