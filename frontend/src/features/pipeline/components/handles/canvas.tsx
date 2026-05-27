@@ -40,6 +40,17 @@ export function CanvasHandle() {
 		[store],
 	);
 
+	const onRemoveNode = useCallback(
+		(nodeIds: string | string[]) => {
+			const ids = array.toArray(nodeIds);
+			store.setState((state) => ({
+				...state,
+				nodes: state.nodes.filter((node) => !ids.includes(node.id)),
+			}));
+		},
+		[store],
+	);
+
 	const onEdgeConnect = useCallback(
 		(connection: Connection) => {
 			const edge = {
@@ -90,14 +101,18 @@ export function CanvasHandle() {
 			onChangeNodes,
 		);
 		const unsubscribe3 = events.on(
+			PipelineEvents.CANVAS_NODES_REMOVE,
+			onRemoveNode,
+		);
+		const unsubscribe4 = events.on(
 			PipelineEvents.CANVAS_EDGES_CONNECT,
 			onEdgeConnect,
 		);
-		const unsubscribe4 = events.on(
+		const unsubscribe5 = events.on(
 			PipelineEvents.CANVAS_EDGES_CHANGE,
 			onChangeEdges,
 		);
-		const unsubscribe5 = events.on(
+		const unsubscribe6 = events.on(
 			PipelineEvents.CANVAS_EDGES_REMOVE,
 			onRemoveEdge,
 		);
@@ -108,8 +123,16 @@ export function CanvasHandle() {
 			unsubscribe3();
 			unsubscribe4();
 			unsubscribe5();
+			unsubscribe6();
 		};
-	}, [onAddNode, onChangeNodes, onEdgeConnect, onChangeEdges, onRemoveEdge]);
+	}, [
+		onAddNode,
+		onChangeNodes,
+		onRemoveNode,
+		onEdgeConnect,
+		onChangeEdges,
+		onRemoveEdge,
+	]);
 
 	return null;
 }
