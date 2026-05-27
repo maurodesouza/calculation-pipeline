@@ -3,6 +3,7 @@ import { useRef } from "react";
 
 import { Page } from "#/components/ui/page";
 import { Panel } from "#/components/ui/panel";
+import { Separator } from "#/components/ui/separator";
 import { Route as RootRoute } from "#/routes/__root";
 import { Canvas } from "../components/canvas";
 import { Handles } from "../components/handles";
@@ -36,8 +37,12 @@ function PipelineCanvas() {
 			<PipelineStoreProvider value={{ store: storeRef.current }}>
 				<div className="flex flex-col w-full h-full">
 					<Header.Container>
-						<Header.NameInput />
-						<Header.SaveButton />
+						<Header.Wrapper>
+							<Header.Controls.GoToListButton />
+							<Separator orientation="vertical" />
+							<Header.Controls.NameInput />
+						</Header.Wrapper>
+						<Header.Controls.SaveButton />
 					</Header.Container>
 
 					<div className="flex-1 flex">
