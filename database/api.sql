@@ -7,6 +7,8 @@ CREATE TABLE cp.pipelines (
     name VARCHAR(255) NOT NULL,
     description TEXT,
 
+	canvas JSONB,
+
     initial_step_id UUID,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
