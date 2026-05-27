@@ -15,3 +15,12 @@ export type SavePipelinePayload = {
 
 	canvas?: string;
 };
+
+export type StepInput = {
+	id: string;
+	name?: string;
+	description?: string;
+	operation: string;
+	by: number;
+	nextStepId?: string;
+};

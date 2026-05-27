@@ -4,10 +4,12 @@ import { useCallback, useEffect } from "react";
 import { z } from "zod";
 import { events } from "#/events";
 import { PipelineEvents } from "#/features/pipeline/events";
+import { buildChainFromCanvas } from "#/features/pipeline/utils/chain-builder";
 import { queryClient } from "#/integrations/tanstack-query/root-provider";
 import { getPipelineQueryOptions } from "../../lib/react-query/get-pipeline-query-options";
 import { getPipelinesQueryOptions } from "../../lib/react-query/get-pipelines-query-options";
 import { savePipelineMutationOptions } from "../../lib/react-query/save-pipeline-mutation-options";
+import { syncStepsMutationOptions } from "../../lib/react-query/sync-steps-mutation-options";
 import { usePipelineContext } from "../../store";
 
 const nameSchema = z.string().max(50, "Name must be at most 50 characters");
@@ -17,6 +19,7 @@ export function PipelineHandle() {
 	const navigate = useNavigate({ from: "/pipelines/$id" as never });
 
 	const savePipelineMutation = useMutation(savePipelineMutationOptions());
+	const syncStepsMutation = useMutation(syncStepsMutationOptions());
 
 	const onUpdateName = useCallback(
 		(name: string) => {
@@ -45,6 +48,16 @@ export function PipelineHandle() {
 			}),
 		});
 
+		const pipelineId = state.id === "new" ? result.id : state.id;
+		const steps = buildChainFromCanvas(state.nodes, state.edges);
+
+		if (steps.length > 0) {
+			await syncStepsMutation.mutateAsync({
+				pipelineId,
+				steps,
+			});
+		}
+
 		queryClient.invalidateQueries(getPipelinesQueryOptions());
 
 		if (state.id === "new") {
@@ -59,7 +72,7 @@ export function PipelineHandle() {
 		}
 
 		queryClient.invalidateQueries(getPipelineQueryOptions(state.id));
-	}, [savePipelineMutation, store, navigate]);
+	}, [savePipelineMutation, syncStepsMutation, store, navigate]);
 
 	useEffect(() => {
 		const unsubscribe1 = events.on(PipelineEvents.UPDATE_NAME, onUpdateName);
