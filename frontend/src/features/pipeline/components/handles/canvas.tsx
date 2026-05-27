@@ -59,8 +59,12 @@ export function CanvasHandle() {
 				if (!node) return state;
 
 				const newNode: Node = {
-					...node,
 					id: random.uuid(),
+					data: node.data,
+					type: node.type,
+					draggable: true,
+					selectable: true,
+					focusable: true,
 					position: {
 						x: node.position.x + 50,
 						y: node.position.y + 50,
