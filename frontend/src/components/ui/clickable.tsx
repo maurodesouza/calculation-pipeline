@@ -31,7 +31,7 @@ const buttonVariants = tv({
 				data-[tone=default]:hover:bg-background-support! data-[tone=default]:hover:text-foreground! data-[tone=default]:hover:border-background-support!
 			`,
 			icon: `
-				bg-transparent! text-foreground! hover:text-tone-foreground-context!
+				bg-transparent! text-foreground! hover:text-tone-foreground-context! hover:bg-background-support!
 				data-[tone=default]:hover:text-foreground-max!
 			`,
 		},
