@@ -1,4 +1,8 @@
-import { InvalidStateTransitionError, StepInconsistencyError } from "../errors";
+import {
+	InvalidCanvasError,
+	InvalidStateTransitionError,
+	StepInconsistencyError,
+} from "../errors";
 import { UUID } from "../value-objects/uuid";
 import { Step } from "./step";
 
@@ -15,6 +19,7 @@ type CreatePayload = {
 	name?: string;
 	description?: string;
 	initialStepId?: string;
+	canvas?: string;
 };
 
 type RestorePayload = {
@@ -23,6 +28,7 @@ type RestorePayload = {
 	description?: string;
 	initialStepId?: string;
 	steps?: Step[];
+	canvas?: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -33,6 +39,7 @@ type ConstructorPayload = {
 	description?: string;
 	initialStepId?: UUID;
 	steps: Step[];
+	canvas: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -43,6 +50,7 @@ export class Pipeline {
 	private description?: string;
 	private initialStepId?: UUID;
 	private steps: Step[];
+	private canvas: string;
 	private createdAt: Date;
 	private updatedAt: Date;
 
@@ -52,6 +60,7 @@ export class Pipeline {
 		this.description = payload.description;
 		this.initialStepId = payload.initialStepId;
 		this.steps = payload.steps || [];
+		this.canvas = payload.canvas;
 		this.createdAt = payload.createdAt;
 		this.updatedAt = payload.updatedAt;
 	}
@@ -67,11 +76,14 @@ export class Pipeline {
 			: [undefined, undefined];
 		if (!!stepIdError) return [undefined, stepIdError];
 
+		const canvas = payload.canvas || JSON.stringify({});
+
 		const objPayload: ConstructorPayload = {
 			...payload,
 			id,
 			initialStepId: stepId,
 			steps: [],
+			canvas,
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -90,12 +102,21 @@ export class Pipeline {
 		if (!!idError) return [undefined, idError];
 		if (!!initialStepIdError) return [undefined, initialStepIdError];
 
+		const canvas = payload.canvas || JSON.stringify({});
+
+		try {
+			JSON.parse(canvas);
+		} catch {
+			return [undefined, new InvalidCanvasError(canvas)];
+		}
+
 		return [
 			new Pipeline({
 				...payload,
 				id,
 				initialStepId,
 				steps: payload.steps || [],
+				canvas,
 			}),
 			undefined,
 		];
@@ -228,5 +249,20 @@ export class Pipeline {
 
 	getSteps() {
 		return this.steps;
+	}
+
+	getCanvas() {
+		return this.canvas;
+	}
+
+	setCanvas(canvas: string): [undefined, undefined] | [undefined, Error] {
+		try {
+			JSON.parse(canvas);
+		} catch {
+			return [undefined, new InvalidCanvasError(canvas)];
+		}
+		this.canvas = canvas;
+		this.updatedAt = new Date();
+		return [undefined, undefined];
 	}
 }

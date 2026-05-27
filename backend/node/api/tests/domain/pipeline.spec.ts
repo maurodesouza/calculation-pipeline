@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Pipeline } from '../../src/domain/entities/pipeline';
 import { Step } from '../../src/domain/entities/step';
 import { UUID } from '../../src/domain/value-objects/uuid';
+import { InvalidCanvasError } from '../../src/domain/errors/invalid-canvas-error';
 import { InvalidUuidError } from '../../src/domain/errors/invalid-uuid-error';
 import { RequiredUuidError } from '../../src/domain/errors/required-uuid-error';
 import { InvalidStateTransitionError } from '../../src/domain/errors';
@@ -40,6 +41,7 @@ describe('Pipeline', () => {
 			expect(pipeline.getName()).toBeUndefined();
 			expect(pipeline.getDescription()).toBeUndefined();
 			expect(pipeline.getInitialStepId()).toBeUndefined();
+			expect(pipeline.getCanvas()).toBe(JSON.stringify({}));
 		});
 
 		it('should fail with invalid initial step id', () => {
@@ -48,6 +50,13 @@ describe('Pipeline', () => {
 			});
 
 			expect(error).toBeInstanceOf(InvalidUuidError);
+		});
+
+		it('should create with custom canvas', () => {
+			const customCanvas = JSON.stringify({ nodes: [], edges: [] });
+			const pipeline = expectSuccess(Pipeline.create({ canvas: customCanvas }));
+
+			expect(pipeline.getCanvas()).toBe(customCanvas);
 		});
 	});
 
@@ -95,6 +104,43 @@ describe('Pipeline', () => {
 
 				expect(error).toBeInstanceOf(InvalidUuidError);
 			}
+		});
+
+		it('should restore with valid canvas', () => {
+			const input = {
+				id: UUID.create().getValue(),
+				canvas: JSON.stringify({ nodes: [], edges: [] }),
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
+
+			const pipeline = expectSuccess(Pipeline.restore(input));
+
+			expect(pipeline.getId()).toBe(input.id);
+			expect(pipeline.getCanvas()).toBe(input.canvas);
+		});
+
+		it('should fail with invalid canvas JSON', () => {
+			const [, error] = Pipeline.restore({
+				id: UUID.create().getValue(),
+				canvas: 'invalid-json',
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			});
+
+			expect(error).toBeInstanceOf(InvalidCanvasError);
+		});
+
+		it('should use default canvas when not provided', () => {
+			const input = {
+				id: UUID.create().getValue(),
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
+
+			const pipeline = expectSuccess(Pipeline.restore(input));
+
+			expect(pipeline.getCanvas()).toBe(JSON.stringify({}));
 		});
 	});
 
@@ -262,6 +308,38 @@ describe('Pipeline', () => {
 			expect(error).toBeDefined();
 			expect(error).toBeInstanceOf(InvalidStateTransitionError);
 			expect(pipeline.getInitialStepId()).toBeUndefined()
+		});
+
+		describe('setCanvas', () => {
+			it('should set valid canvas', () => {
+				const pipeline = expectSuccess(Pipeline.create({}));
+				const newCanvas = JSON.stringify({ nodes: [{ id: '1' }], edges: [] });
+
+				const [, error] = pipeline.setCanvas(newCanvas);
+
+				expect(error).toBeUndefined();
+				expect(pipeline.getCanvas()).toBe(newCanvas);
+			});
+
+			it('should fail with invalid canvas JSON', () => {
+				const pipeline = expectSuccess(Pipeline.create({}));
+
+				const [, error] = pipeline.setCanvas('invalid-json');
+
+				expect(error).toBeInstanceOf(InvalidCanvasError);
+			});
+
+			it('should update updatedAt when setting canvas', async () => {
+				const pipeline = expectSuccess(Pipeline.create({}));
+				const originalUpdatedAt = pipeline.getUpdatedAt();
+
+				// Wait a bit to ensure timestamp difference
+				await new Promise(resolve => setTimeout(resolve, 1));
+
+				pipeline.setCanvas(JSON.stringify({ nodes: [] }));
+
+				expect(pipeline.getUpdatedAt()).not.toBe(originalUpdatedAt);
+			});
 		});
 	});
 });

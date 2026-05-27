@@ -39,12 +39,13 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 		pipeline: Pipeline,
 	): Promise<[undefined, undefined] | [undefined, Error]> {
 		const [, error] = await this.sql.query(
-			"INSERT INTO cp.pipelines (id, name, description, initial_step_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)",
+			"INSERT INTO cp.pipelines (id, name, description, initial_step_id, canvas, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 			[
 				pipeline.getId(),
 				pipeline.getName(),
 				pipeline.getDescription(),
 				pipeline.getInitialStepId(),
+				pipeline.getCanvas(),
 				pipeline.getCreatedAt(),
 				pipeline.getUpdatedAt(),
 			],
@@ -57,11 +58,12 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 		pipeline: Pipeline,
 	): Promise<[undefined, undefined] | [undefined, Error]> {
 		const [, error] = await this.sql.query(
-			"UPDATE cp.pipelines SET name = $1, description = $2, initial_step_id = $3, updated_at = $4 WHERE id = $5",
+			"UPDATE cp.pipelines SET name = $1, description = $2, initial_step_id = $3, canvas = $4, updated_at = $5 WHERE id = $6",
 			[
 				pipeline.getName(),
 				pipeline.getDescription(),
 				pipeline.getInitialStepId(),
+				pipeline.getCanvas(),
 				pipeline.getUpdatedAt(),
 				pipeline.getId(),
 			],
@@ -94,6 +96,7 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 			name: row.name,
 			description: row.description,
 			initialStepId: row.initial_step_id,
+			canvas: row.canvas,
 			steps,
 			createdAt: row.created_at,
 			updatedAt: row.updated_at,
@@ -301,6 +304,7 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 				name: row.name,
 				description: row.description,
 				initialStepId: row.initial_step_id,
+				canvas: row.canvas,
 				steps,
 				createdAt: row.created_at,
 				updatedAt: row.updated_at,
