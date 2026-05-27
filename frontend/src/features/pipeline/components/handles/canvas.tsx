@@ -13,6 +13,7 @@ import { useCallback, useEffect } from "react";
 import { events } from "#/events";
 import { PipelineEvents } from "#/features/pipeline/events";
 import { array } from "#/utils/array";
+import { random } from "#/utils/random";
 import { usePipelineContext } from "../../store";
 
 export function CanvasHandle() {
@@ -47,6 +48,30 @@ export function CanvasHandle() {
 				...state,
 				nodes: state.nodes.filter((node) => !ids.includes(node.id)),
 			}));
+		},
+		[store],
+	);
+
+	const onDuplicateNode = useCallback(
+		(nodeId: string) => {
+			store.setState((state) => {
+				const node = state.nodes.find((n) => n.id === nodeId);
+				if (!node) return state;
+
+				const newNode: Node = {
+					...node,
+					id: random.uuid(),
+					position: {
+						x: node.position.x + 50,
+						y: node.position.y + 50,
+					},
+				};
+
+				return {
+					...state,
+					nodes: [...state.nodes, newNode],
+				};
+			});
 		},
 		[store],
 	);
@@ -105,14 +130,18 @@ export function CanvasHandle() {
 			onRemoveNode,
 		);
 		const unsubscribe4 = events.on(
+			PipelineEvents.CANVAS_NODES_DUPLICATE,
+			onDuplicateNode,
+		);
+		const unsubscribe5 = events.on(
 			PipelineEvents.CANVAS_EDGES_CONNECT,
 			onEdgeConnect,
 		);
-		const unsubscribe5 = events.on(
+		const unsubscribe6 = events.on(
 			PipelineEvents.CANVAS_EDGES_CHANGE,
 			onChangeEdges,
 		);
-		const unsubscribe6 = events.on(
+		const unsubscribe7 = events.on(
 			PipelineEvents.CANVAS_EDGES_REMOVE,
 			onRemoveEdge,
 		);
@@ -124,11 +153,13 @@ export function CanvasHandle() {
 			unsubscribe4();
 			unsubscribe5();
 			unsubscribe6();
+			unsubscribe7();
 		};
 	}, [
 		onAddNode,
 		onChangeNodes,
 		onRemoveNode,
+		onDuplicateNode,
 		onEdgeConnect,
 		onChangeEdges,
 		onRemoveEdge,

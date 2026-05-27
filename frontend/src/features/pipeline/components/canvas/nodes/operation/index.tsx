@@ -1,5 +1,5 @@
 import type { Node, NodeProps } from "@xyflow/react";
-import { Divide, Minus, Plus, Trash2, X } from "lucide-react";
+import { Copy, Divide, Minus, Plus, Trash2, X } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
 import { ContextMenu } from "#/components/ui/context-menu";
 import { events } from "#/events";
@@ -45,6 +45,13 @@ export function OperationNode(props: NodeProps<OperationNodeData>) {
 				</Canvas.Node.Container>
 			</ContextMenu.Trigger>
 			<ContextMenu.Content>
+				<ContextMenu.Item
+					onClick={() => events.pipelines.canvas.nodes.duplicate(id)}
+				>
+					<Copy data-icon="inline-start" />
+					Duplicate
+				</ContextMenu.Item>
+				<ContextMenu.Separator />
 				<ContextMenu.Item
 					tone="danger"
 					onClick={() => events.pipelines.canvas.nodes.remove(id)}
