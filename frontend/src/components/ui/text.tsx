@@ -1,9 +1,9 @@
 import { Link as RouterLink } from "@tanstack/react-router";
+import { Label as LabelPrimitive } from "radix-ui";
 import type { JSX } from "react";
 import React from "react";
 import { tv, type VariantProps } from "tailwind-variants";
-
-import { twx } from "#/utils/tailwind";
+import { cn, twx } from "#/utils/tailwind";
 
 const headingVariants = tv({
 	base: "font-semibold text-foreground",
@@ -50,7 +50,21 @@ const Strong = twx.strong`text-foreground text-sm font-semibold`;
 
 const Small = twx.small`text-foreground text-xs italic`;
 
-const Label = twx.label`text-foreground text-sm font-semibold block`;
+function Label({
+	className,
+	...props
+}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+	return (
+		<LabelPrimitive.Root
+			data-slot="label"
+			className={cn(
+				"base-1 flex items-center gap-2 text-sm leading-none font-medium select-none text-foreground group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+				className,
+			)}
+			{...props}
+		/>
+	);
+}
 
 const Highlight = twx.span`text-tone-foreground-context text-sm`;
 
