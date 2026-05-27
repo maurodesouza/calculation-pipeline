@@ -157,6 +157,13 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 			}
 
 			for (const step of toDelete) {
+				// Clear initial_step_id from ALL pipelines that reference this step
+				const [, clearError] = await this.sql.query(
+					"UPDATE cp.pipelines SET initial_step_id = NULL WHERE initial_step_id = $1",
+					[step.getId()],
+				);
+				if (clearError) throw clearError;
+
 				const [, deleteError] = await this.deleteStep(step.getId());
 				if (deleteError) throw deleteError;
 				output.deleted++;
