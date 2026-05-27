@@ -181,7 +181,7 @@ function FieldError({
 }) {
 	const content = useMemo(() => {
 		if (children) {
-			return children;
+			return <Text.Error>{children}</Text.Error>;
 		}
 
 		if (!errors?.length) {
@@ -218,7 +218,7 @@ function FieldError({
 		<div
 			role="alert"
 			data-slot="field-error"
-			className={cn("text-sm font-normal", className)}
+			className={cn("text-sm font-normal shrink-0", className)}
 			{...props}
 		>
 			{content}
