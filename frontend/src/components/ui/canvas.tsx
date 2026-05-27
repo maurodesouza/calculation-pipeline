@@ -18,7 +18,29 @@ function Flow(props: ReactFlowProps) {
 	return <ReactFlow {...props} />;
 }
 
-const NodeContainer = twx.div`border border-ring-inner p-lg w-full max-w-32 rounded-md bg-background-default flex flex-col gap-md items-center`;
+const nodeContainerVariants = tv({
+	base: "border border-tone-ring-inner p-lg w-full max-w-32 rounded-md bg-background-default flex flex-col gap-md items-center",
+	variants: {
+		variant: {
+			none: "border-ring-inner",
+			brand: "tone palette-brand",
+			success: "tone palette-success",
+			error: "tone palette-error",
+			warning: "tone palette-warning",
+		},
+	},
+
+	defaultVariants: {
+		variant: "none",
+	},
+});
+
+type NodeContainerProps = React.ComponentProps<"div"> &
+	VariantProps<typeof nodeContainerVariants>;
+
+const NodeContainer = twx.div((props: NodeContainerProps) =>
+	nodeContainerVariants(props),
+);
 
 const iconVariants = tv({
 	base: "size-16 grid place-items-center border border-tone-ring-inner rounded-full bg-tone-luminosity-300 text-tone-foreground-contrast",

@@ -26,7 +26,7 @@ export function OperationNode(props: NodeProps<OperationNodeData>) {
 	const Icon = operationIcons[operation];
 
 	return (
-		<Canvas.Node.Container>
+		<Canvas.Node.Container variant={props.selected ? "brand" : "none"}>
 			<Canvas.Node.IconWrapper>
 				<Icon size={32} />
 			</Canvas.Node.IconWrapper>
