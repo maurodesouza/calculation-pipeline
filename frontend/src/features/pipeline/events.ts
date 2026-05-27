@@ -6,6 +6,7 @@ export enum PipelineEvents {
 	CANVAS_NODES_CHANGE = "pipelines.canvas.nodes.change",
 	CANVAS_EDGES_CONNECT = "pipelines.canvas.edges.connect",
 	CANVAS_EDGES_CHANGE = "pipelines.canvas.edges.change",
+	CANVAS_EDGES_REMOVE = "pipelines.canvas.edges.remove",
 
 	SAVE_PIPELINE = "pipelines.save",
 	UPDATE_NAME = "pipelines.update.name",
@@ -28,6 +29,7 @@ declare module "#/events/index" {
 				edges: {
 					connect: (payload: Connection) => void;
 					change: (payload: EdgeChange[]) => void;
+					remove: (payload: string | string[]) => void;
 				};
 			};
 		};

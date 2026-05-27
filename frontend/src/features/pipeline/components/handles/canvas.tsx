@@ -58,6 +58,17 @@ export function CanvasHandle() {
 		[store],
 	);
 
+	const onRemoveEdge = useCallback(
+		(edgeIds: string | string[]) => {
+			const ids = array.toArray(edgeIds);
+			store.setState((state) => ({
+				...state,
+				edges: state.edges.filter((edge) => !ids.includes(edge.id)),
+			}));
+		},
+		[store],
+	);
+
 	useEffect(() => {
 		const unsubscribe1 = events.on(PipelineEvents.CANVAS_NODES_ADD, onAddNode);
 		const unsubscribe2 = events.on(
@@ -72,14 +83,19 @@ export function CanvasHandle() {
 			PipelineEvents.CANVAS_EDGES_CHANGE,
 			onChangeEdges,
 		);
+		const unsubscribe5 = events.on(
+			PipelineEvents.CANVAS_EDGES_REMOVE,
+			onRemoveEdge,
+		);
 
 		return () => {
 			unsubscribe1();
 			unsubscribe2();
 			unsubscribe3();
 			unsubscribe4();
+			unsubscribe5();
 		};
-	}, [onAddNode, onChangeNodes, onEdgeConnect, onChangeEdges]);
+	}, [onAddNode, onChangeNodes, onEdgeConnect, onChangeEdges, onRemoveEdge]);
 
 	return null;
 }
