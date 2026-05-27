@@ -222,6 +222,16 @@ export class Pipeline {
 		return [undefined, undefined];
 	}
 
+	setName(name?: string): void {
+		this.name = name;
+		this.updatedAt = new Date();
+	}
+
+	setDescription(description?: string): void {
+		this.description = description;
+		this.updatedAt = new Date();
+	}
+
 	setSteps(steps: Step[]): [undefined, undefined] | [undefined, Error] {
 		const [, validationError] = Pipeline.validateStepChain(steps);
 		if (validationError) return [undefined, validationError];
