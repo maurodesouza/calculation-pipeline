@@ -3,6 +3,7 @@ import { Copy, Divide, Minus, Plus, Trash2, X } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
 import { ContextMenu } from "#/components/ui/context-menu";
 import { events } from "#/events";
+import { EditNodePanel } from "#/features/pipeline/components/panels/edit-node";
 
 type OperationNodeData = Node<
 	{
@@ -30,7 +31,14 @@ export function OperationNode(props: NodeProps<OperationNodeData>) {
 	return (
 		<ContextMenu.Root>
 			<ContextMenu.Trigger asChild>
-				<Canvas.Node.Container variant={props.selected ? "brand" : "none"}>
+				<Canvas.Node.Container
+					variant={props.selected ? "brand" : "none"}
+					onClick={() =>
+						events.pipelines.panel.show(() => (
+							<EditNodePanel id={id} initialData={data} />
+						))
+					}
+				>
 					<Canvas.Node.IconWrapper>
 						<Icon size={32} />
 					</Canvas.Node.IconWrapper>

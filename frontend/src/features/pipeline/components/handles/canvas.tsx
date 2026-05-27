@@ -76,6 +76,18 @@ export function CanvasHandle() {
 		[store],
 	);
 
+	const onUpdateNodeData = useCallback(
+		({ id, data }: { id: string; data: Partial<Node["data"]> }) => {
+			store.setState((state) => ({
+				...state,
+				nodes: state.nodes.map((node) =>
+					node.id === id ? { ...node, data: { ...node.data, ...data } } : node,
+				),
+			}));
+		},
+		[store],
+	);
+
 	const onEdgeConnect = useCallback(
 		(connection: Connection) => {
 			const edge = {
@@ -134,14 +146,18 @@ export function CanvasHandle() {
 			onDuplicateNode,
 		);
 		const unsubscribe5 = events.on(
+			PipelineEvents.CANVAS_NODES_UPDATE_DATA,
+			onUpdateNodeData,
+		);
+		const unsubscribe6 = events.on(
 			PipelineEvents.CANVAS_EDGES_CONNECT,
 			onEdgeConnect,
 		);
-		const unsubscribe6 = events.on(
+		const unsubscribe7 = events.on(
 			PipelineEvents.CANVAS_EDGES_CHANGE,
 			onChangeEdges,
 		);
-		const unsubscribe7 = events.on(
+		const unsubscribe8 = events.on(
 			PipelineEvents.CANVAS_EDGES_REMOVE,
 			onRemoveEdge,
 		);
@@ -154,12 +170,14 @@ export function CanvasHandle() {
 			unsubscribe5();
 			unsubscribe6();
 			unsubscribe7();
+			unsubscribe8();
 		};
 	}, [
 		onAddNode,
 		onChangeNodes,
 		onRemoveNode,
 		onDuplicateNode,
+		onUpdateNodeData,
 		onEdgeConnect,
 		onChangeEdges,
 		onRemoveEdge,
