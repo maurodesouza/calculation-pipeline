@@ -65,6 +65,17 @@ export class Pipeline {
 		this.updatedAt = payload.updatedAt;
 	}
 
+	private static validateCanvas(
+		canvas: string,
+	): [undefined, undefined] | [undefined, Error] {
+		try {
+			JSON.parse(canvas);
+		} catch {
+			return [undefined, new InvalidCanvasError(canvas)];
+		}
+		return [undefined, undefined];
+	}
+
 	static create(
 		payload: CreatePayload,
 	): [Pipeline, undefined] | [undefined, Error] {
@@ -77,6 +88,9 @@ export class Pipeline {
 		if (!!stepIdError) return [undefined, stepIdError];
 
 		const canvas = payload.canvas || JSON.stringify({});
+
+		const [, canvasError] = Pipeline.validateCanvas(canvas);
+		if (canvasError) return [undefined, canvasError];
 
 		const objPayload: ConstructorPayload = {
 			...payload,
@@ -104,11 +118,8 @@ export class Pipeline {
 
 		const canvas = payload.canvas || JSON.stringify({});
 
-		try {
-			JSON.parse(canvas);
-		} catch {
-			return [undefined, new InvalidCanvasError(canvas)];
-		}
+		const [, canvasError] = Pipeline.validateCanvas(canvas);
+		if (canvasError) return [undefined, canvasError];
 
 		return [
 			new Pipeline({
@@ -256,11 +267,9 @@ export class Pipeline {
 	}
 
 	setCanvas(canvas: string): [undefined, undefined] | [undefined, Error] {
-		try {
-			JSON.parse(canvas);
-		} catch {
-			return [undefined, new InvalidCanvasError(canvas)];
-		}
+		const [, canvasError] = Pipeline.validateCanvas(canvas);
+		if (canvasError) return [undefined, canvasError];
+
 		this.canvas = canvas;
 		this.updatedAt = new Date();
 		return [undefined, undefined];
