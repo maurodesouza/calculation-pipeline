@@ -22,6 +22,13 @@ const operationIcons = {
 	multiply: X,
 };
 
+const operationPalette = {
+	sum: "brand",
+	subtract: "warning",
+	divide: "warning",
+	multiply: "brand",
+} as const;
+
 export function OperationNode(props: NodeProps<OperationNodeData>) {
 	const { data, id } = props;
 
@@ -39,7 +46,7 @@ export function OperationNode(props: NodeProps<OperationNodeData>) {
 						))
 					}
 				>
-					<Canvas.Node.IconWrapper>
+					<Canvas.Node.IconWrapper variant={operationPalette[operation]}>
 						<Icon size={32} />
 					</Canvas.Node.IconWrapper>
 

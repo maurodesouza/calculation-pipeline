@@ -4,10 +4,10 @@ import { Panel } from "#/components/ui/panel";
 import { Text } from "#/components/ui/text";
 
 const steps = [
-	{ id: "sum", label: "Sum", icon: Plus },
-	{ id: "subtract", label: "Subtract", icon: Minus },
-	{ id: "divide", label: "Divide", icon: Divide },
-	{ id: "multiply", label: "Multiply", icon: X },
+	{ id: "sum", label: "Sum", icon: Plus, palette: "brand" },
+	{ id: "multiply", label: "Multiply", icon: X, palette: "brand" },
+	{ id: "subtract", label: "Subtract", icon: Minus, palette: "warning" },
+	{ id: "divide", label: "Divide", icon: Divide, palette: "warning" },
 ];
 
 export function StepsPanel() {
@@ -40,7 +40,7 @@ export function StepsPanel() {
 								onDragStart={onDragStart}
 								data-operation={step.id}
 							>
-								<Canvas.Node.IconWrapper>
+								<Canvas.Node.IconWrapper variant={step.palette as never}>
 									<Icon size={32} />
 								</Canvas.Node.IconWrapper>
 
