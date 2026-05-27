@@ -8,6 +8,7 @@ type Output = {
 	name?: string;
 	description?: string;
 	initialStepId?: string;
+	canvas?: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -27,6 +28,7 @@ export class GetPipelineUseCase {
 			name: pipeline.getName(),
 			description: pipeline.getDescription(),
 			initialStepId: pipeline.getInitialStepId(),
+			canvas: pipeline.getCanvas(),
 			createdAt: pipeline.getCreatedAt(),
 			updatedAt: pipeline.getUpdatedAt(),
 		};
