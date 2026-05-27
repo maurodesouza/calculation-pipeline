@@ -34,17 +34,17 @@ function PipelineCanvas() {
 	return (
 		<Page.Container>
 			<PipelineStoreProvider value={{ store: storeRef.current }}>
-				<div className="flex w-full h-full">
-					<Panel.Template.Full
-						context="pipelines"
-						initialPanel={<StepsPanel />}
-					/>
+				<div className="flex flex-col w-full h-full">
+					<Header.Container>
+						<Header.NameInput />
+						<Header.SaveButton />
+					</Header.Container>
 
-					<div className="flex-1 flex flex-col">
-						<Header.Container>
-							<Header.NameInput />
-							<Header.SaveButton />
-						</Header.Container>
+					<div className="flex-1 flex">
+						<Panel.Template.Full
+							context="pipelines"
+							initialPanel={<StepsPanel />}
+						/>
 						<Canvas />
 					</div>
 				</div>
