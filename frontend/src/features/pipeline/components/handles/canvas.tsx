@@ -3,7 +3,9 @@ import {
 	applyEdgeChanges,
 	applyNodeChanges,
 	type Connection,
+	type Edge,
 	type EdgeChange,
+	MarkerType,
 	type Node,
 	type NodeChange,
 } from "@xyflow/react";
@@ -40,9 +42,21 @@ export function CanvasHandle() {
 
 	const onEdgeConnect = useCallback(
 		(connection: Connection) => {
+			const edge = {
+				...connection,
+				type: "default",
+				markerEnd: {
+					type: MarkerType.ArrowClosed,
+				},
+				style: {
+					strokeWidth: 20,
+					width: 20,
+				},
+			} as Edge;
+
 			store.setState((state) => ({
 				...state,
-				edges: addEdge(connection, state.edges),
+				edges: addEdge(edge, state.edges),
 			}));
 		},
 		[store],
