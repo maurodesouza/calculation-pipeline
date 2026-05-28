@@ -13,10 +13,7 @@ type CreateRunResult = {
 export function createRunMutationOptions() {
 	return mutationOptions({
 		mutationFn: async (payload: CreateRunPayload): Promise<CreateRunResult> => {
-			const response = await axios.post(
-				"http://localhost:3000/runs",
-				payload,
-			);
+			const response = await axios.post("http://localhost:3000/runs", payload);
 			return response.data;
 		},
 		mutationKey: ["create-run"],
