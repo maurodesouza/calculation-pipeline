@@ -15,9 +15,16 @@ export enum PipelineEvents {
 	SAVE_PIPELINE = "pipelines.save",
 	UPDATE_NAME = "pipelines.update.name",
 
+	CREATE_RUN = "pipelines.run.create",
+
 	RUN_PANEL_OPEN = "pipelines.run.panel.open",
 	RUN_PANEL_CLOSE = "pipelines.run.panel.close",
 }
+
+export type CreateRunEventPayload = {
+	payload: number;
+	pipelineId: string;
+};
 
 declare module "#/events/index" {
 	interface Events {
@@ -33,10 +40,9 @@ declare module "#/events/index" {
 			};
 
 			run: {
-				panel: {
-					open: () => void;
-					close: () => void;
-				};
+				create: (
+					payload: CreateRunEventPayload,
+				) => Promise<{ runId: string }[]>;
 			};
 
 			canvas: {

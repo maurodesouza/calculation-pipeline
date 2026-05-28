@@ -1,20 +1,19 @@
-import { useMutation } from "@tanstack/react-query";
 import { useSelector } from "@tanstack/react-store";
 import {
 	type ColumnDef,
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { Play, X } from "lucide-react";
+import { Loader, Play, X } from "lucide-react";
 import { Activity, useCallback, useEffect, useMemo, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { Field } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
 import { ResizablePanel } from "#/components/ui/resizable-panel";
 import { Table } from "#/components/ui/table";
-import { events } from "#/events";
+import { events } from "#/events/index";
+import { useTransition } from "#/hooks/use-transition";
 import { PipelineEvents } from "../../events";
-import { createRunMutationOptions } from "../../lib/react-query/create-run-mutation-options";
 import { usePipelineContext } from "../../store";
 import type { CanvasOperationNode } from "../../types/canvas-node";
 import { canvas } from "../../utils/canvas";
@@ -34,11 +33,11 @@ const columns: ColumnDef<CanvasOperationNode>[] = [
 
 export function RunPanel() {
 	const { store } = usePipelineContext();
-	const createRunMutation = useMutation(createRunMutationOptions());
 
-	const pipelineId = useSelector(store, (state) => state.id);
 	const nodes = useSelector(store, (state) => state.nodes);
 	const edges = useSelector(store, (state) => state.edges);
+
+	const isCreating = useTransition(["creating-run"]);
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [payload, setPayload] = useState(0);
@@ -61,6 +60,18 @@ export function RunPanel() {
 		setIsOpen(false);
 	}, []);
 
+	async function onCreateRun() {
+		events
+			.sequence(undefined, {
+				transition: ["creating-run"],
+			})
+			.step(() => events.pipelines.save())
+			.step(([{ pipelineId }]) =>
+				events.pipelines.run.create({ pipelineId, payload }),
+			)
+			.run();
+	}
+
 	useEffect(() => {
 		const unsubscribeOpen = events.on(
 			PipelineEvents.RUN_PANEL_OPEN,
@@ -76,12 +87,6 @@ export function RunPanel() {
 			unsubscribeClose();
 		};
 	}, [onOpenPanel, onClosePanel]);
-
-	const handleCreateRun = useCallback(() => {
-		if (pipelineId === "new") return;
-
-		createRunMutation.mutate({ pipelineId, payload });
-	}, [pipelineId, payload, createRunMutation]);
 
 	return (
 		<Activity mode={isOpen ? "visible" : "hidden"}>
@@ -109,9 +114,14 @@ export function RunPanel() {
 									tone="success"
 									variant="ghost"
 									size="icon"
-									onClick={handleCreateRun}
+									onClick={onCreateRun}
+									disabled={isCreating}
 								>
-									<Play size={16} />
+									{isCreating ? (
+										<Loader size={16} className="animate-spin" />
+									) : (
+										<Play size={16} />
+									)}
 								</Clickable.Button>
 							</div>
 
