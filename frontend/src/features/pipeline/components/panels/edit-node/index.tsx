@@ -7,7 +7,7 @@ import {
 	Trash2,
 	X,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { Field } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
@@ -16,6 +16,8 @@ import { Select } from "#/components/ui/select";
 import { Separator } from "#/components/ui/separator";
 import { Text } from "#/components/ui/text";
 import { events } from "#/events";
+import type { Operation } from "#/features/pipeline/types/canvas-node";
+import { fn } from "#/utils/fn";
 import { StepsPanel } from "../steps";
 
 const operations = [
@@ -30,7 +32,7 @@ type EditNodePanelProps = {
 
 	initialData: {
 		props: {
-			operation: string;
+			operation: Operation;
 			by: number;
 		};
 	};
@@ -39,30 +41,39 @@ type EditNodePanelProps = {
 export function EditNodePanel(props: EditNodePanelProps) {
 	const { id, initialData } = props;
 
+	const updateDataRef = useRef(
+		fn.debounce((payload) => {
+			updateData(payload);
+		}, 500),
+	);
+
 	const [operation, setOperation] = useState(initialData.props.operation);
 	const [by, setBy] = useState(initialData.props.by);
 
-	function handleOperationChange(value: string) {
+	function handleOperationChange(value: Operation) {
 		setOperation(value);
-		events.pipelines.canvas.nodes.updateData({
-			id,
-			data: {
-				props: {
-					operation: value as "sum" | "subtract" | "divide" | "multiply",
-					by,
-				},
-			},
+		updateDataRef.current({
+			operation: value,
+			by,
 		});
 	}
 
 	function handleByChange(value: number) {
 		setBy(value);
+
+		updateDataRef.current({
+			operation,
+			by: value,
+		});
+	}
+
+	function updateData(payload: { operation: Operation; by: number }) {
 		events.pipelines.canvas.nodes.updateData({
 			id,
 			data: {
 				props: {
-					operation: operation as "sum" | "subtract" | "divide" | "multiply",
-					by: value,
+					operation: payload.operation,
+					by: payload.by,
 				},
 			},
 		});

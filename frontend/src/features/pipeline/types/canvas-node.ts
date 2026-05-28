@@ -1,8 +1,10 @@
 import type { Node } from "@xyflow/react";
 
+export type Operation = "sum" | "subtract" | "divide" | "multiply";
+
 export type OperationNodeData = {
 	props: {
-		operation: "sum" | "subtract" | "divide" | "multiply";
+		operation: Operation;
 		by: number;
 	};
 };
