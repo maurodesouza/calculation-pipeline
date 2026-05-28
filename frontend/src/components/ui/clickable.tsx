@@ -20,7 +20,10 @@ const buttonVariants = tv({
 				data-[tone=default]:bg-background-support! data-[tone=default]:text-foreground!
 			`,
 			ghost: `
-				bg-transparent! text-foreground! hover:bg-tone-luminosity-300! hover:text-tone-foreground-contrast!
+				bg-transparent! text-tone-foreground-context! hover:bg-tone-luminosity-300! hover:text-tone-foreground-contrast!
+
+				data-[tone=default]:bg-foreground!
+
 				data-[tone=default]:hover:bg-background-support! data-[tone=default]:hover:text-foreground!
 			`,
 			outline: `
