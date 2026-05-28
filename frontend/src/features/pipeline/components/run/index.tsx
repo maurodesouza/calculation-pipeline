@@ -5,7 +5,6 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { Node } from "@xyflow/react";
 import { Play, X } from "lucide-react";
 import { Activity, useCallback, useEffect, useMemo, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
@@ -17,30 +16,21 @@ import { events } from "#/events";
 import { PipelineEvents } from "../../events";
 import { createRunMutationOptions } from "../../lib/react-query/create-run-mutation-options";
 import { usePipelineContext } from "../../store";
+import type { CanvasOperationNode } from "../../types/canvas-node";
+import { buildChainFromCanvas } from "../../utils/chain-builder";
 
-type OperationNodeData = {
-	props: {
-		operation: "sum" | "subtract" | "divide" | "multiply";
-		by: number;
-	};
-};
-
-const columns: ColumnDef<Node<OperationNodeData>>[] = [
+const columns: ColumnDef<CanvasOperationNode>[] = [
 	{
 		id: "operation",
 		header: "Operation",
-		accessorFn: (row) => row.data?.props.operation,
+		accessorFn: (row) => row.data.props.operation,
 	},
 	{
 		id: "by",
 		header: "By",
-		accessorFn: (row) => row.data?.props.by,
+		accessorFn: (row) => row.data.props.by,
 	},
 ];
-
-function isOperationNode(node: Node): node is Node<OperationNodeData> {
-	return node.type === "operation";
-}
 
 export function RunPanel() {
 	const { store } = usePipelineContext();
@@ -48,11 +38,14 @@ export function RunPanel() {
 
 	const pipelineId = useSelector(store, (state) => state.id);
 	const nodes = useSelector(store, (state) => state.nodes);
+	const edges = useSelector(store, (state) => state.edges);
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [payload, setPayload] = useState(0);
 
-	const tableData = useMemo(() => nodes.filter(isOperationNode), [nodes]);
+	const tableData = useMemo(() => {
+		return buildChainFromCanvas(nodes, edges);
+	}, [nodes, edges]);
 
 	const table = useReactTable({
 		data: tableData,
