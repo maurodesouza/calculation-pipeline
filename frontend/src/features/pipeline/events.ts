@@ -1,5 +1,6 @@
-import type { Connection, EdgeChange, Node, NodeChange } from "@xyflow/react";
+import type { Connection, EdgeChange, NodeChange } from "@xyflow/react";
 import type { Renderable } from "#/types/renderable";
+import type { CanvasNode, CanvasOperationNode } from "./types/canvas-node";
 
 export enum PipelineEvents {
 	CANVAS_NODES_ADD = "pipelines.canvas.nodes.add",
@@ -40,13 +41,13 @@ declare module "#/events/index" {
 
 			canvas: {
 				nodes: {
-					add: (payload: Node | Node[]) => void;
+					add: (payload: CanvasNode | CanvasNode[]) => void;
 					remove: (payload: string | string[]) => void;
 					change: (payload: NodeChange[]) => void;
 					duplicate: (payload: string) => void;
 					updateData: (payload: {
 						id: string;
-						data: Partial<Node["data"]>;
+						data: Partial<CanvasOperationNode["data"]>;
 					}) => void;
 				};
 				edges: {

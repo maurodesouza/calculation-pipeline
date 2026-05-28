@@ -1,11 +1,10 @@
-import type { Node, NodeProps } from "@xyflow/react";
+import type { NodeProps } from "@xyflow/react";
 import { Play } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
 import { events } from "#/events/index";
+import type { CanvasInitNode } from "#/features/pipeline/types/canvas-node";
 
-type InitNodeData = Node<Record<string, never>, "init">;
-
-export function InitNode(_props: NodeProps<InitNodeData>) {
+export function InitNode(_props: NodeProps<CanvasInitNode>) {
 	return (
 		<Canvas.Node.IconWrapper
 			variant="success"

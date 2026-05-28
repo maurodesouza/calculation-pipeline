@@ -11,6 +11,7 @@ import { getPipelinesQueryOptions } from "../../lib/react-query/get-pipelines-qu
 import { savePipelineMutationOptions } from "../../lib/react-query/save-pipeline-mutation-options";
 import { syncStepsMutationOptions } from "../../lib/react-query/sync-steps-mutation-options";
 import { usePipelineContext } from "../../store";
+import type { StepInput } from "../../types/pipeline";
 
 const nameSchema = z.string().max(50, "Name must be at most 50 characters");
 
@@ -49,7 +50,13 @@ export function PipelineHandle() {
 		});
 
 		const pipelineId = state.id === "new" ? result.id : state.id;
-		const steps = buildChainFromCanvas(state.nodes, state.edges);
+		const chain = buildChainFromCanvas(state.nodes, state.edges);
+		const steps: StepInput[] = chain.map((node, index) => ({
+			id: node.id,
+			operation: node.data.props.operation,
+			by: node.data.props.by,
+			nextStepId: chain[index + 1]?.id,
+		}));
 
 		if (steps.length > 0) {
 			await syncStepsMutation.mutateAsync({

@@ -1,9 +1,10 @@
 import { useSelector } from "@tanstack/react-store";
-import type { Node, ReactFlowInstance } from "@xyflow/react";
+import type { ReactFlowInstance } from "@xyflow/react";
 import { useCallback, useRef } from "react";
 import { Canvas as CanvasUI } from "#/components/ui/canvas";
 import { events } from "#/events";
 import { usePipelineContext } from "#/features/pipeline/store";
+import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
 import { random } from "#/utils/random";
 import { StepsPanel } from "../panels/steps";
 import { edgeTypes } from "./edges";
@@ -34,7 +35,9 @@ export function Canvas() {
 			y: event.clientY,
 		});
 
-		const newNode = {
+		if (!position) return;
+
+		const newNode: CanvasOperationNode = {
 			id: random.uuid(),
 			type: "operation",
 			position,
@@ -42,7 +45,7 @@ export function Canvas() {
 			draggable: true,
 			selectable: true,
 			focusable: true,
-		} as Node;
+		};
 
 		events.pipelines.canvas.nodes.add(newNode);
 	}, []);

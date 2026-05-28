@@ -6,7 +6,6 @@ import {
 	type Edge,
 	type EdgeChange,
 	MarkerType,
-	type Node,
 	type NodeChange,
 } from "@xyflow/react";
 import { useCallback, useEffect } from "react";
@@ -15,12 +14,13 @@ import { PipelineEvents } from "#/features/pipeline/events";
 import { array } from "#/utils/array";
 import { random } from "#/utils/random";
 import { usePipelineContext } from "../../store";
+import type { CanvasNode, CanvasOperationNode } from "../../types/canvas-node";
 
 export function CanvasHandle() {
 	const { store } = usePipelineContext();
 
 	const onAddNode = useCallback(
-		(node: Node | Node[]) => {
+		(node: CanvasNode | CanvasNode[]) => {
 			const nodes = array.toArray(node);
 
 			store.setState((state) => ({
@@ -35,7 +35,7 @@ export function CanvasHandle() {
 		(changes: NodeChange[]) => {
 			store.setState((state) => ({
 				...state,
-				nodes: applyNodeChanges(changes, state.nodes),
+				nodes: applyNodeChanges(changes, state.nodes) as CanvasNode[],
 			}));
 		},
 		[store],
@@ -61,7 +61,7 @@ export function CanvasHandle() {
 				const node = state.nodes.find((n) => n.id === nodeId);
 				if (!node) return state;
 
-				const newNode: Node = {
+				const newNode = {
 					id: random.uuid(),
 					data: node.data,
 					type: node.type,
@@ -72,7 +72,7 @@ export function CanvasHandle() {
 						x: node.position.x + 50,
 						y: node.position.y + 50,
 					},
-				};
+				} as CanvasNode;
 
 				return {
 					...state,
@@ -84,12 +84,18 @@ export function CanvasHandle() {
 	);
 
 	const onUpdateNodeData = useCallback(
-		({ id, data }: { id: string; data: Partial<Node["data"]> }) => {
+		({
+			id,
+			data,
+		}: {
+			id: string;
+			data: Partial<CanvasOperationNode["data"]>;
+		}) => {
 			store.setState((state) => ({
 				...state,
 				nodes: state.nodes.map((node) =>
 					node.id === id ? { ...node, data: { ...node.data, ...data } } : node,
-				),
+				) as CanvasNode[],
 			}));
 		},
 		[store],

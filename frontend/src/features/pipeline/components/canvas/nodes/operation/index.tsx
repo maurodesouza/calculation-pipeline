@@ -1,19 +1,10 @@
-import type { Node, NodeProps } from "@xyflow/react";
+import type { NodeProps } from "@xyflow/react";
 import { Copy, Divide, Minus, Plus, Trash2, X } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
 import { ContextMenu } from "#/components/ui/context-menu";
 import { events } from "#/events";
 import { EditNodePanel } from "#/features/pipeline/components/panels/edit-node";
-
-type OperationNodeData = Node<
-	{
-		props: {
-			operation: "sum" | "subtract" | "divide" | "multiply";
-			by: number;
-		};
-	},
-	"operation"
->;
+import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
 
 const operationIcons = {
 	sum: Plus,
@@ -29,7 +20,7 @@ const operationPalette = {
 	multiply: "brand",
 } as const;
 
-export function OperationNode(props: NodeProps<OperationNodeData>) {
+export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 	const { data, id } = props;
 
 	const operation = data.props.operation;

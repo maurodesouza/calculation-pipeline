@@ -1,12 +1,13 @@
 import type { Store } from "@tanstack/react-store";
 import { createStore, createStoreContext } from "@tanstack/react-store";
-import type { Edge, Node } from "@xyflow/react";
+import type { Edge } from "@xyflow/react";
 import { json } from "#/utils/json";
 import { random } from "#/utils/random";
+import type { CanvasNode } from "../types/canvas-node";
 import type { Pipeline } from "../types/pipeline";
 
 type Canvas = {
-	nodes: Node[];
+	nodes: CanvasNode[];
 	edges: Edge[];
 };
 
@@ -28,7 +29,7 @@ const INITIAL_CANVAS_STATE = {
 			selectable: true,
 			focusable: true,
 		},
-	] as Node[],
+	] as CanvasNode[],
 	edges: [],
 };
 
