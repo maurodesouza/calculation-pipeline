@@ -4,8 +4,7 @@ import { useCallback, useRef } from "react";
 import { Canvas as CanvasUI } from "#/components/ui/canvas";
 import { events } from "#/events";
 import { usePipelineContext } from "#/features/pipeline/store";
-import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
-import { random } from "#/utils/random";
+import { canvas } from "../../utils/canvas";
 import { StepsPanel } from "../panels/steps";
 import { edgeTypes } from "./edges";
 import { nodeTypes } from "./nodes";
@@ -37,17 +36,9 @@ export function Canvas() {
 
 		if (!position) return;
 
-		const newNode: CanvasOperationNode = {
-			id: random.uuid(),
-			type: "operation",
-			position,
-			data: { props: payload },
-			draggable: true,
-			selectable: true,
-			focusable: true,
-		};
-
-		events.pipelines.canvas.nodes.add(newNode);
+		events.pipelines.canvas.nodes.add(
+			canvas.nodes.create("operation", position, { props: payload }),
+		);
 	}, []);
 
 	function onDragStart(event: React.DragEvent) {

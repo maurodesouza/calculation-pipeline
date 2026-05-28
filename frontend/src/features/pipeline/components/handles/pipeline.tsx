@@ -4,7 +4,6 @@ import { useCallback, useEffect } from "react";
 import { z } from "zod";
 import { events } from "#/events";
 import { PipelineEvents } from "#/features/pipeline/events";
-import { buildChainFromCanvas } from "#/features/pipeline/utils/chain-builder";
 import { queryClient } from "#/integrations/tanstack-query/root-provider";
 import { getPipelineQueryOptions } from "../../lib/react-query/get-pipeline-query-options";
 import { getPipelinesQueryOptions } from "../../lib/react-query/get-pipelines-query-options";
@@ -12,6 +11,7 @@ import { savePipelineMutationOptions } from "../../lib/react-query/save-pipeline
 import { syncStepsMutationOptions } from "../../lib/react-query/sync-steps-mutation-options";
 import { usePipelineContext } from "../../store";
 import type { StepInput } from "../../types/pipeline";
+import { canvas } from "../../utils/canvas";
 
 const nameSchema = z.string().max(50, "Name must be at most 50 characters");
 
@@ -50,13 +50,8 @@ export function PipelineHandle() {
 		});
 
 		const pipelineId = state.id === "new" ? result.id : state.id;
-		const chain = buildChainFromCanvas(state.nodes, state.edges);
-		const steps: StepInput[] = chain.map((node, index) => ({
-			id: node.id,
-			operation: node.data.props.operation,
-			by: node.data.props.by,
-			nextStepId: chain[index + 1]?.id,
-		}));
+		const chain = canvas.chain.build(state.nodes, state.edges);
+		const steps: StepInput[] = chain.map(canvas.nodes.map.toStepInput());
 
 		if (steps.length > 0) {
 			await syncStepsMutation.mutateAsync({

@@ -12,9 +12,9 @@ import { useCallback, useEffect } from "react";
 import { events } from "#/events";
 import { PipelineEvents } from "#/features/pipeline/events";
 import { array } from "#/utils/array";
-import { random } from "#/utils/random";
 import { usePipelineContext } from "../../store";
 import type { CanvasNode, CanvasOperationNode } from "../../types/canvas-node";
+import { canvas } from "../../utils/canvas";
 
 export function CanvasHandle() {
 	const { store } = usePipelineContext();
@@ -46,10 +46,8 @@ export function CanvasHandle() {
 			const ids = array.toArray(nodeIds);
 			store.setState((state) => ({
 				...state,
-				nodes: state.nodes.filter((node) => !ids.includes(node.id)),
-				edges: state.edges.filter(
-					(edge) => !ids.includes(edge.source) && !ids.includes(edge.target),
-				),
+				nodes: state.nodes.filter(canvas.nodes.filter.removeIds(ids)),
+				edges: state.edges.filter(canvas.edges.filter.removeFromIds(ids)),
 			}));
 		},
 		[store],
@@ -58,21 +56,17 @@ export function CanvasHandle() {
 	const onDuplicateNode = useCallback(
 		(nodeId: string) => {
 			store.setState((state) => {
-				const node = state.nodes.find((n) => n.id === nodeId);
+				const node = state.nodes.find(canvas.nodes.find.byId(nodeId));
 				if (!node) return state;
 
-				const newNode = {
-					id: random.uuid(),
-					data: node.data,
-					type: node.type,
-					draggable: true,
-					selectable: true,
-					focusable: true,
-					position: {
-						x: node.position.x + 50,
-						y: node.position.y + 50,
+				const newNode = canvas.nodes.create(
+					node.type,
+					{
+						x: node.position.x + 150,
+						y: node.position.y,
 					},
-				} as CanvasNode;
+					node.data,
+				);
 
 				return {
 					...state,
@@ -93,8 +87,8 @@ export function CanvasHandle() {
 		}) => {
 			store.setState((state) => ({
 				...state,
-				nodes: state.nodes.map((node) =>
-					node.id === id ? { ...node, data: { ...node.data, ...data } } : node,
+				nodes: state.nodes.map(
+					canvas.nodes.map.updateData(id, data),
 				) as CanvasNode[],
 			}));
 		},
@@ -138,7 +132,7 @@ export function CanvasHandle() {
 			const ids = array.toArray(edgeIds);
 			store.setState((state) => ({
 				...state,
-				edges: state.edges.filter((edge) => !ids.includes(edge.id)),
+				edges: state.edges.filter(canvas.edges.filter.removeIds(ids)),
 			}));
 		},
 		[store],

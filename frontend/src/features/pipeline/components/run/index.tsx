@@ -17,7 +17,7 @@ import { PipelineEvents } from "../../events";
 import { createRunMutationOptions } from "../../lib/react-query/create-run-mutation-options";
 import { usePipelineContext } from "../../store";
 import type { CanvasOperationNode } from "../../types/canvas-node";
-import { buildChainFromCanvas } from "../../utils/chain-builder";
+import { canvas } from "../../utils/canvas";
 
 const columns: ColumnDef<CanvasOperationNode>[] = [
 	{
@@ -44,7 +44,7 @@ export function RunPanel() {
 	const [payload, setPayload] = useState(0);
 
 	const tableData = useMemo(() => {
-		return buildChainFromCanvas(nodes, edges);
+		return canvas.chain.build(nodes, edges);
 	}, [nodes, edges]);
 
 	const table = useReactTable({
