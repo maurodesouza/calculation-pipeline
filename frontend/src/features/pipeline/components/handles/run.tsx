@@ -1,0 +1,31 @@
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
+import { events } from "#/events";
+import {
+	type CreateRunEventPayload,
+	PipelineEvents,
+} from "#/features/pipeline/events";
+import { createRunMutationOptions } from "../../lib/react-query/create-run-mutation-options";
+
+export function RunHandle() {
+	const createRunMutation = useMutation(createRunMutationOptions());
+
+	const createRun = useCallback(
+		async (payload: CreateRunEventPayload) => {
+			const { id } = await createRunMutation.mutateAsync(payload);
+
+			return { runId: id };
+		},
+		[createRunMutation],
+	);
+
+	useEffect(() => {
+		const unsubscribe1 = events.on(PipelineEvents.CREATE_RUN, createRun);
+
+		return () => {
+			unsubscribe1();
+		};
+	}, [createRun]);
+
+	return null;
+}
