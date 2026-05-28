@@ -1,26 +1,20 @@
-import type { Edge, Node } from "@xyflow/react";
-import type { StepInput } from "../types/pipeline";
-
-type OperationNodeData = {
-	props: {
-		operation: "sum" | "subtract" | "divide" | "multiply";
-		by: number;
-	};
-};
+import type { Edge } from "@xyflow/react";
+import type { CanvasNode, CanvasOperationNode } from "../types/canvas-node";
 
 export function buildChainFromCanvas(
-	nodes: Node[],
+	nodes: CanvasNode[],
 	edges: Edge[],
-): StepInput[] {
+): CanvasOperationNode[] {
 	const operationNodes = nodes.filter((node) => node.type === "operation");
 
 	if (operationNodes.length === 0) {
 		return [];
 	}
 
-	const nodeMap = new Map<string, Node>();
+	const nodeMap = new Map<string, CanvasOperationNode>();
+
 	for (const node of nodes) {
-		nodeMap.set(node.id, node);
+		nodeMap.set(node.id, node as CanvasOperationNode);
 	}
 
 	const edgeMap = new Map<string, string>();
@@ -28,33 +22,23 @@ export function buildChainFromCanvas(
 		edgeMap.set(edge.source, edge.target);
 	}
 
-	const steps: StepInput[] = [];
+	const steps: CanvasOperationNode[] = [];
 	const visited = new Set<string>();
 
-	let currentNode = operationNodes.find((node) => {
-		const hasIncomingEdge = edges.some((edge) => edge.target === node.id);
-		return !hasIncomingEdge;
-	});
+	const initNode = nodes.find((node) => node.type === "init");
+	if (!initNode) return [];
 
-	if (!currentNode && operationNodes.length > 0) {
-		currentNode = operationNodes[0];
-	}
+	const initEdge = edges.find((edge) => edge.source === initNode.id);
+	if (!initEdge) return [];
 
-	while (currentNode && !visited.has(currentNode.id)) {
-		visited.add(currentNode.id);
+	let curNode = nodeMap.get(initEdge.target);
 
-		const data = currentNode.data as OperationNodeData;
+	while (curNode && !visited.has(curNode.id)) {
+		visited.add(curNode.id);
 
-		const nextStepId = edgeMap.get(currentNode.id);
-
-		steps.push({
-			id: currentNode.id,
-			operation: data.props.operation,
-			by: data.props.by,
-			nextStepId,
-		});
-
-		currentNode = nextStepId ? nodeMap.get(nextStepId) : undefined;
+		const nextStepId = edgeMap.get(curNode.id);
+		steps.push(curNode);
+		curNode = nextStepId ? nodeMap.get(nextStepId) : undefined;
 	}
 
 	return steps;
