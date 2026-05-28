@@ -110,7 +110,7 @@ function Container(props: React.PropsWithChildren) {
 
 	return (
 		<div
-			className="z-10 base-1 flex flex-col border-t border-ring-inner bg-background-default"
+			className="z-10 base-1 flex flex-col border-t border-ring-inner bg-background-default relative"
 			style={{ height: `${height}px` }}
 			{...props}
 		/>
@@ -127,7 +127,7 @@ function Handle(props: React.PropsWithChildren) {
 			type="button"
 			aria-label="Resize panel"
 			className={cn(
-				"-mt-7.5 h-15.5 cursor-grab! bg-transparent hover:bg-background-support/80 transition-colors w-full border-none p-0 grid place-items-center",
+				"h-15.5 absolute z-10 -top-7.5 left-0 right-0 cursor-grab! bg-transparent hover:bg-background-support/80 transition-colors w-full border-none p-0 grid place-items-center",
 				isDragging && "cursor-grabbing! bg-background-support/60",
 			)}
 			{...props}
@@ -137,9 +137,7 @@ function Handle(props: React.PropsWithChildren) {
 
 const HandleIndicator = twx.div`bg-background-support h-2 w-32 rounded-md`;
 
-function Content(props: React.PropsWithChildren) {
-	return <div className="flex-1 overflow-hidden" {...props} />;
-}
+const Content = twx.div`flex flex-col flex-1 overflow-hidden relative p-lg`;
 
 export const ResizablePanel = {
 	Provider: ResizablePanelProvider,
