@@ -22,7 +22,7 @@ export enum PipelineEvents {
 declare module "#/events/index" {
 	interface Events {
 		pipelines: {
-			save: () => void;
+			save: () => Promise<{ pipelineId: string }[]>;
 			update: {
 				name: (name: string) => void;
 			};

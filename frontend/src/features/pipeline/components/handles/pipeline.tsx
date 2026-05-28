@@ -76,6 +76,8 @@ export function PipelineHandle() {
 		}
 
 		queryClient.invalidateQueries(getPipelineQueryOptions(state.id));
+
+		return { pipelineId };
 	}, [savePipelineMutation, syncStepsMutation, store, navigate]);
 
 	useEffect(() => {
