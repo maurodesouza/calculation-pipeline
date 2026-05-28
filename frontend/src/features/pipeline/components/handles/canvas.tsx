@@ -47,6 +47,9 @@ export function CanvasHandle() {
 			store.setState((state) => ({
 				...state,
 				nodes: state.nodes.filter((node) => !ids.includes(node.id)),
+				edges: state.edges.filter(
+					(edge) => !ids.includes(edge.source) && !ids.includes(edge.target),
+				),
 			}));
 		},
 		[store],
