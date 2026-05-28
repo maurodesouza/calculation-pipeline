@@ -12,9 +12,7 @@ function buildChainFromCanvas(
 ): CanvasOperationNode[] {
 	const operationNodes = nodes.filter((node) => node.type === "operation");
 
-	if (operationNodes.length === 0) {
-		return [];
-	}
+	if (operationNodes.length === 0) return [];
 
 	const nodeMap = new Map<string, CanvasOperationNode>();
 
