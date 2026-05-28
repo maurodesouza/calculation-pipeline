@@ -63,6 +63,8 @@ export function PipelineHandle() {
 		queryClient.invalidateQueries(getPipelinesQueryOptions());
 
 		if (state.id === "new") {
+			store.setState((s) => ({ ...s, id: result.id }));
+
 			navigate({
 				to: "/pipelines/$id" as never,
 				params: {
