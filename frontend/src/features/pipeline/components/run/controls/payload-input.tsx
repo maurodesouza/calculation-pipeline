@@ -1,6 +1,7 @@
 import { useSelector } from "@tanstack/react-store";
 import { Field } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
+import { events } from "#/events";
 import { usePipelineContext } from "../../../store";
 
 export function PayloadInput() {
@@ -8,10 +9,7 @@ export function PayloadInput() {
 	const payload = useSelector(store, (state) => state.run.payload);
 
 	const handleChange = (value: number) => {
-		store.setState((prev) => ({
-			...prev,
-			run: { ...prev.run, payload: value },
-		}));
+		events.pipelines.run.update.payload({ payload: value });
 	};
 
 	return (

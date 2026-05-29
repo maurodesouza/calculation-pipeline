@@ -7,6 +7,7 @@ import {
 	type PauseRunEventPayload,
 	PipelineEvents,
 	type ResumeRunEventPayload,
+	type RunUpdatePayloadEventPayload,
 } from "#/features/pipeline/events";
 import { usePipelineContext } from "#/features/pipeline/store";
 import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
@@ -29,7 +30,7 @@ export function RunHandle() {
 
 			store.setState((state) => ({
 				...state,
-				run: { id, status: "pending" as const },
+				run: { id, status: "pending" as const, payload: state.run.payload },
 				nodes: state.nodes.map(
 					canvas.nodes.map.updateOperationData({
 						execution: {
@@ -66,17 +67,32 @@ export function RunHandle() {
 		[finalizeRunMutation],
 	);
 
+	const updatePayload = useCallback(
+		({ payload }: RunUpdatePayloadEventPayload) => {
+			store.setState((prev) => ({
+				...prev,
+				run: { ...prev.run, payload },
+			}));
+		},
+		[store],
+	);
+
 	useEffect(() => {
 		const unsubscribe1 = events.on(PipelineEvents.CREATE_RUN, createRun);
 		const unsubscribe2 = events.on(PipelineEvents.RUN_PAUSE, pauseRun);
 		const unsubscribe3 = events.on(PipelineEvents.RUN_RESUME, resumeRun);
 		const unsubscribe4 = events.on(PipelineEvents.RUN_FINALIZE, finalizeRun);
+		const unsubscribe5 = events.on(
+			PipelineEvents.RUN_UPDATE_PAYLOAD,
+			updatePayload,
+		);
 
 		return () => {
 			unsubscribe1();
 			unsubscribe2();
 			unsubscribe3();
 			unsubscribe4();
+			unsubscribe5();
 		};
 	}, [createRun, pauseRun, resumeRun, finalizeRun]);
 

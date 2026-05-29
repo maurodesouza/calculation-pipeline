@@ -20,6 +20,7 @@ export enum PipelineEvents {
 	RUN_RESUME = "pipelines.run.resume",
 	RUN_FINALIZE = "pipelines.run.finalize",
 	RUN_FINALIZED = "pipelines.run.finalized",
+	RUN_UPDATE_PAYLOAD = "pipelines.run.update.payload",
 
 	RUN_PANEL_OPEN = "pipelines.run.panel.open",
 	RUN_PANEL_CLOSE = "pipelines.run.panel.close",
@@ -49,6 +50,10 @@ export type RunFinalizedEventPayload = {
 	error: string;
 };
 
+export type RunUpdatePayloadEventPayload = {
+	payload: number;
+};
+
 declare module "#/events/index" {
 	interface Events {
 		pipelines: {
@@ -76,6 +81,9 @@ declare module "#/events/index" {
 					payload: FinalizeRunEventPayload,
 				) => Promise<{ success: boolean }[]>;
 				finalized: (payload: RunFinalizedEventPayload) => void;
+				update: {
+					payload: (payload: RunUpdatePayloadEventPayload) => void;
+				};
 			};
 
 			execution: {
