@@ -2,6 +2,7 @@ import { CompleteRunUseCase } from "./application/use-cases/complete-run";
 import { CreatePipelineUseCase } from "./application/use-cases/create-pipeline";
 import { CreateRunUseCase } from "./application/use-cases/create-run";
 import { FailRunUseCase } from "./application/use-cases/fail-run";
+import { FinalizeRunUseCase } from "./application/use-cases/finalize-run";
 import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
 import { InitializeRunUseCase } from "./application/use-cases/initialize-run";
 import { ListPipelinesUseCase } from "./application/use-cases/list-pipelines";
@@ -89,6 +90,7 @@ async function api() {
 	instance.register("initialize-run-use-case", new InitializeRunUseCase());
 	instance.register("complete-run-use-case", new CompleteRunUseCase());
 	instance.register("fail-run-use-case", new FailRunUseCase());
+	instance.register("finalize-run-use-case", new FinalizeRunUseCase());
 	instance.register("pause-run-use-case", new PauseRunUseCase());
 	instance.register("resume-run-use-case", new ResumeRunUseCase());
 
