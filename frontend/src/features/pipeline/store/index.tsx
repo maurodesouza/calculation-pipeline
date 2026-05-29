@@ -11,12 +11,17 @@ type Canvas = {
 	edges: Edge[];
 };
 
+type RunStatus = "idle" | "pending" | "started" | "completed" | "failed";
+
 type PipelineStore = Canvas & {
 	rawPipeline: Record<string, unknown>;
 	id: string;
 	name: string;
 	description: string;
-	currentRunId: string | null;
+	run: {
+		id: string | null;
+		status: RunStatus;
+	};
 };
 
 const INITIAL_CANVAS_STATE = {
@@ -49,7 +54,7 @@ export function createPipelineStore(pipeline?: Pipeline) {
 		id,
 		name,
 		description: pipeline?.description || "",
-		currentRunId: null,
+		run: { id: null, status: "idle" },
 
 		nodes: canvas?.nodes || [],
 		edges: canvas?.edges || [],

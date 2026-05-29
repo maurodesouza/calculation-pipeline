@@ -66,8 +66,10 @@ export function RunPanel() {
 
 	const nodes = useSelector(store, (state) => state.nodes);
 	const edges = useSelector(store, (state) => state.edges);
+	const runStatus = useSelector(store, (state) => state.run.status);
 
 	const isCreating = useTransition(["creating-run"]);
+	const isRunning = runStatus === "pending" || runStatus === "started";
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [payload, setPayload] = useState(0);
@@ -145,9 +147,9 @@ export function RunPanel() {
 									variant="ghost"
 									size="icon"
 									onClick={onCreateRun}
-									disabled={isCreating}
+									disabled={isCreating || isRunning}
 								>
-									{isCreating ? (
+									{isCreating || isRunning ? (
 										<Loader size={16} className="animate-spin" />
 									) : (
 										<Play size={16} />

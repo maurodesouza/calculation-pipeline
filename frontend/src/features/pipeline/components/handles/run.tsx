@@ -6,6 +6,8 @@ import {
 	PipelineEvents,
 } from "#/features/pipeline/events";
 import { usePipelineContext } from "#/features/pipeline/store";
+import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
+import { canvas } from "#/features/pipeline/utils/canvas";
 import { createRunMutationOptions } from "../../lib/react-query/create-run-mutation-options";
 
 export function RunHandle() {
@@ -18,7 +20,15 @@ export function RunHandle() {
 
 			store.setState((state) => ({
 				...state,
-				currentRunId: id,
+				run: { id, status: "pending" as const },
+				nodes: state.nodes.map(
+					canvas.nodes.map.updateOperationData({
+						execution: {
+							state: "pending" as const,
+							runId: id,
+						},
+					}),
+				) as CanvasOperationNode[],
 			}));
 
 			return { runId: id };
