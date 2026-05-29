@@ -17,6 +17,10 @@ async function main() {
 			type: "direct",
 			routingKey: "run.resume",
 		}),
+		queue.setup("api.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.finalize-requested",
+		}),
 
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
@@ -37,6 +41,10 @@ async function main() {
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
 			routingKey: "run.resumed",
+		}),
+		queue.setup("processor.randomize", "realtime.run.finalized", {
+			type: "direct",
+			routingKey: "run.finalized",
 		}),
 
 		queue.setup("processor.randomize", "randomizer", {
@@ -65,7 +73,7 @@ async function main() {
 		const exchange = `${info.fields.exchange.split(".")[0]}.events`;
 		const routingKey = info.fields.routingKey;
 
-		await new Promise((resolve) => setTimeout(resolve, 5000));
+		await new Promise((resolve) => setTimeout(resolve, 2000));
 
 		await queue.publish(exchange, message, { routingKey });
 	});
