@@ -18,6 +18,8 @@ export enum PipelineEvents {
 	CREATE_RUN = "pipelines.run.create",
 	RUN_PAUSE = "pipelines.run.pause",
 	RUN_RESUME = "pipelines.run.resume",
+	RUN_FINALIZE = "pipelines.run.finalize",
+	RUN_FINALIZED = "pipelines.run.finalized",
 
 	RUN_PANEL_OPEN = "pipelines.run.panel.open",
 	RUN_PANEL_CLOSE = "pipelines.run.panel.close",
@@ -36,6 +38,15 @@ export type PauseRunEventPayload = {
 
 export type ResumeRunEventPayload = {
 	runId: string;
+};
+
+export type FinalizeRunEventPayload = {
+	runId: string;
+};
+
+export type RunFinalizedEventPayload = {
+	runId: string;
+	error: string;
 };
 
 declare module "#/events/index" {
@@ -61,6 +72,10 @@ declare module "#/events/index" {
 				resume: (
 					payload: ResumeRunEventPayload,
 				) => Promise<{ success: boolean }[]>;
+				finalize: (
+					payload: FinalizeRunEventPayload,
+				) => Promise<{ success: boolean }[]>;
+				finalized: (payload: RunFinalizedEventPayload) => void;
 			};
 
 			execution: {

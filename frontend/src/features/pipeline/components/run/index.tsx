@@ -10,6 +10,7 @@ import {
 	Loader,
 	Pause,
 	Play,
+	Square,
 	Trash2,
 	X,
 } from "lucide-react";
@@ -166,29 +167,45 @@ export function RunPanel() {
 									)}
 								</Clickable.Button>
 
+								{isPaused ? (
+									<Clickable.Button
+										tone="brand"
+										variant="ghost"
+										size="icon"
+										onClick={() =>
+											runId && events.pipelines.run.resume({ runId })
+										}
+										title="Resume run"
+									>
+										<Play size={16} />
+									</Clickable.Button>
+								) : (
+									<Clickable.Button
+										tone="warning"
+										variant="ghost"
+										size="icon"
+										onClick={() =>
+											runId && events.pipelines.run.pause({ runId })
+										}
+										disabled={!isRunning}
+										title="Pause run"
+									>
+										<Pause size={16} />
+									</Clickable.Button>
+								)}
 
-							{isPaused ? (
 								<Clickable.Button
-									tone="brand"
+									tone="danger"
 									variant="ghost"
 									size="icon"
-									onClick={() => runId && events.pipelines.run.resume({ runId })}
-									title="Resume run"
+									onClick={() =>
+										runId && events.pipelines.run.finalize({ runId })
+									}
+									disabled={!isRunning && !isPaused}
+									title="Finalize run"
 								>
-									<Play size={16} />
+									<Square size={16} />
 								</Clickable.Button>
-						) : (
-							<Clickable.Button
-								tone="warning"
-								variant="ghost"
-								size="icon"
-								onClick={() => runId && events.pipelines.run.pause({ runId })}
-								disabled={!isRunning}
-								title="Pause run"
-							>
-								<Pause size={16} />
-							</Clickable.Button>
-						)}
 
 								<Clickable.Button
 									tone="danger"

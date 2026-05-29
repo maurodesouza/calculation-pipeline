@@ -26,6 +26,10 @@ type RunResumedPayload = {
 	runId: string;
 };
 
+type RunFinalizedPayload = {
+	runId: string;
+};
+
 type StepRequestedPayload = {
 	runId: string;
 	stepId: string;
@@ -113,6 +117,23 @@ export function ExecutionHandle() {
 		[store],
 	);
 
+	const handleRunFinalized = useCallback(
+		({ runId }: RunFinalizedPayload) => {
+			const state = store.state;
+
+			if (state.run.id !== runId) return;
+
+			store.setState((prev) => ({
+				...prev,
+				run: { id: null, status: "idle" as const },
+				nodes: prev.nodes.map(
+					canvas.nodes.map.clearExecution(),
+				) as CanvasOperationNode[],
+			}));
+		},
+		[store],
+	);
+
 	const handleStepRequested = useCallback(
 		({ runId, stepId }: StepRequestedPayload) => {
 			const state = store.state;
@@ -181,6 +202,7 @@ export function ExecutionHandle() {
 		const unsub3 = events.on("run.failed", handleRunFailed);
 		const unsub7 = events.on("run.paused", handleRunPaused);
 		const unsub8 = events.on("run.resumed", handleRunResumed);
+		const unsub9 = events.on("run.finalized", handleRunFinalized);
 		const unsub4 = events.on("step.requested", handleStepRequested);
 		const unsub5 = events.on("step.finished", handleStepFinished);
 		const unsub6 = events.on(
@@ -197,6 +219,7 @@ export function ExecutionHandle() {
 			unsub6();
 			unsub7();
 			unsub8();
+			unsub9();
 		};
 	}, [
 		handleRunStarted,
@@ -204,6 +227,7 @@ export function ExecutionHandle() {
 		handleRunFailed,
 		handleRunPaused,
 		handleRunResumed,
+		handleRunFinalized,
 		handleStepRequested,
 		handleStepFinished,
 		handleClearExecution,
