@@ -155,6 +155,7 @@ export function RunPanel() {
 								</Clickable.Button>
 
 								<Clickable.Button
+									tone="danger"
 									variant="ghost"
 									size="icon"
 									onClick={() => events.emit(PipelineEvents.EXECUTION_CLEAR)}
