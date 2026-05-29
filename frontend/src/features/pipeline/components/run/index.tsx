@@ -4,16 +4,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import {
-	Check,
-	CircleDashed,
-	Loader,
-	Pause,
-	Play,
-	Square,
-	Trash2,
-	X,
-} from "lucide-react";
+import { Check, CircleDashed, Loader, X } from "lucide-react";
 import { Activity, useCallback, useEffect, useMemo, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { Field } from "#/components/ui/field";
@@ -21,11 +12,11 @@ import { Input } from "#/components/ui/input";
 import { ResizablePanel } from "#/components/ui/resizable-panel";
 import { Table } from "#/components/ui/table";
 import { events } from "#/events/index";
-import { useTransition } from "#/hooks/use-transition";
 import { PipelineEvents } from "../../events";
 import { usePipelineContext } from "../../store";
 import type { CanvasOperationNode } from "../../types/canvas-node";
 import { canvas } from "../../utils/canvas";
+import { Controls } from "./controls";
 
 const columns: ColumnDef<CanvasOperationNode>[] = [
 	{
@@ -75,12 +66,6 @@ export function RunPanel() {
 
 	const nodes = useSelector(store, (state) => state.nodes);
 	const edges = useSelector(store, (state) => state.edges);
-	const runId = useSelector(store, (state) => state.run.id);
-	const runStatus = useSelector(store, (state) => state.run.status);
-
-	const isCreating = useTransition(["creating-run"]);
-	const isRunning = runStatus === "pending" || runStatus === "started";
-	const isPaused = runStatus === "paused";
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [payload, setPayload] = useState(0);
@@ -102,18 +87,6 @@ export function RunPanel() {
 	const onClosePanel = useCallback(() => {
 		setIsOpen(false);
 	}, []);
-
-	async function onCreateRun() {
-		events
-			.sequence(undefined, {
-				transition: ["creating-run"],
-			})
-			.step(() => events.pipelines.save())
-			.step(([{ pipelineId }]) =>
-				events.pipelines.run.create({ pipelineId, payload }),
-			)
-			.run();
-	}
 
 	useEffect(() => {
 		const unsubscribeOpen = events.on(
@@ -152,71 +125,12 @@ export function RunPanel() {
 						</Clickable.Button>
 
 						<div className="flex gap-md">
-							<div className="p-xs border border-ring-inner rounded-md flex flex-col gap-xs">
-								<Clickable.Button
-									tone="success"
-									variant="ghost"
-									size="icon"
-									onClick={onCreateRun}
-									disabled={isCreating || isRunning || isPaused}
-								>
-									{isCreating || isRunning || isPaused ? (
-										<Loader size={16} className="animate-spin" />
-									) : (
-										<Play size={16} />
-									)}
-								</Clickable.Button>
-
-								{isPaused ? (
-									<Clickable.Button
-										tone="brand"
-										variant="ghost"
-										size="icon"
-										onClick={() =>
-											runId && events.pipelines.run.resume({ runId })
-										}
-										title="Resume run"
-									>
-										<Play size={16} />
-									</Clickable.Button>
-								) : (
-									<Clickable.Button
-										tone="warning"
-										variant="ghost"
-										size="icon"
-										onClick={() =>
-											runId && events.pipelines.run.pause({ runId })
-										}
-										disabled={!isRunning}
-										title="Pause run"
-									>
-										<Pause size={16} />
-									</Clickable.Button>
-								)}
-
-								<Clickable.Button
-									tone="danger"
-									variant="ghost"
-									size="icon"
-									onClick={() =>
-										runId && events.pipelines.run.finalize({ runId })
-									}
-									disabled={!isRunning && !isPaused}
-									title="Finalize run"
-								>
-									<Square size={16} />
-								</Clickable.Button>
-
-								<Clickable.Button
-									tone="danger"
-									variant="ghost"
-									size="icon"
-									onClick={() => events.emit(PipelineEvents.EXECUTION_CLEAR)}
-									title="Clear execution history"
-								>
-									<Trash2 size={16} />
-								</Clickable.Button>
-							</div>
+							<Controls.Container>
+								<Controls.Play />
+								<Controls.Toggle />
+								<Controls.Finalize />
+								<Controls.Clear />
+							</Controls.Container>
 
 							<div className="flex-1">
 								<Field.Root className="mb-md">
