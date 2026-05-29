@@ -1,5 +1,6 @@
 import { Processor, Step } from "../src/domain/processor";
 import { CannotResumeRunError, RunAlreadyExistsError, RunNotFoundError, StepNotFoundError, StepExecutionError, InvalidPayloadError } from "../src/domain/errors";
+import { FinalizedError } from "../src/domain/errors/run-finalized";
 
 describe("processor", () => {
 	let processor: Processor
@@ -647,6 +648,127 @@ describe("processor", () => {
 			expect(error).toBeUndefined();
 			expect(processor.runs.get(runId)?.currentStep).toBe("2");
 			expect(scheduleSpy).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe("finalize", () => {
+		it("should finalize immediately when run is paused and not executing", async () => {
+			const notifications: any[] = [];
+
+			const notifyAllSpy = vitest
+				.spyOn(Processor.prototype, "notifyAll")
+				.mockImplementation(async (event) => {
+					notifications.push(event.getPayload());
+				});
+
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(),
+				steps,
+				payload: 100,
+				paused: true,
+				executingStep: undefined,
+			});
+
+			const [success, error] = processor.finalize(runId);
+
+			expect(success).toBe(true);
+			expect(error).toBeUndefined();
+			expect(processor.runs.has(runId)).toBe(false);
+			expect(notifyAllSpy).toHaveBeenCalledTimes(2);
+			expect(notifications[0]).toStrictEqual({ runId });
+			expect(notifications[1]).toStrictEqual({ runId, error: expect.any(String) });
+		});
+
+		it("should set finalizeRequested flag when step is executing", async () => {
+			const notifyAllSpy = vitest
+				.spyOn(Processor.prototype, "notifyAll")
+				.mockImplementation(async () => {});
+
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(),
+				steps,
+				payload: 100,
+				paused: false,
+				executingStep: "1",
+			});
+
+			const [success, error] = processor.finalize(runId);
+
+			expect(success).toBe(true);
+			expect(error).toBeUndefined();
+			expect(processor.runs.get(runId)?.finalizeRequested).toBe(true);
+			expect(notifyAllSpy).not.toHaveBeenCalled();
+		});
+
+		it("should finalize when executed is called with finalizeRequested", async () => {
+			const notifications: any[] = [];
+
+			const notifyAllSpy = vitest
+				.spyOn(Processor.prototype, "notifyAll")
+				.mockImplementation(async (event) => {
+					notifications.push(event.getPayload());
+				});
+
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+				nextStepId: "2",
+			});
+
+			steps.set("2", {
+				id: "2",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(),
+				steps,
+				payload: 100,
+				paused: false,
+				executingStep: "1",
+				finalizeRequested: true,
+			});
+
+			const [, error] = processor.executed(runId, { result: 100, error: undefined });
+
+			expect(error).toBeUndefined();
+			expect(processor.runs.has(runId)).toBe(false);
+			expect(notifyAllSpy).toHaveBeenCalledTimes(2);
+			expect(notifications[0]).toStrictEqual({ runId });
+			expect(notifications[1]).toStrictEqual({ runId, error: expect.any(String) });
+		});
+
+		it("should return error when run not found", async () => {
+			const [, error] = processor.finalize("non-existent");
+
+			expect(error).toBeDefined();
+			expect(error).toBeInstanceOf(RunNotFoundError);
 		});
 	});
 });

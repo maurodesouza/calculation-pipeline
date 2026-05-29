@@ -11,3 +11,4 @@ export {
 	RunNotFoundError,
 	StepNotFoundError,
 } from "./not-found-error";
+export { RunFinalizedError } from "./run-finalized";

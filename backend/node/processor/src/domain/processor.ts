@@ -3,6 +3,7 @@ import {
 	CannotResumeRunError,
 	InvalidPayloadError,
 	RunAlreadyExistsError,
+	RunFinalizedError,
 	RunNotFoundError,
 	StepExecutionError,
 	StepNotFoundError,
@@ -10,6 +11,7 @@ import {
 import { ExecuteStepEvent } from "./events/execute-step";
 import { RunCompletedEvent } from "./events/run-completed";
 import { RunFailedEvent } from "./events/run-failed";
+import { RunFinalizedEvent } from "./events/run-finalized";
 import { RunPausedEvent } from "./events/run-paused";
 import { RunResumedEvent } from "./events/run-resumed";
 import { RunStartedEvent } from "./events/run-started";
@@ -33,6 +35,8 @@ type Run = {
 	lastStep?: string;
 	payload: number;
 	paused: boolean;
+	executingStep?: string;
+	finalizeRequested?: boolean;
 };
 
 export class Processor extends Mediator {
@@ -64,8 +68,13 @@ export class Processor extends Mediator {
 			return this.handleFailure(runId, new InvalidPayloadError());
 		}
 
+		const firstStep = steps[0];
+		if (!firstStep) {
+			return this.handleFailure(runId, new StepNotFoundError());
+		}
+
 		this.runs.set(runId, {
-			currentStep: steps[0]!.id,
+			currentStep: firstStep.id,
 			payload,
 			results: new Map(),
 			steps: new Map(steps.map((step) => [step.id, step])),
@@ -96,6 +105,9 @@ export class Processor extends Mediator {
 			return this.handleFailure(runId, new StepNotFoundError());
 		}
 
+		run.executingStep = currentStep.id;
+		this.runs.set(runId, run);
+
 		this.notifyAll(
 			new ExecuteStepEvent({
 				runId,
@@ -121,6 +133,15 @@ export class Processor extends Mediator {
 		}
 
 		run.results.set(run.currentStep, result);
+		run.executingStep = undefined;
+		this.runs.set(runId, run);
+
+		if (run.finalizeRequested) {
+			this.notifyAll(new RunFinalizedEvent({ runId }));
+			this.handleFailure(runId, new RunFinalizedError());
+			return [true, undefined];
+		}
+
 		const step = run.steps.get(run.currentStep);
 
 		if (!step) {
@@ -185,6 +206,26 @@ export class Processor extends Mediator {
 
 		void this.schedule(runId, lastResult.result);
 		this.notifyAll(new RunResumedEvent({ runId }));
+
+		return [true, undefined];
+	}
+
+	finalize(runId: string): [true, undefined] | [false, Error] {
+		const run = this.runs.get(runId);
+
+		if (!run) {
+			return this.handleFailure(runId, new RunNotFoundError());
+		}
+
+		if (run.executingStep) {
+			run.finalizeRequested = true;
+			this.runs.set(runId, run);
+			return [true, undefined];
+		}
+
+		this.notifyAll(new RunFinalizedEvent({ runId }));
+		this.runs.delete(runId);
+		this.handleFailure(runId, new RunFinalizedError());
 
 		return [true, undefined];
 	}
