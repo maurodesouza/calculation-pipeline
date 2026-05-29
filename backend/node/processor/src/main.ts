@@ -22,6 +22,10 @@ async function main() {
 			type: "direct",
 			routingKey: "run.resume",
 		}),
+		queue.setup("api.events", "processor.run.finalize", {
+			type: "direct",
+			routingKey: "run.finalize-requested",
+		}),
 
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
@@ -77,6 +81,10 @@ async function main() {
 		queue.setup("processor.events", "realtime.run.resumed", {
 			type: "direct",
 			routingKey: "run.resumed",
+		}),
+		queue.setup("processor.events", "realtime.run.finalized", {
+			type: "direct",
+			routingKey: "run.finalized",
 		}),
 
 		queue.setup("processor.events", "sum.execution.requested", {
