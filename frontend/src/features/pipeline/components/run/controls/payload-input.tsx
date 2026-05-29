@@ -15,7 +15,7 @@ export function PayloadInput() {
 	};
 
 	return (
-		<Field.Root className="mb-md">
+		<Field.Root>
 			<Field.Label htmlFor="payload-input">Payload:</Field.Label>
 			<Input
 				id="payload-input"

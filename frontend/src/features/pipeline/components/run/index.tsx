@@ -37,14 +37,14 @@ export function RunPanel() {
 	return (
 		<Activity mode={isOpen ? "visible" : "hidden"}>
 			<ResizablePanel.Provider
-				minHeight={230}
+				minHeight={240}
 				maxHeight={800}
 				defaultHeight={230}
 			>
 				<ResizablePanel.Container>
 					<ResizablePanel.Handle />
+
 					<ResizablePanel.Content>
-						<ResizablePanel.HandleIndicator className="self-center" />
 						<Clickable.Button
 							variant="icon"
 							size="icon"
@@ -54,7 +54,9 @@ export function RunPanel() {
 							<X size={16} />
 						</Clickable.Button>
 
-						<div className="flex gap-md">
+						<ResizablePanel.HandleIndicator className="self-center" />
+
+						<div className="flex gap-md h-full min-h-0">
 							<Controls.Container>
 								<Controls.Play />
 								<Controls.Toggle />
@@ -62,10 +64,12 @@ export function RunPanel() {
 								<Controls.Clear />
 							</Controls.Container>
 
-							<div className="flex-1">
+							<div className="flex flex-col gap-md h-full w-full">
 								<Controls.PayloadInput />
 
-								<RunTable />
+								<div className="scrollbar overflow-y-scroll">
+									<RunTable />
+								</div>
 							</div>
 						</div>
 					</ResizablePanel.Content>

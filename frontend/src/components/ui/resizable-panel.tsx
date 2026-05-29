@@ -135,9 +135,9 @@ function Handle(props: React.PropsWithChildren) {
 	);
 }
 
-const HandleIndicator = twx.div`bg-background-support h-2 w-32 rounded-md`;
+const HandleIndicator = twx.div`shrink-0 bg-background-support h-2 w-32 rounded-md`;
 
-const Content = twx.div`flex flex-col flex-1 overflow-hidden relative p-lg`;
+const Content = twx.div`flex flex-col gap-md h-full overflow-hidden relative p-lg`;
 
 export const ResizablePanel = {
 	Provider: ResizablePanelProvider,
