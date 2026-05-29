@@ -14,6 +14,14 @@ async function main() {
 			type: "direct",
 			routingKey: "run.created",
 		}),
+		queue.setup("api.events", "processor.run.pause", {
+			type: "direct",
+			routingKey: "run.pause",
+		}),
+		queue.setup("api.events", "processor.run.resume", {
+			type: "direct",
+			routingKey: "run.resume",
+		}),
 
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
@@ -60,6 +68,15 @@ async function main() {
 		queue.setup("processor.events", "api.execution.completed", {
 			type: "direct",
 			routingKey: "execution.completed",
+		}),
+
+		queue.setup("processor.events", "realtime.run.paused", {
+			type: "direct",
+			routingKey: "run.paused",
+		}),
+		queue.setup("processor.events", "realtime.run.resumed", {
+			type: "direct",
+			routingKey: "run.resumed",
 		}),
 
 		queue.setup("processor.events", "sum.execution.requested", {
