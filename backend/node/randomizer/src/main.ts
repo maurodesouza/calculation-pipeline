@@ -9,6 +9,14 @@ async function main() {
 			type: "direct",
 			routingKey: "run.created",
 		}),
+		queue.setup("api.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.pause",
+		}),
+		queue.setup("api.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.resume",
+		}),
 
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
@@ -21,6 +29,14 @@ async function main() {
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
 			routingKey: "execution.completed",
+		}),
+		queue.setup("processor.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.paused",
+		}),
+		queue.setup("processor.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.resumed",
 		}),
 
 		queue.setup("processor.randomize", "randomizer", {
