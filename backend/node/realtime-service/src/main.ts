@@ -6,6 +6,8 @@ import { executionFailedConsumer } from "./interfaces/queue/consumer/execution-f
 import { executionFinishedConsumer } from "./interfaces/queue/consumer/execution-finished-consumer";
 import { executionRequestedConsumer } from "./interfaces/queue/consumer/execution-requested-consumer";
 import { executionStartedConsumer } from "./interfaces/queue/consumer/execution-started-consumer";
+import { runPausedConsumer } from "./interfaces/queue/consumer/run-paused-consumer";
+import { runResumedConsumer } from "./interfaces/queue/consumer/run-resumed-consumer";
 
 async function main() {
 	const queue = new RabbitMQAdapter();
@@ -23,6 +25,14 @@ async function main() {
 		queue.setup("processor.events", "realtime.execution.completed", {
 			type: "direct",
 			routingKey: "execution.completed",
+		}),
+		queue.setup("processor.events", "realtime.run.paused", {
+			type: "direct",
+			routingKey: "run.paused",
+		}),
+		queue.setup("processor.events", "realtime.run.resumed", {
+			type: "direct",
+			routingKey: "run.resumed",
 		}),
 
 		queue.setup("processor.events", "realtime.execution.requested", {
@@ -72,6 +82,8 @@ async function main() {
 		executionCompletedConsumer(queue, registry),
 		executionRequestedConsumer(queue, registry),
 		executionFinishedConsumer(queue, registry),
+		runPausedConsumer(queue, registry),
+		runResumedConsumer(queue, registry),
 	]);
 
 	const server = createServer(registry);
