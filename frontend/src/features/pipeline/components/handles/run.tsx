@@ -94,7 +94,7 @@ export function RunHandle() {
 			unsubscribe4();
 			unsubscribe5();
 		};
-	}, [createRun, pauseRun, resumeRun, finalizeRun]);
+	}, [createRun, pauseRun, resumeRun, finalizeRun, updatePayload]);
 
 	return null;
 }
