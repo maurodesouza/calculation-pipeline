@@ -3,12 +3,12 @@ import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
 import { createServer } from "./interfaces/http/server";
 import { executionCompletedConsumer } from "./interfaces/queue/consumer/execution-completed-consumer";
 import { executionFailedConsumer } from "./interfaces/queue/consumer/execution-failed-consumer";
-import { executionFinishedConsumer } from "./interfaces/queue/consumer/execution-finished-consumer";
 import { executionRequestedConsumer } from "./interfaces/queue/consumer/execution-requested-consumer";
 import { executionStartedConsumer } from "./interfaces/queue/consumer/execution-started-consumer";
 import { runFinalizedConsumer } from "./interfaces/queue/consumer/run-finalized-consumer";
 import { runPausedConsumer } from "./interfaces/queue/consumer/run-paused-consumer";
 import { runResumedConsumer } from "./interfaces/queue/consumer/run-resumed-consumer";
+import { stepFinishedConsumer } from "./interfaces/queue/consumer/step-finished-consumer";
 
 async function main() {
 	const queue = new RabbitMQAdapter();
@@ -61,21 +61,9 @@ async function main() {
 			routingKey: "execution.unknown-requested",
 		}),
 
-		queue.setup("multiply.events", "realtime.execution.finished", {
+		queue.setup("processor.events", "realtime.step.finished", {
 			type: "direct",
-			routingKey: "execution.finished",
-		}),
-		queue.setup("sum.events", "realtime.execution.finished", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-		queue.setup("divide.events", "realtime.execution.finished", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-		queue.setup("subtract.events", "realtime.execution.finished", {
-			type: "direct",
-			routingKey: "execution.finished",
+			routingKey: "step.finished",
 		}),
 	]);
 
@@ -86,7 +74,7 @@ async function main() {
 		executionFailedConsumer(queue, registry),
 		executionCompletedConsumer(queue, registry),
 		executionRequestedConsumer(queue, registry),
-		executionFinishedConsumer(queue, registry),
+		stepFinishedConsumer(queue, registry),
 		runPausedConsumer(queue, registry),
 		runResumedConsumer(queue, registry),
 		runFinalizedConsumer(queue, registry),
