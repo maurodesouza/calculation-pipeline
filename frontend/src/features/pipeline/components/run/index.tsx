@@ -4,7 +4,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { Loader, Play, X } from "lucide-react";
+import { Check, CircleDashed, Loader, Play, Trash2, X } from "lucide-react";
 import { Activity, useCallback, useEffect, useMemo, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { Field } from "#/components/ui/field";
@@ -28,6 +28,36 @@ const columns: ColumnDef<CanvasOperationNode>[] = [
 		id: "by",
 		header: "By",
 		accessorFn: (row) => row.data.props.by,
+	},
+	{
+		id: "status",
+		header: "Status",
+		cell: ({ row }) => {
+			const execution = row.original.data.execution;
+			if (!execution) return null;
+
+			const { state, result, error } = execution;
+
+			if (state === "pending")
+				return <CircleDashed size={16} className="opacity-50" />;
+			if (state === "running")
+				return <Loader size={16} className="animate-spin" />;
+			if (state === "completed")
+				return (
+					<span className="flex items-center gap-xs">
+						<Check size={16} className="text-success" />
+						{result}
+					</span>
+				);
+			if (state === "failed")
+				return (
+					<span className="flex items-center gap-xs">
+						<X size={16} className="text-error" />
+						{error}
+					</span>
+				);
+			return null;
+		},
 	},
 ];
 
@@ -109,7 +139,7 @@ export function RunPanel() {
 						</Clickable.Button>
 
 						<div className="flex gap-md">
-							<div className="p-xs border border-ring-inner rounded-md">
+							<div className="p-xs border border-ring-inner rounded-md flex flex-col gap-xs">
 								<Clickable.Button
 									tone="success"
 									variant="ghost"
@@ -122,6 +152,15 @@ export function RunPanel() {
 									) : (
 										<Play size={16} />
 									)}
+								</Clickable.Button>
+
+								<Clickable.Button
+									variant="ghost"
+									size="icon"
+									onClick={() => events.emit(PipelineEvents.EXECUTION_CLEAR)}
+									title="Clear execution history"
+								>
+									<Trash2 size={16} />
 								</Clickable.Button>
 							</div>
 
