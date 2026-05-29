@@ -61,7 +61,7 @@ export function createPipelineStore(pipeline?: Pipeline) {
 		id,
 		name,
 		description: pipeline?.description || "",
-		run: { id: null, status: "idle", payload: 0 },
+		run: { id: null, status: "idle" as const, payload: 0 },
 
 		nodes: canvas?.nodes || [],
 		edges: canvas?.edges || [],
