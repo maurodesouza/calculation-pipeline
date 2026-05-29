@@ -78,6 +78,13 @@ export const canvas = {
 			byType: (type: string) => (node: CanvasNode) => {
 				return node.type === type;
 			},
+
+			byExecutionState:
+				(runId: string, state: string) => (node: CanvasNode) => {
+					if (node.type !== "operation") return false;
+					const exec = (node as CanvasOperationNode).data.execution;
+					return exec?.state === state && exec?.runId === runId;
+				},
 		},
 
 		filter: {
@@ -104,6 +111,29 @@ export const canvas = {
 						},
 					};
 				},
+
+			updateOperationData:
+				<T>(data: T) =>
+				(node: CanvasNode) => {
+					if (node.type !== "operation") return node;
+					return {
+						...node,
+						data: {
+							...node.data,
+							...data,
+						},
+					} as CanvasNode;
+				},
+
+			clearExecution: () => (node: CanvasNode) => {
+				if (node.type !== "operation") return node;
+				const { execution: _, ...restData } = (node as CanvasOperationNode)
+					.data;
+				return {
+					...node,
+					data: restData,
+				} as CanvasNode;
+			},
 			toStepInput:
 				() =>
 				(
