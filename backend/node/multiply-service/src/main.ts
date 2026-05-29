@@ -32,15 +32,36 @@ async function main() {
 		async (message: MultiplyPayload) => {
 			const { runId, value, by } = message;
 
-			const result = value * by;
+			const operationResult = await executeMultiply(value, by);
 
-			await queue.publish(
-				"multiply.randomize",
-				{ runId, result },
-				{ routingKey: "execution.finished" },
-			);
+			if (operationResult.error) {
+				await queue.publish(
+					"multiply.events",
+					{ runId, error: operationResult.error },
+					{ routingKey: "execution.finished" },
+				);
+			} else {
+				await queue.publish(
+					"multiply.randomize",
+					{ runId, result: operationResult.result },
+					{ routingKey: "execution.finished" },
+				);
+			}
 		},
 	);
+
+	async function executeMultiply(
+		value: number,
+		by: number,
+	): Promise<{ result?: number; error?: string }> {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		if (Math.random() < 0.1) {
+			return { error: `[multiply-service]: random error occurred` };
+		}
+
+		return { result: value * by };
+	}
 
 	console.log("🚀 multiply service is running...");
 }

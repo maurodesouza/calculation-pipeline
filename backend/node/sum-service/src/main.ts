@@ -30,14 +30,35 @@ async function main() {
 	queue.consume("sum.execution.requested", async (message: SumPayload) => {
 		const { runId, value, by } = message;
 
-		const result = value + by;
+		const operationResult = await executeSum(value, by);
 
-		await queue.publish(
-			"sum.randomize",
-			{ runId, result },
-			{ routingKey: "execution.finished" },
-		);
+		if (operationResult.error) {
+			await queue.publish(
+				"sum.events",
+				{ runId, error: operationResult.error },
+				{ routingKey: "execution.finished" },
+			);
+		} else {
+			await queue.publish(
+				"sum.randomize",
+				{ runId, result: operationResult.result },
+				{ routingKey: "execution.finished" },
+			);
+		}
 	});
+
+	async function executeSum(
+		value: number,
+		by: number,
+	): Promise<{ result?: number; error?: string }> {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		if (Math.random() < 0.1) {
+			return { error: `[sum-service]: random error occurred` };
+		}
+
+		return { result: value + by };
+	}
 
 	console.log("🚀 sum service is running...");
 }
