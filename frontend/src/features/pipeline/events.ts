@@ -19,6 +19,8 @@ export enum PipelineEvents {
 
 	RUN_PANEL_OPEN = "pipelines.run.panel.open",
 	RUN_PANEL_CLOSE = "pipelines.run.panel.close",
+
+	EXECUTION_CLEAR = "pipelines.execution.clear",
 }
 
 export type CreateRunEventPayload = {
@@ -43,6 +45,10 @@ declare module "#/events/index" {
 				create: (
 					payload: CreateRunEventPayload,
 				) => Promise<{ runId: string }[]>;
+			};
+
+			execution: {
+				clear: () => void;
 			};
 
 			canvas: {

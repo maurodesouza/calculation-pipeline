@@ -5,18 +5,25 @@ import {
 	type CreateRunEventPayload,
 	PipelineEvents,
 } from "#/features/pipeline/events";
+import { usePipelineContext } from "#/features/pipeline/store";
 import { createRunMutationOptions } from "../../lib/react-query/create-run-mutation-options";
 
 export function RunHandle() {
+	const { store } = usePipelineContext();
 	const createRunMutation = useMutation(createRunMutationOptions());
 
 	const createRun = useCallback(
 		async (payload: CreateRunEventPayload) => {
 			const { id } = await createRunMutation.mutateAsync(payload);
 
+			store.setState((state) => ({
+				...state,
+				currentRunId: id,
+			}));
+
 			return { runId: id };
 		},
-		[createRunMutation],
+		[createRunMutation, store],
 	);
 
 	useEffect(() => {
