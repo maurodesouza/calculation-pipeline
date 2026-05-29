@@ -6,6 +6,7 @@ import { UUID } from "../value-objects/uuid";
 enum RUNS_STATUS {
 	PENDING = "pending",
 	RUNNING = "running",
+	PAUSED = "paused",
 	COMPLETED = "completed",
 	FAILED = "failed",
 }
@@ -152,6 +153,52 @@ export class Run {
 		this.status = RUNS_STATUS.FAILED;
 		this.error = error;
 		this.updatedAt = new Date();
+
+		return [true, undefined];
+	}
+
+	pause(): [true, undefined] | [false, Error] {
+		if (this.status !== RUNS_STATUS.RUNNING) {
+			return [
+				false,
+				new InvalidStateTransitionError("run", this.status, "running"),
+			];
+		}
+
+		this.status = RUNS_STATUS.PAUSED;
+		this.updatedAt = new Date();
+
+		return [true, undefined];
+	}
+
+	resume(): [true, undefined] | [false, Error] {
+		if (this.status !== RUNS_STATUS.PAUSED) {
+			return [
+				false,
+				new InvalidStateTransitionError("run", this.status, "paused"),
+			];
+		}
+
+		this.status = RUNS_STATUS.RUNNING;
+		this.updatedAt = new Date();
+
+		return [true, undefined];
+	}
+
+	finalize(): [true, undefined] | [false, Error] {
+		if (
+			this.status !== RUNS_STATUS.RUNNING &&
+			this.status !== RUNS_STATUS.PAUSED
+		) {
+			return [
+				false,
+				new InvalidStateTransitionError(
+					"run",
+					this.status,
+					"running or paused",
+				),
+			];
+		}
 
 		return [true, undefined];
 	}
