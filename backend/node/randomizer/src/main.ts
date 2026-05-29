@@ -69,14 +69,53 @@ async function main() {
 		}),
 	]);
 
-	queue.consume("randomizer", async (message: any, info) => {
-		const exchange = `${info.fields.exchange.split(".")[0]}.events`;
-		const routingKey = info.fields.routingKey;
+	queue.consume(
+		"randomizer",
+		async (message: Record<string, unknown>, info) => {
+			const exchange = `${info.fields.exchange.split(".")[0]}.events`;
+			const routingKey = info.fields.routingKey;
 
-		await new Promise((resolve) => setTimeout(resolve, 2000));
+			await applyChaos(queue, exchange, routingKey, message);
+		},
+	);
 
-		await queue.publish(exchange, message, { routingKey });
-	});
+	async function applyChaos(
+		queue: RabbitMQAdapter,
+		exchange: string,
+		routingKey: string,
+		message: Record<string, unknown>,
+	) {
+		const copies = decideDuplication();
+		const interMessageDelay = decideInterMessageDelay();
+		const preExecutionDelay = decidePreExecutionDelay();
+
+		await new Promise((resolve) => setTimeout(resolve, preExecutionDelay));
+
+		for (let i = 0; i < copies; i++) {
+			await queue.publish(exchange, message, { routingKey });
+			await new Promise((resolve) => setTimeout(resolve, interMessageDelay));
+		}
+	}
+
+	function decideDuplication(): number {
+		// 70% chance of 1 copy, 20% of 2, 10% of 3
+		const roll = Math.random();
+		if (roll < 0.7) return 1;
+		if (roll < 0.9) return 2;
+		return 3;
+	}
+
+	function decideInterMessageDelay(): number {
+		// 60% chance of no delay, 40% chance of 500-5000ms
+		if (Math.random() < 0.6) return 0;
+		return Math.floor(Math.random() * 4500) + 500;
+	}
+
+	function decidePreExecutionDelay(): number {
+		// 50% chance of no delay, 50% chance of 500-3000ms
+		if (Math.random() < 0.5) return 0;
+		return Math.floor(Math.random() * 2500) + 500;
+	}
 
 	console.log("🚀 randomizer is running");
 }
