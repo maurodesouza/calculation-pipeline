@@ -4,7 +4,15 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { Check, CircleDashed, Loader, Play, Trash2, X } from "lucide-react";
+import {
+	Check,
+	CircleDashed,
+	Loader,
+	Pause,
+	Play,
+	Trash2,
+	X,
+} from "lucide-react";
 import { Activity, useCallback, useEffect, useMemo, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { Field } from "#/components/ui/field";
@@ -66,10 +74,12 @@ export function RunPanel() {
 
 	const nodes = useSelector(store, (state) => state.nodes);
 	const edges = useSelector(store, (state) => state.edges);
+	const runId = useSelector(store, (state) => state.run.id);
 	const runStatus = useSelector(store, (state) => state.run.status);
 
 	const isCreating = useTransition(["creating-run"]);
 	const isRunning = runStatus === "pending" || runStatus === "started";
+	const isPaused = runStatus === "paused";
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [payload, setPayload] = useState(0);
@@ -147,14 +157,38 @@ export function RunPanel() {
 									variant="ghost"
 									size="icon"
 									onClick={onCreateRun}
-									disabled={isCreating || isRunning}
+									disabled={isCreating || isRunning || isPaused}
 								>
-									{isCreating || isRunning ? (
+									{isCreating || isRunning || isPaused ? (
 										<Loader size={16} className="animate-spin" />
 									) : (
 										<Play size={16} />
 									)}
 								</Clickable.Button>
+
+
+							{isPaused ? (
+								<Clickable.Button
+									tone="brand"
+									variant="ghost"
+									size="icon"
+									onClick={() => runId && events.pipelines.run.resume({ runId })}
+									title="Resume run"
+								>
+									<Play size={16} />
+								</Clickable.Button>
+						) : (
+							<Clickable.Button
+								tone="warning"
+								variant="ghost"
+								size="icon"
+								onClick={() => runId && events.pipelines.run.pause({ runId })}
+								disabled={!isRunning}
+								title="Pause run"
+							>
+								<Pause size={16} />
+							</Clickable.Button>
+						)}
 
 								<Clickable.Button
 									tone="danger"

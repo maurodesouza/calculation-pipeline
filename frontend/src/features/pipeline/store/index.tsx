@@ -11,7 +11,13 @@ type Canvas = {
 	edges: Edge[];
 };
 
-type RunStatus = "idle" | "pending" | "started" | "completed" | "failed";
+type RunStatus =
+	| "idle"
+	| "pending"
+	| "started"
+	| "paused"
+	| "completed"
+	| "failed";
 
 type PipelineStore = Canvas & {
 	rawPipeline: Record<string, unknown>;

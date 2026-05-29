@@ -18,6 +18,14 @@ type RunFailedPayload = {
 	error?: string;
 };
 
+type RunPausedPayload = {
+	runId: string;
+};
+
+type RunResumedPayload = {
+	runId: string;
+};
+
 type StepRequestedPayload = {
 	runId: string;
 	stepId: string;
@@ -72,6 +80,34 @@ export function ExecutionHandle() {
 			store.setState((prev) => ({
 				...prev,
 				run: { ...prev.run, status: "failed" as const },
+			}));
+		},
+		[store],
+	);
+
+	const handleRunPaused = useCallback(
+		({ runId }: RunPausedPayload) => {
+			const state = store.state;
+
+			if (state.run.id !== runId) return;
+
+			store.setState((prev) => ({
+				...prev,
+				run: { ...prev.run, status: "paused" as const },
+			}));
+		},
+		[store],
+	);
+
+	const handleRunResumed = useCallback(
+		({ runId }: RunResumedPayload) => {
+			const state = store.state;
+
+			if (state.run.id !== runId) return;
+
+			store.setState((prev) => ({
+				...prev,
+				run: { ...prev.run, status: "started" as const },
 			}));
 		},
 		[store],
@@ -143,6 +179,8 @@ export function ExecutionHandle() {
 		const unsub1 = events.on("run.started", handleRunStarted);
 		const unsub2 = events.on("run.completed", handleRunCompleted);
 		const unsub3 = events.on("run.failed", handleRunFailed);
+		const unsub7 = events.on("run.paused", handleRunPaused);
+		const unsub8 = events.on("run.resumed", handleRunResumed);
 		const unsub4 = events.on("step.requested", handleStepRequested);
 		const unsub5 = events.on("step.finished", handleStepFinished);
 		const unsub6 = events.on(
@@ -157,11 +195,15 @@ export function ExecutionHandle() {
 			unsub4();
 			unsub5();
 			unsub6();
+			unsub7();
+			unsub8();
 		};
 	}, [
 		handleRunStarted,
 		handleRunCompleted,
 		handleRunFailed,
+		handleRunPaused,
+		handleRunResumed,
 		handleStepRequested,
 		handleStepFinished,
 		handleClearExecution,

@@ -16,6 +16,8 @@ export enum PipelineEvents {
 	UPDATE_NAME = "pipelines.update.name",
 
 	CREATE_RUN = "pipelines.run.create",
+	RUN_PAUSE = "pipelines.run.pause",
+	RUN_RESUME = "pipelines.run.resume",
 
 	RUN_PANEL_OPEN = "pipelines.run.panel.open",
 	RUN_PANEL_CLOSE = "pipelines.run.panel.close",
@@ -26,6 +28,14 @@ export enum PipelineEvents {
 export type CreateRunEventPayload = {
 	payload: number;
 	pipelineId: string;
+};
+
+export type PauseRunEventPayload = {
+	runId: string;
+};
+
+export type ResumeRunEventPayload = {
+	runId: string;
 };
 
 declare module "#/events/index" {
@@ -45,6 +55,12 @@ declare module "#/events/index" {
 				create: (
 					payload: CreateRunEventPayload,
 				) => Promise<{ runId: string }[]>;
+				pause: (
+					payload: PauseRunEventPayload,
+				) => Promise<{ success: boolean }[]>;
+				resume: (
+					payload: ResumeRunEventPayload,
+				) => Promise<{ success: boolean }[]>;
 			};
 
 			execution: {
