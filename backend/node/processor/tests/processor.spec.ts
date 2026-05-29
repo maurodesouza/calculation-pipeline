@@ -1,5 +1,5 @@
 import { Processor, Step } from "../src/domain/processor";
-import { RunAlreadyExistsError, RunNotFoundError, StepNotFoundError, StepExecutionError, InvalidPayloadError } from "../src/domain/errors";
+import { CannotResumeRunError, RunAlreadyExistsError, RunNotFoundError, StepNotFoundError, StepExecutionError, InvalidPayloadError } from "../src/domain/errors";
 
 describe("processor", () => {
 	let processor: Processor
@@ -161,7 +161,8 @@ describe("processor", () => {
 				currentStep: "1",
 				results: new Map(),
 				steps,
-				payload: 100
+				payload: 100,
+				paused: false,
 			})
 
 			const [, error] = processor.schedule(runId, 100)
@@ -203,7 +204,8 @@ describe("processor", () => {
 				currentStep: "missing-step",
 				results: new Map(),
 				steps: new Map(),
-				payload: 100
+				payload: 100,
+				paused: false
 			})
 
 			const [, error] = processor.schedule(runId, 100)
@@ -236,7 +238,8 @@ describe("processor", () => {
 				currentStep: "1",
 				results: new Map(),
 				steps,
-				payload: 100
+				payload: 100,
+				paused: false,
 			})
 
 			const [, error] = processor.schedule(runId, "invalid" as any)
@@ -281,7 +284,8 @@ describe("processor", () => {
 				currentStep: "1",
 				results: new Map(),
 				steps,
-				payload: 100
+				payload: 100,
+				paused: false
 			})
 
 			const [, error] = processor.executed(runId, { result: 100, error: undefined })
@@ -319,7 +323,8 @@ describe("processor", () => {
 				currentStep: "1",
 				results: new Map(),
 				steps,
-				payload: 100
+				payload: 100,
+				paused: false
 			})
 
 			const [, error] = processor.executed(runId, { result: 100, error: undefined })
@@ -370,7 +375,8 @@ describe("processor", () => {
 				currentStep: "missing-step",
 				results: new Map(),
 				steps,
-				payload: 100
+				payload: 100,
+				paused: false
 			})
 
 			const [, error] = processor.executed(runId, { result: 100, error: undefined })
@@ -406,7 +412,8 @@ describe("processor", () => {
 				currentStep: "1",
 				results: new Map(),
 				steps,
-				payload: 100
+				payload: 100,
+				paused: false
 			})
 
 			const [, error] = processor.executed(runId, { result: 0, error: "division by zero" })
@@ -421,6 +428,225 @@ describe("processor", () => {
 			expect(notifications[0].error).toBeDefined();
 
 			expect(processor.runs.has(runId)).toBe(false);
+		});
+	});
+
+	describe("pause", () => {
+		it("should set run as paused", async () => {
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(),
+				steps,
+				payload: 100,
+				paused: false,
+			});
+
+			const [, error] = processor.pause(runId);
+
+			expect(error).toBeUndefined();
+			expect(processor.runs.get(runId)?.paused).toBe(true);
+		});
+
+		it("should return error when run does not exist", async () => {
+			const [, error] = processor.pause("non-existent-run-id");
+
+			expect(error).toBeDefined();
+			expect(error).toBeInstanceOf(RunNotFoundError);
+		});
+	});
+
+	describe("resume", () => {
+		it("should resume a paused run and schedule next step", async () => {
+			const notifications: any[] = [];
+
+			const notifyAllSpy = vitest
+				.spyOn(Processor.prototype, "notifyAll")
+				.mockImplementation(async (event) => {
+					notifications.push(event.getPayload());
+				});
+			const scheduleSpy = vitest
+				.spyOn(Processor.prototype, "schedule")
+				.mockImplementation(() => [true, undefined]);
+
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("2", {
+				id: "2",
+				operation: "multiply",
+				by: 10,
+			});
+
+			const results = new Map();
+			results.set("2", { result: 100, error: undefined });
+
+			processor.runs.set(runId, {
+				currentStep: "2",
+				results,
+				steps,
+				payload: 100,
+				paused: true,
+			});
+
+			const [, error] = processor.resume(runId);
+
+			expect(error).toBeUndefined();
+			expect(processor.runs.get(runId)?.paused).toBe(false);
+			expect(scheduleSpy).toHaveBeenCalledTimes(1);
+			expect(scheduleSpy).toHaveBeenCalledWith(runId, 100);
+			expect(notifyAllSpy).toHaveBeenCalledTimes(1);
+			expect(notifications[0]).toStrictEqual({ runId });
+		});
+
+		it("should return error when run does not exist", async () => {
+			const [, error] = processor.resume("non-existent-run-id");
+
+			expect(error).toBeDefined();
+			expect(error).toBeInstanceOf(RunNotFoundError);
+		});
+
+		it("should return success without scheduling if run is not paused", async () => {
+			const scheduleSpy = vitest
+				.spyOn(Processor.prototype, "schedule")
+				.mockImplementation(() => [true, undefined]);
+
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(),
+				steps,
+				payload: 100,
+				paused: false,
+			});
+
+			const [, error] = processor.resume(runId);
+
+			expect(error).toBeUndefined();
+			expect(scheduleSpy).toHaveBeenCalledTimes(0);
+		});
+
+		it("should return error when no previous result to resume from", async () => {
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(), // no results for current step
+				steps,
+				payload: 100,
+				paused: true,
+			});
+
+			const [, error] = processor.resume(runId);
+
+			expect(error).toBeDefined();
+			expect(error).toBeInstanceOf(CannotResumeRunError);
+		});
+	});
+
+	describe("pause behavior in executed", () => {
+		it("should not schedule next step when run is paused", async () => {
+			const notifications: any[] = [];
+
+			const notifyAllSpy = vitest
+				.spyOn(Processor.prototype, "notifyAll")
+				.mockImplementation(async (event) => {
+					notifications.push(event.getPayload());
+				});
+			const scheduleSpy = vitest
+				.spyOn(Processor.prototype, "schedule")
+				.mockImplementation(() => [true, undefined]);
+
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+				nextStepId: "2",
+			});
+
+			steps.set("2", {
+				id: "2",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(),
+				steps,
+				payload: 100,
+				paused: true, // run is paused
+			});
+
+			const [, error] = processor.executed(runId, { result: 100, error: undefined });
+
+			expect(error).toBeUndefined();
+			expect(processor.runs.get(runId)?.currentStep).toBe("2");
+			expect(scheduleSpy).toHaveBeenCalledTimes(0);
+			expect(notifyAllSpy).toHaveBeenCalledTimes(1);
+			expect(notifications[0]).toStrictEqual({ runId });
+		});
+
+		it("should schedule next step when run is not paused", async () => {
+			const scheduleSpy = vitest
+				.spyOn(Processor.prototype, "schedule")
+				.mockImplementation(() => [true, undefined]);
+
+			const runId = "123";
+			const steps = new Map<string, Step>();
+
+			steps.set("1", {
+				id: "1",
+				operation: "multiply",
+				by: 10,
+				nextStepId: "2",
+			});
+
+			steps.set("2", {
+				id: "2",
+				operation: "multiply",
+				by: 10,
+			});
+
+			processor.runs.set(runId, {
+				currentStep: "1",
+				results: new Map(),
+				steps,
+				payload: 100,
+				paused: false, // run is not paused
+			});
+
+			const [, error] = processor.executed(runId, { result: 100, error: undefined });
+
+			expect(error).toBeUndefined();
+			expect(processor.runs.get(runId)?.currentStep).toBe("2");
+			expect(scheduleSpy).toHaveBeenCalledTimes(1);
 		});
 	});
 });

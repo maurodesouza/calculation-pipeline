@@ -1,5 +1,6 @@
 import { Mediator } from "../infra/mediator/mediator";
 import {
+	CannotResumeRunError,
 	InvalidPayloadError,
 	RunAlreadyExistsError,
 	RunNotFoundError,
@@ -9,6 +10,8 @@ import {
 import { ExecuteStepEvent } from "./events/execute-step";
 import { RunCompletedEvent } from "./events/run-completed";
 import { RunFailedEvent } from "./events/run-failed";
+import { RunPausedEvent } from "./events/run-paused";
+import { RunResumedEvent } from "./events/run-resumed";
 import { RunStartedEvent } from "./events/run-started";
 
 export type Step = {
@@ -27,7 +30,9 @@ type Run = {
 	currentStep: string;
 	results: Map<string, Result>;
 	steps: Map<string, Step>;
+	lastStep?: string;
 	payload: number;
+	paused: boolean;
 };
 
 export class Processor extends Mediator {
@@ -64,6 +69,7 @@ export class Processor extends Mediator {
 			payload,
 			results: new Map(),
 			steps: new Map(steps.map((step) => [step.id, step])),
+			paused: false,
 		});
 
 		this.notifyAll(new RunStartedEvent(runId));
@@ -134,10 +140,51 @@ export class Processor extends Mediator {
 			return [true, undefined];
 		}
 
+		run.lastStep = step.id;
 		run.currentStep = step.nextStepId;
 		this.runs.set(runId, run);
 
-		void this.schedule(runId, result.result);
+		if (run.paused) this.notifyAll(new RunPausedEvent({ runId }));
+		else void this.schedule(runId, result.result);
+
+		return [true, undefined];
+	}
+
+	pause(runId: string): [true, undefined] | [false, Error] {
+		const run = this.runs.get(runId);
+
+		if (!run) {
+			return this.handleFailure(runId, new RunNotFoundError());
+		}
+
+		run.paused = true;
+		this.runs.set(runId, run);
+
+		return [true, undefined];
+	}
+
+	resume(runId: string): [true, undefined] | [false, Error] {
+		const run = this.runs.get(runId);
+
+		if (!run) {
+			return this.handleFailure(runId, new RunNotFoundError());
+		}
+
+		if (!run.paused) {
+			return [true, undefined];
+		}
+
+		run.paused = false;
+		this.runs.set(runId, run);
+
+		const stepToResume = run.lastStep ?? run.currentStep;
+		const lastResult = run.results.get(stepToResume);
+		if (!lastResult) {
+			return [false, new CannotResumeRunError()];
+		}
+
+		void this.schedule(runId, lastResult.result);
+		this.notifyAll(new RunResumedEvent({ runId }));
 
 		return [true, undefined];
 	}

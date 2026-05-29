@@ -14,3 +14,11 @@ export class StepExecutionError extends ExecutionError {
 		this.name = "step execution error";
 	}
 }
+
+export class CannotResumeRunError extends ExecutionError {
+	constructor() {
+		super();
+		this.message = `[processor]: cannot resume run: no previous result to continue from`;
+		this.name = "cannot resume run error";
+	}
+}
