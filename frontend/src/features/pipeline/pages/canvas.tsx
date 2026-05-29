@@ -41,6 +41,8 @@ function PipelineCanvas() {
 							<Header.Controls.GoToListButton />
 							<Separator orientation="vertical" />
 							<Header.Controls.NameInput />
+							<Separator orientation="vertical" />
+							<Header.Controls.StatsDisplay />
 						</Header.Wrapper>
 						<Header.Controls.SaveButton />
 					</Header.Container>
