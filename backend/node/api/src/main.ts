@@ -5,6 +5,8 @@ import { FailRunUseCase } from "./application/use-cases/fail-run";
 import { GetPipelineUseCase } from "./application/use-cases/get-pipeline";
 import { InitializeRunUseCase } from "./application/use-cases/initialize-run";
 import { ListPipelinesUseCase } from "./application/use-cases/list-pipelines";
+import { PauseRunUseCase } from "./application/use-cases/pause-run";
+import { ResumeRunUseCase } from "./application/use-cases/resume-run";
 import { SyncStepsUseCase } from "./application/use-cases/sync-steps";
 import { UpdatePipelineUseCase } from "./application/use-cases/update-pipeline";
 import { Container } from "./infra/DI/container";
@@ -30,9 +32,26 @@ async function api() {
 			type: "direct",
 			routingKey: "run.created",
 		}),
+		queue.setup("api.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.pause",
+		}),
+		queue.setup("api.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.resume",
+		}),
+
 		queue.setup("api.events", "processor.run.created", {
 			type: "direct",
 			routingKey: "run.created",
+		}),
+		queue.setup("api.events", "processor.run.pause", {
+			type: "direct",
+			routingKey: "run.pause",
+		}),
+		queue.setup("api.events", "processor.run.resume", {
+			type: "direct",
+			routingKey: "run.resume",
 		}),
 
 		queue.setup("processor.events", "api.execution.started", {
@@ -66,6 +85,8 @@ async function api() {
 	instance.register("initialize-run-use-case", new InitializeRunUseCase());
 	instance.register("complete-run-use-case", new CompleteRunUseCase());
 	instance.register("fail-run-use-case", new FailRunUseCase());
+	instance.register("pause-run-use-case", new PauseRunUseCase());
+	instance.register("resume-run-use-case", new ResumeRunUseCase());
 
 	HTTPInterface.initialize();
 	QueueInterface.initialize();
