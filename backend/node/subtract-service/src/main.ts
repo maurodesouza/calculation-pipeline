@@ -30,20 +30,20 @@ async function main() {
 	queue.consume(
 		"subtract.execution.requested",
 		async (message: SubtractPayload) => {
-			const { runId, value, by } = message;
+			const { runId, value, by, stepId } = message;
 
 			const operationResult = await executeSubtract(value, by);
 
 			if (operationResult.error) {
 				await queue.publish(
 					"subtract.events",
-					{ runId, error: operationResult.error },
+					{ runId, stepId, error: operationResult.error },
 					{ routingKey: "execution.finished" },
 				);
 			} else {
 				await queue.publish(
 					"subtract.randomize",
-					{ runId, result: operationResult.result },
+					{ runId, stepId, result: operationResult.result },
 					{ routingKey: "execution.finished" },
 				);
 			}

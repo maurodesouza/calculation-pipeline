@@ -28,20 +28,20 @@ async function main() {
 	]);
 
 	queue.consume("sum.execution.requested", async (message: SumPayload) => {
-		const { runId, value, by } = message;
+		const { runId, value, by, stepId } = message;
 
 		const operationResult = await executeSum(value, by);
 
 		if (operationResult.error) {
 			await queue.publish(
 				"sum.events",
-				{ runId, error: operationResult.error },
+				{ runId, stepId, error: operationResult.error },
 				{ routingKey: "execution.finished" },
 			);
 		} else {
 			await queue.publish(
 				"sum.randomize",
-				{ runId, result: operationResult.result },
+				{ runId, stepId, result: operationResult.result },
 				{ routingKey: "execution.finished" },
 			);
 		}
