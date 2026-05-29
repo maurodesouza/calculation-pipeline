@@ -4,6 +4,7 @@ import { inject } from "../../../infra/DI/container";
 
 type ExecutionFinishedPayload = {
 	runId: string;
+	stepId: string;
 	result?: number;
 	error?: string;
 };
@@ -23,8 +24,8 @@ export class ExecutionFinishedConsumer {
 		this.queue.consume(
 			"processor.execution.finished",
 			async (message: ExecutionFinishedPayload) => {
-				const { runId, result, error } = message;
-				this.processor.executed(runId, { result, error });
+				const { runId, stepId, result, error } = message;
+				this.processor.executed(runId, stepId, { result: result ?? 0, error });
 			},
 		);
 	}

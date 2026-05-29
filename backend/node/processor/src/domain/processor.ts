@@ -26,6 +26,7 @@ export type Step = {
 type Result = {
 	error?: string;
 	result: number;
+	stepId?: string;
 };
 
 type Run = {
@@ -60,18 +61,13 @@ export class Processor extends Mediator {
 		payload: number,
 		steps: Step[],
 	): [true, undefined] | [false, Error] {
-		if (this.runs.has(runId)) {
-			return this.handleFailure(runId, new RunAlreadyExistsError());
-		}
+		if (this.runs.has(runId)) return [false, new RunAlreadyExistsError()];
 
-		if (typeof payload !== "number") {
+		if (typeof payload !== "number")
 			return this.handleFailure(runId, new InvalidPayloadError());
-		}
 
 		const firstStep = steps[0];
-		if (!firstStep) {
-			return this.handleFailure(runId, new StepNotFoundError());
-		}
+		if (!firstStep) return [false, new StepNotFoundError()];
 
 		this.runs.set(runId, {
 			currentStep: firstStep.id,
@@ -83,27 +79,22 @@ export class Processor extends Mediator {
 
 		this.notifyAll(new RunStartedEvent(runId));
 
-		void this.schedule(runId, payload);
+		const [, error] = this.schedule(runId, payload);
+		if (error) return [false, error];
 
 		return [true, undefined];
 	}
 
 	schedule(runId: string, payload: number): [true, undefined] | [false, Error] {
+		const run = this.runs.get(runId);
+		if (!run) return [false, new RunNotFoundError()];
+
 		if (typeof payload !== "number") {
 			return this.handleFailure(runId, new InvalidPayloadError());
 		}
 
-		const run = this.runs.get(runId);
-
-		if (!run) {
-			return this.handleFailure(runId, new RunNotFoundError());
-		}
-
 		const currentStep = run.steps.get(run.currentStep);
-
-		if (!currentStep) {
-			return this.handleFailure(runId, new StepNotFoundError());
-		}
+		if (!currentStep) return this.handleFailure(runId, new StepNotFoundError());
 
 		run.executingStep = currentStep.id;
 		this.runs.set(runId, run);
@@ -121,12 +112,15 @@ export class Processor extends Mediator {
 		return [true, undefined];
 	}
 
-	executed(runId: string, result: Result): [true, undefined] | [false, Error] {
+	executed(
+		runId: string,
+		stepId: string,
+		result: Result,
+	): [true, undefined] | [false, Error] {
 		const run = this.runs.get(runId);
+		if (!run) return [false, new RunNotFoundError()];
 
-		if (!run) {
-			return this.handleFailure(runId, new RunNotFoundError());
-		}
+		if (stepId !== run.executingStep) return [true, undefined];
 
 		if (result.error) {
 			return this.handleFailure(runId, new StepExecutionError(result.error));
@@ -143,10 +137,7 @@ export class Processor extends Mediator {
 		}
 
 		const step = run.steps.get(run.currentStep);
-
-		if (!step) {
-			return this.handleFailure(runId, new StepNotFoundError());
-		}
+		if (!step) return this.handleFailure(runId, new StepNotFoundError());
 
 		if (!step.nextStepId) {
 			this.notifyAll(
@@ -173,10 +164,7 @@ export class Processor extends Mediator {
 
 	pause(runId: string): [true, undefined] | [false, Error] {
 		const run = this.runs.get(runId);
-
-		if (!run) {
-			return this.handleFailure(runId, new RunNotFoundError());
-		}
+		if (!run) return [false, new RunNotFoundError()];
 
 		run.paused = true;
 		this.runs.set(runId, run);
@@ -186,10 +174,7 @@ export class Processor extends Mediator {
 
 	resume(runId: string): [true, undefined] | [false, Error] {
 		const run = this.runs.get(runId);
-
-		if (!run) {
-			return this.handleFailure(runId, new RunNotFoundError());
-		}
+		if (!run) return [false, new RunNotFoundError()];
 
 		if (!run.paused) {
 			return [true, undefined];
@@ -200,9 +185,7 @@ export class Processor extends Mediator {
 
 		const stepToResume = run.lastStep ?? run.currentStep;
 		const lastResult = run.results.get(stepToResume);
-		if (!lastResult) {
-			return [false, new CannotResumeRunError()];
-		}
+		if (!lastResult) return [false, new CannotResumeRunError()];
 
 		void this.schedule(runId, lastResult.result);
 		this.notifyAll(new RunResumedEvent({ runId }));
@@ -212,10 +195,7 @@ export class Processor extends Mediator {
 
 	finalize(runId: string): [true, undefined] | [false, Error] {
 		const run = this.runs.get(runId);
-
-		if (!run) {
-			return this.handleFailure(runId, new RunNotFoundError());
-		}
+		if (!run) return [false, new RunNotFoundError()];
 
 		if (run.executingStep) {
 			run.finalizeRequested = true;
