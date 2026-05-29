@@ -64,6 +64,7 @@ export function Canvas() {
 					onDrop={onDrop}
 					onDragStart={onDragStart}
 					onDragOver={onDragOver}
+					deleteKeyCode="Delete"
 					onPaneClick={() => events.pipelines.panel.show(() => <StepsPanel />)}
 				>
 					<CanvasUI.Background />
