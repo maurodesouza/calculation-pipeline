@@ -22,6 +22,8 @@ install:
 	@cd node/subtract-service && pnpm install
 	@echo "Installing dependencies for sum-service..."
 	@cd node/sum-service && pnpm install
+	@echo "Installing dependencies for realtime-service..."
+	@cd node/realtime-service && pnpm install
 	@echo "All dependencies installed successfully!"
 
 dev:
@@ -34,6 +36,7 @@ dev:
 	@cd node/randomizer && nohup pnpm dev > ../../logs/randomizer.log 2>&1 &
 	@cd node/subtract-service && nohup pnpm dev > ../../logs/subtract-service.log 2>&1 &
 	@cd node/sum-service && nohup pnpm dev > ../../logs/sum-service.log 2>&1 &
+	@cd node/realtime-service && nohup pnpm dev > ../../logs/realtime-service.log 2>&1 &
 	@echo "All services started in background!"
 	@echo "Check logs with: tail -f backend/logs/<service>.log"
 	@echo "Stop services with: pkill -f 'tsx'"
@@ -47,6 +50,7 @@ dev-foreground:
 	@echo "  cd backend/node/randomizer && pnpm dev"
 	@echo "  cd backend/node/subtract-service && pnpm dev"
 	@echo "  cd backend/node/sum-service && pnpm dev"
+	@echo "  cd backend/node/realtime-service && pnpm dev"
 
 stop:
 	@echo "Stopping all services..."
