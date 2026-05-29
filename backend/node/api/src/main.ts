@@ -53,6 +53,10 @@ async function api() {
 			type: "direct",
 			routingKey: "run.resume",
 		}),
+		queue.setup("api.events", "processor.run.finalize", {
+			type: "direct",
+			routingKey: "run.finalize-requested",
+		}),
 
 		queue.setup("processor.events", "api.execution.started", {
 			type: "direct",
