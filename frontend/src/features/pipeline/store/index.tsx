@@ -27,6 +27,7 @@ type PipelineStore = Canvas & {
 	run: {
 		id: string | null;
 		status: RunStatus;
+		payload: number;
 	};
 };
 
@@ -60,7 +61,7 @@ export function createPipelineStore(pipeline?: Pipeline) {
 		id,
 		name,
 		description: pipeline?.description || "",
-		run: { id: null, status: "idle" },
+		run: { id: null, status: "idle", payload: 0 },
 
 		nodes: canvas?.nodes || [],
 		edges: canvas?.edges || [],

@@ -1,6 +1,7 @@
 import { twx } from "#/utils/tailwind";
 import { ClearButton } from "./clear-button";
 import { FinalizeButton } from "./finalize-button";
+import { PayloadInput } from "./payload-input";
 import { PlayButton } from "./play-button";
 import { ToggleButton } from "./toggle-button";
 
@@ -12,4 +13,5 @@ export const Controls = {
 	Toggle: ToggleButton,
 	Finalize: FinalizeButton,
 	Clear: ClearButton,
+	PayloadInput: PayloadInput,
 };

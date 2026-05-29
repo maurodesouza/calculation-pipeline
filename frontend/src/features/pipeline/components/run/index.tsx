@@ -7,8 +7,6 @@ import {
 import { Check, CircleDashed, Loader, X } from "lucide-react";
 import { Activity, useCallback, useEffect, useMemo, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
-import { Field } from "#/components/ui/field";
-import { Input } from "#/components/ui/input";
 import { ResizablePanel } from "#/components/ui/resizable-panel";
 import { Table } from "#/components/ui/table";
 import { events } from "#/events/index";
@@ -68,7 +66,6 @@ export function RunPanel() {
 	const edges = useSelector(store, (state) => state.edges);
 
 	const [isOpen, setIsOpen] = useState(false);
-	const [payload, setPayload] = useState(0);
 
 	const tableData = useMemo(() => {
 		return canvas.chain.build(nodes, edges);
@@ -133,16 +130,7 @@ export function RunPanel() {
 							</Controls.Container>
 
 							<div className="flex-1">
-								<Field.Root className="mb-md">
-									<Field.Label htmlFor="payload-input">Payload:</Field.Label>
-									<Input
-										id="payload-input"
-										type="number"
-										value={payload}
-										onChange={(e) => setPayload(Number(e.target.value))}
-										className="w-32"
-									/>
-								</Field.Root>
+								<Controls.PayloadInput />
 
 								<Table.Root table={table}>
 									<Table.Header>
