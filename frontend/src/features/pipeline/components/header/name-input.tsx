@@ -47,7 +47,7 @@ export function NameInput() {
 			<Input
 				id="pipeline-name"
 				value={name}
-				className="max-w-96 w-full shrink-0"
+				className="w-80 shrink-0"
 				onChange={onChange}
 				maxLength={50}
 				aria-invalid={!!error}
