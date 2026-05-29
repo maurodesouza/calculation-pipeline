@@ -6,6 +6,7 @@ import { executionFailedConsumer } from "./interfaces/queue/consumer/execution-f
 import { executionFinishedConsumer } from "./interfaces/queue/consumer/execution-finished-consumer";
 import { executionRequestedConsumer } from "./interfaces/queue/consumer/execution-requested-consumer";
 import { executionStartedConsumer } from "./interfaces/queue/consumer/execution-started-consumer";
+import { runFinalizedConsumer } from "./interfaces/queue/consumer/run-finalized-consumer";
 import { runPausedConsumer } from "./interfaces/queue/consumer/run-paused-consumer";
 import { runResumedConsumer } from "./interfaces/queue/consumer/run-resumed-consumer";
 
@@ -33,6 +34,10 @@ async function main() {
 		queue.setup("processor.events", "realtime.run.resumed", {
 			type: "direct",
 			routingKey: "run.resumed",
+		}),
+		queue.setup("processor.events", "realtime.run.finalized", {
+			type: "direct",
+			routingKey: "run.finalized",
 		}),
 
 		queue.setup("processor.events", "realtime.execution.requested", {
@@ -84,6 +89,7 @@ async function main() {
 		executionFinishedConsumer(queue, registry),
 		runPausedConsumer(queue, registry),
 		runResumedConsumer(queue, registry),
+		runFinalizedConsumer(queue, registry),
 	]);
 
 	const server = createServer(registry);
