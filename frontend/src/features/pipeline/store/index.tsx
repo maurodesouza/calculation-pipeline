@@ -16,6 +16,7 @@ type PipelineStore = Canvas & {
 	id: string;
 	name: string;
 	description: string;
+	currentRunId: string | null;
 };
 
 const INITIAL_CANVAS_STATE = {
@@ -48,6 +49,7 @@ export function createPipelineStore(pipeline?: Pipeline) {
 		id,
 		name,
 		description: pipeline?.description || "",
+		currentRunId: null,
 
 		nodes: canvas?.nodes || [],
 		edges: canvas?.edges || [],
