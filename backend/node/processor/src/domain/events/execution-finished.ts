@@ -8,17 +8,16 @@ type EventPayload = {
 	error?: string;
 };
 
-export class ExecutionFinishedEvent extends Event<EventPayload> {
-	constructor(payload: EventPayload) {
-		super("ExecutionFinished");
-		this.payload = payload;
-	}
+type ConstructorData = Omit<EventPayload, "eventId">;
 
-	private payload: EventPayload;
+export class ExecutionFinishedEvent extends Event<EventPayload> {
+	constructor(private readonly data: ConstructorData) {
+		super("ExecutionFinished");
+	}
 
 	getPayload(): EventPayload {
 		return {
-			...this.payload,
+			...this.data,
 			eventId: this.eventId,
 		};
 	}

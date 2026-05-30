@@ -78,7 +78,7 @@ export class Processor extends Mediator {
 			paused: false,
 		});
 
-		this.notifyAll(new RunStartedEvent(runId));
+		this.notifyAll(new RunStartedEvent({ runId }));
 
 		const [, error] = this.schedule(runId, payload);
 		if (error) return [false, error];
