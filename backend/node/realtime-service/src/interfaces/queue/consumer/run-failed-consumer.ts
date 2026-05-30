@@ -7,11 +7,11 @@ type Payload = {
 	error: string;
 };
 
-export async function executionFailedConsumer(
+export async function runFailedConsumer(
 	queue: RabbitMQAdapter,
 	registry: ClientRegistry,
 ): Promise<void> {
-	await queue.consume<Payload>("realtime.execution.failed", async (message) => {
+	await queue.consume<Payload>("realtime.run.failed", async (message) => {
 		registry.emit(message.eventId, "run.failed", {
 			runId: message.runId,
 			error: message.error,

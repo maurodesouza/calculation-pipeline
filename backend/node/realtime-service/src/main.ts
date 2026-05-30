@@ -1,31 +1,33 @@
 import { ClientRegistry } from "./domain/run-registry";
 import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
 import { createServer } from "./interfaces/http/server";
-import { executionCompletedConsumer } from "./interfaces/queue/consumer/execution-completed-consumer";
-import { executionFailedConsumer } from "./interfaces/queue/consumer/execution-failed-consumer";
-import { executionFinishedConsumer } from "./interfaces/queue/consumer/execution-finished-consumer";
 import { executionRequestedConsumer } from "./interfaces/queue/consumer/execution-requested-consumer";
-import { executionStartedConsumer } from "./interfaces/queue/consumer/execution-started-consumer";
+import { runCompletedConsumer } from "./interfaces/queue/consumer/run-completed-consumer";
+import { runFailedConsumer } from "./interfaces/queue/consumer/run-failed-consumer";
 import { runFinalizedConsumer } from "./interfaces/queue/consumer/run-finalized-consumer";
 import { runPausedConsumer } from "./interfaces/queue/consumer/run-paused-consumer";
 import { runResumedConsumer } from "./interfaces/queue/consumer/run-resumed-consumer";
+import { runStartedConsumer } from "./interfaces/queue/consumer/run-started-consumer";
+import { stepFinishedConsumer } from "./interfaces/queue/consumer/step-finished-consumer";
 
 async function main() {
 	const queue = new RabbitMQAdapter();
 	await queue.connect();
 
 	await Promise.all([
-		queue.setup("processor.events", "realtime.execution.started", {
+		//#region CONSUMER | RUN ACTIONS QUEUES
+
+		queue.setup("processor.events", "realtime.run.started", {
 			type: "direct",
-			routingKey: "execution.started",
+			routingKey: "run.started",
 		}),
-		queue.setup("processor.events", "realtime.execution.failed", {
+		queue.setup("processor.events", "realtime.run.failed", {
 			type: "direct",
-			routingKey: "execution.failed",
+			routingKey: "run.failed",
 		}),
-		queue.setup("processor.events", "realtime.execution.completed", {
+		queue.setup("processor.events", "realtime.run.completed", {
 			type: "direct",
-			routingKey: "execution.completed",
+			routingKey: "run.completed",
 		}),
 		queue.setup("processor.events", "realtime.run.paused", {
 			type: "direct",
@@ -39,6 +41,9 @@ async function main() {
 			type: "direct",
 			routingKey: "run.finalized",
 		}),
+		//#endregion
+
+		//#region CONSUMER | STEP EXECUTION QUEUES
 
 		queue.setup("processor.events", "realtime.execution.requested", {
 			type: "direct",
@@ -60,21 +65,21 @@ async function main() {
 			type: "direct",
 			routingKey: "execution.unknown-requested",
 		}),
-
-		queue.setup("processor.events", "realtime.execution.finished", {
+		queue.setup("processor.events", "realtime.step.finished", {
 			type: "direct",
-			routingKey: "execution.finished",
+			routingKey: "step.finished",
 		}),
+		//#endregion
 	]);
 
 	const registry = new ClientRegistry();
 
 	await Promise.all([
-		executionStartedConsumer(queue, registry),
-		executionFailedConsumer(queue, registry),
-		executionCompletedConsumer(queue, registry),
+		runStartedConsumer(queue, registry),
+		runFailedConsumer(queue, registry),
+		runCompletedConsumer(queue, registry),
 		executionRequestedConsumer(queue, registry),
-		executionFinishedConsumer(queue, registry),
+		stepFinishedConsumer(queue, registry),
 		runPausedConsumer(queue, registry),
 		runResumedConsumer(queue, registry),
 		runFinalizedConsumer(queue, registry),

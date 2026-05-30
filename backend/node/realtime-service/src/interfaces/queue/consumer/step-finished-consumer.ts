@@ -1,22 +1,26 @@
 import type { ClientRegistry } from "../../../domain/run-registry";
 import type { RabbitMQAdapter } from "../../../infra/queue/rabbitmq-adapter";
 
-type Payload = {
+type StepFinishedPayload = {
 	eventId: string;
 	runId: string;
-	result: number;
+	stepId: string;
+	result?: number;
+	error?: string;
 };
 
-export async function executionCompletedConsumer(
+export async function stepFinishedConsumer(
 	queue: RabbitMQAdapter,
 	registry: ClientRegistry,
 ): Promise<void> {
-	await queue.consume<Payload>(
-		"realtime.execution.completed",
+	await queue.consume<StepFinishedPayload>(
+		"realtime.step.finished",
 		async (message) => {
-			registry.emit(message.eventId, "run.completed", {
+			registry.emit(message.eventId, "step.finished", {
 				runId: message.runId,
+				stepId: message.stepId,
 				result: message.result,
+				error: message.error,
 			});
 		},
 	);

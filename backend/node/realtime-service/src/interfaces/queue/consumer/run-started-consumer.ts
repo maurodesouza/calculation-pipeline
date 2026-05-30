@@ -6,12 +6,12 @@ type Payload = {
 	runId: string;
 };
 
-export async function executionStartedConsumer(
+export async function runStartedConsumer(
 	queue: RabbitMQAdapter,
 	registry: ClientRegistry,
 ): Promise<void> {
 	await queue.consume<Payload>(
-		"realtime.execution.started",
+		"realtime.run.started",
 		async (message) => {
 			registry.emit(message.eventId, "run.started", { runId: message.runId });
 		},
