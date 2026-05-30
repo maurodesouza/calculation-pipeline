@@ -29,48 +29,60 @@ async function api() {
 	await Promise.all([pgPromiseAdapter.connect(), queue.connect()]);
 
 	await Promise.all([
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.created",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.pause",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.resume",
-		}),
+		//#region API QUEUES
 
 		queue.setup("api.events", "processor.run.created", {
 			type: "direct",
 			routingKey: "run.created",
 		}),
-		queue.setup("api.events", "processor.run.pause", {
+		queue.setup("api.events", "processor.run.pause-requested", {
 			type: "direct",
-			routingKey: "run.pause",
+			routingKey: "run.pause-requested",
 		}),
-		queue.setup("api.events", "processor.run.resume", {
+		queue.setup("api.events", "processor.run.resume-requested", {
 			type: "direct",
-			routingKey: "run.resume",
+			routingKey: "run.resume-requested",
 		}),
-		queue.setup("api.events", "processor.run.finalize", {
+		queue.setup("api.events", "processor.run.finalize-requested", {
 			type: "direct",
 			routingKey: "run.finalize-requested",
 		}),
 
-		queue.setup("processor.events", "api.execution.started", {
+		// Randomize
+
+		queue.setup("api.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "execution.started",
+			routingKey: "run.created",
 		}),
-		queue.setup("processor.events", "api.execution.failed", {
+		queue.setup("api.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "execution.failed",
+			routingKey: "run.pause-requested",
 		}),
-		queue.setup("processor.events", "api.execution.completed", {
+		queue.setup("api.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "execution.completed",
+			routingKey: "run.resume-requested",
 		}),
+		queue.setup("api.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "run.finalize-requested",
+		}),
+		//#endregion
+
+		//#region RUN ACTIONS QUEUES
+
+		queue.setup("processor.events", "api.run.started", {
+			type: "direct",
+			routingKey: "run.started",
+		}),
+		queue.setup("processor.events", "api.run.failed", {
+			type: "direct",
+			routingKey: "run.failed",
+		}),
+		queue.setup("processor.events", "api.run.completed", {
+			type: "direct",
+			routingKey: "run.completed",
+		}),
+		//#endregion
 	]);
 
 	const instance = Container.getInstance();

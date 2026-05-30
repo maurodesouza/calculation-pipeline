@@ -28,7 +28,7 @@ export class PauseRunUseCase {
 		await this.queue.publish(
 			"api.randomize",
 			{ runId: input.runId },
-			{ routingKey: "run.pause" },
+			{ routingKey: "run.pause-requested" },
 		);
 
 		return [true, undefined];

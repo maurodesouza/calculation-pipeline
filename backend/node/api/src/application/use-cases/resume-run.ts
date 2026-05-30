@@ -28,7 +28,7 @@ export class ResumeRunUseCase {
 		await this.queue.publish(
 			"api.randomize",
 			{ runId: input.runId },
-			{ routingKey: "run.resume" },
+			{ routingKey: "run.resume-requested" },
 		);
 
 		return [true, undefined];

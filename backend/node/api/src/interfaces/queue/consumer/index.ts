@@ -1,11 +1,11 @@
-import { ExecutionCompletedConsumer } from "./execution-completed-consumer";
-import { ExecutionFailedConsumer } from "./execution-failed-consumer";
-import { ExecutionStartedConsumer } from "./execution-started-consumer";
+import { RunCompletedConsumer } from "./run-completed-consumer";
+import { RunFailedConsumer } from "./run-failed-consumer";
+import { RunStartedConsumer } from "./run-started-consumer";
 
 export const QueueConsumers = {
 	initialize() {
-		new ExecutionStartedConsumer();
-		new ExecutionFailedConsumer();
-		new ExecutionCompletedConsumer();
+		new RunStartedConsumer();
+		new RunFailedConsumer();
+		new RunCompletedConsumer();
 	},
 };
