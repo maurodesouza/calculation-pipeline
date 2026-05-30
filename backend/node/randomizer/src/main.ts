@@ -1,94 +1,19 @@
-import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
+import { RabbitMQAdapter } from "./infra/queue/rabbitmq/rabbitmq-adapter";
+import { rabbitQMTopology } from "./infra/queue/rabbitmq/rabbitmq-topology";
 
 async function main() {
 	const queue = new RabbitMQAdapter();
 	await queue.connect();
 
-	await Promise.all([
-		//#region CONSUMER | RUN REQUEST QUEUES
+	await queue.setup(rabbitQMTopology);
 
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.created",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.pause-requested",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.resume-requested",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.finalize-requested",
-		}),
-		//#endregion
-
-		//#region CONSUMER | RUN ACTIONS QUEUES
-
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.started",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.failed",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.completed",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.paused",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.resumed",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.finalized",
-		}),
-		//#endregion
-
-		//#region CONSUMER | STEP EXECUTION QUEUES
-
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.sum-requested",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.subtraction-requested",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.multiplication-requested",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.division-requested",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.unknown-requested",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-		//#endregion
-	]);
-
-	queue.consume(
+	queue.consume<Record<string, unknown>>(
 		"randomizer",
-		async (message: Record<string, unknown>, info) => {
-			const exchange = `${info.fields.exchange.split(".")[0]}.events`;
-			const routingKey = info.fields.routingKey;
+		async (message, metadata, headers) => {
+			const exchange = metadata.event.split(".")[0] + ".events";
+			const routingKey = metadata.event;
 
-			await applyChaos(queue, exchange, routingKey, message);
+			await applyChaos(queue, exchange, routingKey, message, headers);
 		},
 	);
 
@@ -97,6 +22,7 @@ async function main() {
 		exchange: string,
 		routingKey: string,
 		message: Record<string, unknown>,
+		headers: Record<string, unknown>,
 	) {
 		const copies = decideDuplication();
 		const interMessageDelay = decideInterMessageDelay();
@@ -105,7 +31,9 @@ async function main() {
 		await new Promise((resolve) => setTimeout(resolve, preExecutionDelay));
 
 		for (let i = 0; i < copies; i++) {
-			await queue.publish(exchange, message, { routingKey });
+			await queue.publish(`${exchange}/${routingKey}`, message, {
+				headers: headers as Record<string, string | number | boolean>,
+			});
 			await new Promise((resolve) => setTimeout(resolve, interMessageDelay));
 		}
 	}
