@@ -1,12 +1,14 @@
+import type { Queue } from "../../../application/queue/queue";
 import { RunPausedEvent } from "../../../domain/events/run-paused";
+import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
 export class RunPausedPublisher {
 	@inject("queue")
-	private declare readonly queue: any;
+	private declare readonly queue: Queue;
 
 	@inject("processor")
-	private declare readonly processor: any;
+	private declare readonly processor: Processor;
 
 	constructor() {
 		this.initialize();
