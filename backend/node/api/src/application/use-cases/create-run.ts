@@ -35,9 +35,8 @@ export class CreateRunUseCase {
 		if (saveError) return [undefined, saveError];
 
 		await this.queue.publish(
-			"api.randomize",
+			"run.created",
 			RunCreatedMapper.toPayload(run, pipeline),
-			{ routingKey: "run.created" },
 		);
 
 		return [run.getId(), undefined];
