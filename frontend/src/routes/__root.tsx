@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
 import { events } from "#/events/index";
+import { SSE } from "#/events/ssr";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import globalCss from "../styles/global.css?url";
 
@@ -41,14 +42,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
-		const source = new EventSource("http://localhost:3500/events");
+		const sse = new SSE(events);
+		sse.setup("http://localhost:3500/events");
 
-		source.onmessage = (event) => {
-			const { event: eventName, payload } = JSON.parse(event.data);
-			events.emit(eventName, payload);
-		};
-
-		return () => source.close();
+		return () => sse.close();
 	}, []);
 
 	return (
