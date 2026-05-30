@@ -1,6 +1,7 @@
 import { Event } from "./event";
 
 type EventPayload = {
+	eventId: string;
 	runId: string;
 	stepId: string;
 	result?: number;
@@ -16,6 +17,9 @@ export class ExecutionFinishedEvent extends Event<EventPayload> {
 	private payload: EventPayload;
 
 	getPayload(): EventPayload {
-		return this.payload;
+		return {
+			...this.payload,
+			eventId: this.eventId,
+		};
 	}
 }

@@ -1,6 +1,7 @@
 import { Event } from "./event";
 
 type EventPayload = {
+	eventId: string;
 	runId: string;
 	error: string;
 };
@@ -11,6 +12,9 @@ export class RunFailedEvent extends Event<EventPayload> {
 	}
 
 	getPayload(): EventPayload {
-		return this.data;
+		return {
+			...this.data,
+			eventId: this.eventId,
+		};
 	}
 }
