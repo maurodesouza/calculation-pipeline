@@ -10,7 +10,7 @@ type ConstructorData = Omit<EventPayload, "eventId">;
 
 export class RunCompletedEvent extends Event<EventPayload> {
 	constructor(private readonly data: ConstructorData) {
-		super("run-completed");
+		super("run.completed");
 	}
 
 	getPayload(): EventPayload {

@@ -13,7 +13,7 @@ type ConstructorData = Omit<EventPayload, "eventId">;
 
 export class ExecuteStepEvent extends Event<EventPayload> {
 	constructor(private readonly data: ConstructorData) {
-		super("execute-step");
+		super("execute.step");
 	}
 
 	getPayload(): EventPayload {
