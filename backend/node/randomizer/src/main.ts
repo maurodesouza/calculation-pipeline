@@ -5,38 +5,39 @@ async function main() {
 	await queue.connect();
 
 	await Promise.all([
+		//#region CONSUMER | RUN REQUEST QUEUES
+
 		queue.setup("api.randomize", "randomizer", {
 			type: "direct",
 			routingKey: "run.created",
 		}),
 		queue.setup("api.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "run.pause",
+			routingKey: "run.pause-requested",
 		}),
 		queue.setup("api.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "run.resume",
+			routingKey: "run.resume-requested",
 		}),
 		queue.setup("api.randomize", "randomizer", {
 			type: "direct",
 			routingKey: "run.finalize-requested",
 		}),
+		//#endregion
+
+		//#region CONSUMER | RUN ACTIONS QUEUES
 
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "execution.started",
+			routingKey: "run.started",
 		}),
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "execution.failed",
+			routingKey: "run.failed",
 		}),
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
-			routingKey: "execution.completed",
-		}),
-		queue.setup("processor.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.finished",
+			routingKey: "run.completed",
 		}),
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
@@ -46,10 +47,13 @@ async function main() {
 			type: "direct",
 			routingKey: "run.resumed",
 		}),
-		queue.setup("processor.randomize", "realtime.run.finalized", {
+		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
 			routingKey: "run.finalized",
 		}),
+		//#endregion
+
+		//#region CONSUMER | STEP EXECUTION QUEUES
 
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
@@ -71,6 +75,11 @@ async function main() {
 			type: "direct",
 			routingKey: "execution.unknown-requested",
 		}),
+		queue.setup("processor.randomize", "randomizer", {
+			type: "direct",
+			routingKey: "execution.finished",
+		}),
+		//#endregion
 	]);
 
 	queue.consume(
