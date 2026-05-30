@@ -17,9 +17,7 @@ export class RunPausedPublisher {
 	private initialize() {
 		this.processor.register(RunPausedEvent, async (event: RunPausedEvent) => {
 			const payload = event.getPayload();
-			await this.queue.publish("processor.randomize", payload, {
-				routingKey: "run.paused",
-			});
+			await this.queue.publish("run.paused", payload);
 		});
 	}
 }

@@ -17,9 +17,7 @@ export class RunResumedPublisher {
 	private initialize() {
 		this.processor.register(RunResumedEvent, async (event: RunResumedEvent) => {
 			const payload = event.getPayload();
-			await this.queue.publish("processor.randomize", payload, {
-				routingKey: "run.resumed",
-			});
+			await this.queue.publish("run.resumed", payload);
 		});
 	}
 }

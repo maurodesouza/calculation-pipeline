@@ -18,9 +18,9 @@ export class RunResumeConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
+		this.queue.consume<RunResumePayload>(
 			"processor.run.resume-requested",
-			async (message: RunResumePayload) => {
+			async (message) => {
 				const { runId } = message;
 				this.processor.resume(runId);
 			},

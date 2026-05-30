@@ -17,9 +17,7 @@ export class RunFailedPublisher {
 	private initialize() {
 		this.processor.register(RunFailedEvent, async (event: RunFailedEvent) => {
 			const payload = event.getPayload();
-			await this.queue.publish("processor.randomize", payload, {
-				routingKey: "run.failed",
-			});
+			await this.queue.publish("run.failed", payload);
 		});
 	}
 }

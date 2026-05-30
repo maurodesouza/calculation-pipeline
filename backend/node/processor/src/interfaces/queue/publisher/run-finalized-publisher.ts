@@ -19,9 +19,7 @@ export class RunFinalizedPublisher {
 			RunFinalizedEvent,
 			async (event: RunFinalizedEvent) => {
 				const payload = event.getPayload();
-				await this.queue.publish("processor.randomize", payload, {
-					routingKey: "run.finalized",
-				});
+				await this.queue.publish("run.finalized", payload);
 			},
 		);
 	}

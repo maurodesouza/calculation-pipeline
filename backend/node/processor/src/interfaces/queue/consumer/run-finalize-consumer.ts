@@ -18,9 +18,9 @@ export class RunFinalizeConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
+		this.queue.consume<RunFinalizePayload>(
 			"processor.run.finalize-requested",
-			async (message: RunFinalizePayload) => {
+			async (message) => {
 				const { runId } = message;
 				void this.processor.finalize(runId);
 			},

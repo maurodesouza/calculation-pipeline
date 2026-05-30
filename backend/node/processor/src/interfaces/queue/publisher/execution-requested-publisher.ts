@@ -19,15 +19,13 @@ export class ExecutionRequestedPublisher {
 			ExecuteStepEvent,
 			async (event: ExecuteStepEvent) => {
 				const payload = event.getPayload();
-				const routingKey = this.getRoutingKey(payload.operation);
-				await this.queue.publish("processor.randomize", payload, {
-					routingKey,
-				});
+				const eventKey = this.getEventKey(payload.operation);
+				await this.queue.publish(eventKey, payload);
 			},
 		);
 	}
 
-	private getRoutingKey(operation: string): string {
+	private getEventKey(operation: string): string {
 		switch (operation) {
 			case "sum":
 				return "execution.sum-requested";

@@ -18,9 +18,9 @@ export class RunPauseConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
+		this.queue.consume<RunPausePayload>(
 			"processor.run.pause-requested",
-			async (message: RunPausePayload) => {
+			async (message) => {
 				const { runId } = message;
 				this.processor.pause(runId);
 			},

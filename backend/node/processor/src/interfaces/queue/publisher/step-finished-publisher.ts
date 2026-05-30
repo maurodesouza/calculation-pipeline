@@ -19,9 +19,7 @@ export class StepFinishedPublisher {
 			StepFinishedEvent,
 			async (event: StepFinishedEvent) => {
 				const payload = event.getPayload();
-				await this.queue.publish("processor.randomize", payload, {
-					routingKey: "step.finished",
-				});
+				await this.queue.publish("step.finished", payload);
 			},
 		);
 	}
