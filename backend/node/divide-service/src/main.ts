@@ -1,4 +1,24 @@
-import { RabbitMQAdapter } from "./queue";
+import { RabbitMQAdapter, type RabbitQMTopology } from "./queue";
+
+const topology: RabbitQMTopology[] = [
+	{
+		exchange: { name: "processor.events", type: "topic" },
+		queues: [
+			{
+				name: "divide.execution.requested",
+				bindings: ["execution.division-requested"],
+			},
+		],
+	},
+	{
+		exchange: { name: "divide.randomize", type: "topic" },
+		queues: [{ name: "randomizer", bindings: ["#"] }],
+	},
+	{
+		exchange: { name: "divide.events", type: "topic" },
+		queues: [{ name: "processor.step.finished", bindings: ["step.finished"] }],
+	},
+];
 
 type DividePayload = {
 	runId: string;
@@ -12,40 +32,27 @@ async function main() {
 	const queue = new RabbitMQAdapter();
 	await queue.connect();
 
-	await Promise.all([
-		queue.setup("processor.events", "divide.execution.requested", {
-			type: "direct",
-			routingKey: "execution.division-requested",
-		}),
-		queue.setup("divide.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-		queue.setup("divide.events", "processor.execution.finished", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-	]);
+	await queue.setup(topology);
 
-	queue.consume(
+	queue.consume<DividePayload>(
 		"divide.execution.requested",
-		async (message: DividePayload) => {
+		async (message) => {
 			const { runId, value, by, stepId } = message;
 
 			const operationResult = await executeDivide(value, by);
 
 			if (operationResult.error) {
-				await queue.publish(
-					"divide.events",
-					{ runId, stepId, error: operationResult.error },
-					{ routingKey: "execution.finished" },
-				);
+				await queue.publish("step.finished", {
+					runId,
+					stepId,
+					error: operationResult.error,
+				});
 			} else {
-				await queue.publish(
-					"divide.randomize",
-					{ runId, stepId, result: operationResult.result },
-					{ routingKey: "execution.finished" },
-				);
+				await queue.publish("step.finished", {
+					runId,
+					stepId,
+					result: operationResult.result,
+				});
 			}
 		},
 	);
