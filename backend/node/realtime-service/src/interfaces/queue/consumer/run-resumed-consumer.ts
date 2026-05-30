@@ -2,6 +2,7 @@ import type { ClientRegistry } from "../../../domain/run-registry";
 import type { RabbitMQAdapter } from "../../../infra/queue/rabbitmq-adapter";
 
 type RunResumedPayload = {
+	eventId: string;
 	runId: string;
 };
 
@@ -12,7 +13,7 @@ export async function runResumedConsumer(
 	await queue.consume(
 		"realtime.run.resumed",
 		async (message: RunResumedPayload) => {
-			registry.emit("run.resumed", message);
+			registry.emit(message.eventId, "run.resumed", { runId: message.runId });
 		},
 	);
 }

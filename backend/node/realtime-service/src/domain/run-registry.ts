@@ -11,9 +11,12 @@ export class ClientRegistry {
 		this.clients.delete(res);
 	}
 
-	emit(event: string, data: unknown): void {
+	emit(eventId: string, eventName: string, data: unknown): void {
 		const payload = {
-			event,
+			event: {
+				id: eventId,
+				name: eventName,
+			},
 			payload: data,
 		};
 

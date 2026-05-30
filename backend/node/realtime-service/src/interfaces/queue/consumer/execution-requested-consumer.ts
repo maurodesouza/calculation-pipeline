@@ -2,6 +2,7 @@ import type { ClientRegistry } from "../../../domain/run-registry";
 import type { RabbitMQAdapter } from "../../../infra/queue/rabbitmq-adapter";
 
 type Payload = {
+	eventId: string;
 	runId: string;
 	stepId: string;
 	operation: string;
@@ -16,7 +17,7 @@ export async function executionRequestedConsumer(
 	await queue.consume<Payload>(
 		"realtime.execution.requested",
 		async (message) => {
-			registry.emit("step.requested", {
+			registry.emit(message.eventId, "step.requested", {
 				runId: message.runId,
 				stepId: message.stepId,
 				operation: message.operation,

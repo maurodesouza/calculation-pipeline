@@ -2,6 +2,7 @@ import type { ClientRegistry } from "../../../domain/run-registry";
 import type { RabbitMQAdapter } from "../../../infra/queue/rabbitmq-adapter";
 
 type ExecutionFinishedPayload = {
+	eventId: string;
 	runId: string;
 	stepId: string;
 	result?: number;
@@ -15,7 +16,7 @@ export async function executionFinishedConsumer(
 	await queue.consume<ExecutionFinishedPayload>(
 		"realtime.execution.finished",
 		async (message) => {
-			registry.emit("step.finished", {
+			registry.emit(message.eventId, "step.finished", {
 				runId: message.runId,
 				stepId: message.stepId,
 				result: message.result,

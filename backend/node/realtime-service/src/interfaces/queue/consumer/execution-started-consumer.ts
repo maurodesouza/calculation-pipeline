@@ -2,6 +2,7 @@ import type { ClientRegistry } from "../../../domain/run-registry";
 import type { RabbitMQAdapter } from "../../../infra/queue/rabbitmq-adapter";
 
 type Payload = {
+	eventId: string;
 	runId: string;
 };
 
@@ -12,7 +13,7 @@ export async function executionStartedConsumer(
 	await queue.consume<Payload>(
 		"realtime.execution.started",
 		async (message) => {
-			registry.emit("run.started", { runId: message.runId });
+			registry.emit(message.eventId, "run.started", { runId: message.runId });
 		},
 	);
 }
