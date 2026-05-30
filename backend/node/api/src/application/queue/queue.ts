@@ -1,23 +1,29 @@
-export type QueueSetupConfig = {
-	type: string;
-	routingKey: string;
+export type PublishConfig = {
+	headers?: Record<string, unknown>;
 };
 
-export type PublishSetupConfig = {
-	routingKey?: string;
+type Metadata = {
+	event: string;
 };
+
+export type ConsumeCallback<T> = (
+	message: T,
+	metadata: Metadata,
+	headers?: Record<string, unknown>,
+) => Promise<void>;
 
 export type Queue = {
 	connect(): Promise<void>;
-	setup(
-		exchange: string,
-		queue: string,
-		config: QueueSetupConfig,
-	): Promise<void>;
+
+	setup(topology: unknown): Promise<void>;
+
 	publish(
-		exchange: string,
-		message: any,
-		config?: PublishSetupConfig,
+		event: string,
+		message: unknown,
+		config?: PublishConfig,
 	): Promise<void>;
-	consume(queue: string, callback: Function): Promise<void>;
+	consume<T = unknown>(
+		event: string,
+		callback: ConsumeCallback<T>,
+	): Promise<void>;
 };

@@ -13,7 +13,8 @@ import { UpdatePipelineUseCase } from "./application/use-cases/update-pipeline";
 import { Container } from "./infra/DI/container";
 import { PGPromiseAdapter } from "./infra/database/pg-promise-adapter";
 import { HttpAdapter } from "./infra/http/http-adapter";
-import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
+import { RabbitMQAdapter } from "./infra/queue/rabbitmq/rabbitmq-adapter";
+import { rabbitQMTopology } from "./infra/queue/rabbitmq/rabbitmq-topology";
 import { PipelineRepositoryDAO } from "./infra/repository/pipeline";
 import { RunRepositoryDAO } from "./infra/repository/run";
 import { HTTPInterface } from "./interfaces/http";
@@ -28,62 +29,7 @@ async function api() {
 
 	await Promise.all([pgPromiseAdapter.connect(), queue.connect()]);
 
-	await Promise.all([
-		//#region API QUEUES
-
-		queue.setup("api.events", "processor.run.created", {
-			type: "direct",
-			routingKey: "run.created",
-		}),
-		queue.setup("api.events", "processor.run.pause-requested", {
-			type: "direct",
-			routingKey: "run.pause-requested",
-		}),
-		queue.setup("api.events", "processor.run.resume-requested", {
-			type: "direct",
-			routingKey: "run.resume-requested",
-		}),
-		queue.setup("api.events", "processor.run.finalize-requested", {
-			type: "direct",
-			routingKey: "run.finalize-requested",
-		}),
-
-		// Randomize
-
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.created",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.pause-requested",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.resume-requested",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.finalize-requested",
-		}),
-		//#endregion
-
-		//#region RUN ACTIONS QUEUES
-
-		queue.setup("processor.events", "api.run.started", {
-			type: "direct",
-			routingKey: "run.started",
-		}),
-		queue.setup("processor.events", "api.run.failed", {
-			type: "direct",
-			routingKey: "run.failed",
-		}),
-		queue.setup("processor.events", "api.run.completed", {
-			type: "direct",
-			routingKey: "run.completed",
-		}),
-		//#endregion
-	]);
+	await queue.setup(rabbitQMTopology);
 
 	const instance = Container.getInstance();
 
