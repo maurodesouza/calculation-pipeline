@@ -9,13 +9,13 @@ import {
 	StepNotFoundError,
 } from "./errors";
 import { ExecuteStepEvent } from "./events/execute-step";
+import { ExecutionFinishedEvent } from "./events/execution-finished";
 import { RunCompletedEvent } from "./events/run-completed";
 import { RunFailedEvent } from "./events/run-failed";
 import { RunFinalizedEvent } from "./events/run-finalized";
 import { RunPausedEvent } from "./events/run-paused";
 import { RunResumedEvent } from "./events/run-resumed";
 import { RunStartedEvent } from "./events/run-started";
-import { StepFinishedEvent } from "./events/step-finished";
 
 export type Step = {
 	id: string;
@@ -124,7 +124,7 @@ export class Processor extends Mediator {
 		if (stepId !== run.executingStep) return [true, undefined];
 
 		this.notifyAll(
-			new StepFinishedEvent({
+			new ExecutionFinishedEvent({
 				runId,
 				stepId,
 				result: result.result,

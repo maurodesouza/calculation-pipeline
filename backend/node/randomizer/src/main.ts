@@ -36,6 +36,10 @@ async function main() {
 		}),
 		queue.setup("processor.randomize", "randomizer", {
 			type: "direct",
+			routingKey: "execution.finished",
+		}),
+		queue.setup("processor.randomize", "randomizer", {
+			type: "direct",
 			routingKey: "run.paused",
 		}),
 		queue.setup("processor.randomize", "randomizer", {

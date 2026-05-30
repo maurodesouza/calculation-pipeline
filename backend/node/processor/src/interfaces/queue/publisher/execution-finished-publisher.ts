@@ -1,7 +1,7 @@
-import { StepFinishedEvent } from "../../../domain/events/step-finished";
+import { ExecutionFinishedEvent } from "../../../domain/events/execution-finished";
 import { inject } from "../../../infra/DI/container";
 
-export class StepFinishedPublisher {
+export class ExecutionFinishedPublisher {
 	@inject("queue")
 	private declare readonly queue: any;
 
@@ -14,11 +14,11 @@ export class StepFinishedPublisher {
 
 	private initialize() {
 		this.processor.register(
-			StepFinishedEvent,
-			async (event: StepFinishedEvent) => {
+			ExecutionFinishedEvent,
+			async (event: ExecutionFinishedEvent) => {
 				const payload = event.getPayload();
 				await this.queue.publish("processor.randomize", payload, {
-					routingKey: "step.finished",
+					routingKey: "execution.finished",
 				});
 			},
 		);

@@ -56,7 +56,7 @@ async function main() {
 	): Promise<{ result?: number; error?: string }> {
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		if (Math.random() < 0.1) {
+		if (Math.random() < 0.9) {
 			return { error: `[divide-service]: random error occurred` };
 		}
 

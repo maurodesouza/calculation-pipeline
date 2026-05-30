@@ -7,9 +7,9 @@ type EventPayload = {
 	error?: string;
 };
 
-export class StepFinishedEvent extends Event<EventPayload> {
+export class ExecutionFinishedEvent extends Event<EventPayload> {
 	constructor(payload: EventPayload) {
-		super("StepFinished");
+		super("ExecutionFinished");
 		this.payload = payload;
 	}
 

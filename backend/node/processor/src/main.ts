@@ -86,6 +86,10 @@ async function main() {
 			type: "direct",
 			routingKey: "run.finalized",
 		}),
+		queue.setup("processor.events", "realtime.execution.finished", {
+			type: "direct",
+			routingKey: "execution.finished",
+		}),
 
 		queue.setup("processor.events", "sum.execution.requested", {
 			type: "direct",
