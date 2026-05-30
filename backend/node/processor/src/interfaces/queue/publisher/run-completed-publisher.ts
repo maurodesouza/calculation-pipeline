@@ -1,9 +1,9 @@
 import type { Queue } from "../../../application/queue/queue";
-import { ExecutionFinishedEvent } from "../../../domain/events/execution-finished";
+import { RunCompletedEvent } from "../../../domain/events/run-completed";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-export class ExecutionFinishedPublisher {
+export class RunCompletedPublisher {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -16,11 +16,11 @@ export class ExecutionFinishedPublisher {
 
 	private initialize() {
 		this.processor.register(
-			ExecutionFinishedEvent,
-			async (event: ExecutionFinishedEvent) => {
+			RunCompletedEvent,
+			async (event: RunCompletedEvent) => {
 				const payload = event.getPayload();
 				await this.queue.publish("processor.randomize", payload, {
-					routingKey: "execution.finished",
+					routingKey: "run.completed",
 				});
 			},
 		);

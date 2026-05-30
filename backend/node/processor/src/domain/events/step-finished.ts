@@ -10,9 +10,9 @@ type EventPayload = {
 
 type ConstructorData = Omit<EventPayload, "eventId">;
 
-export class ExecutionFinishedEvent extends Event<EventPayload> {
+export class StepFinishedEvent extends Event<EventPayload> {
 	constructor(private readonly data: ConstructorData) {
-		super("execution.finished");
+		super("step.finished");
 	}
 
 	getPayload(): EventPayload {

@@ -1,9 +1,9 @@
 import type { Queue } from "../../../application/queue/queue";
-import { RunStartedEvent } from "../../../domain/events/run-started";
+import { StepFinishedEvent } from "../../../domain/events/step-finished";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-export class ExecutionStartedPublisher {
+export class StepFinishedPublisher {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -15,11 +15,14 @@ export class ExecutionStartedPublisher {
 	}
 
 	private initialize() {
-		this.processor.register(RunStartedEvent, async (event: RunStartedEvent) => {
-			const payload = event.getPayload();
-			await this.queue.publish("processor.randomize", payload, {
-				routingKey: "execution.started",
-			});
-		});
+		this.processor.register(
+			StepFinishedEvent,
+			async (event: StepFinishedEvent) => {
+				const payload = event.getPayload();
+				await this.queue.publish("processor.randomize", payload, {
+					routingKey: "step.finished",
+				});
+			},
+		);
 	}
 }
