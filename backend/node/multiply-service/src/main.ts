@@ -1,4 +1,24 @@
-import { RabbitMQAdapter } from "./queue";
+import { RabbitMQAdapter, type RabbitQMTopology } from "./queue";
+
+const topology: RabbitQMTopology[] = [
+	{
+		exchange: { name: "processor.events", type: "topic" },
+		queues: [
+			{
+				name: "multiply.execution.requested",
+				bindings: ["execution.multiplication-requested"],
+			},
+		],
+	},
+	{
+		exchange: { name: "multiply.randomize", type: "topic" },
+		queues: [{ name: "randomizer", bindings: ["#"] }],
+	},
+	{
+		exchange: { name: "multiply.events", type: "topic" },
+		queues: [{ name: "processor.step.finished", bindings: ["step.finished"] }],
+	},
+];
 
 type MultiplyPayload = {
 	runId: string;
@@ -12,40 +32,27 @@ async function main() {
 	const queue = new RabbitMQAdapter();
 	await queue.connect();
 
-	await Promise.all([
-		queue.setup("processor.events", "multiply.execution.requested", {
-			type: "direct",
-			routingKey: "execution.multiplication-requested",
-		}),
-		queue.setup("multiply.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-		queue.setup("multiply.events", "processor.execution.finished", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-	]);
+	await queue.setup(topology);
 
-	queue.consume(
+	queue.consume<MultiplyPayload>(
 		"multiply.execution.requested",
-		async (message: MultiplyPayload) => {
+		async (message) => {
 			const { runId, value, by, stepId } = message;
 
 			const operationResult = await executeMultiply(value, by);
 
 			if (operationResult.error) {
-				await queue.publish(
-					"multiply.events",
-					{ runId, stepId, error: operationResult.error },
-					{ routingKey: "execution.finished" },
-				);
+				await queue.publish("step.finished", {
+					runId,
+					stepId,
+					error: operationResult.error,
+				});
 			} else {
-				await queue.publish(
-					"multiply.randomize",
-					{ runId, stepId, result: operationResult.result },
-					{ routingKey: "execution.finished" },
-				);
+				await queue.publish("step.finished", {
+					runId,
+					stepId,
+					result: operationResult.result,
+				});
 			}
 		},
 	);
