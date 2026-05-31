@@ -30,7 +30,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],

@@ -8,7 +8,7 @@ async function main() {
 	await queue.setup(rabbitQMTopology);
 
 	queue.consume<Record<string, unknown>>(
-		"randomizer",
+		"randomize",
 		async (message, metadata, headers) => {
 			const exchange = metadata.event.split(".")[0] + ".events";
 			const routingKey = metadata.event;

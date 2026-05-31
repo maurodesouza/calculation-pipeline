@@ -6,7 +6,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],
@@ -18,7 +18,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],
@@ -30,7 +30,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],
@@ -42,7 +42,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],
@@ -54,7 +54,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],
@@ -66,7 +66,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],

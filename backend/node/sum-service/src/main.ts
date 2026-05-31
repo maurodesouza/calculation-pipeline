@@ -12,7 +12,7 @@ const topology: RabbitQMTopology[] = [
 	},
 	{
 		exchange: { name: "sum.randomize", type: "topic" },
-		queues: [{ name: "randomizer", bindings: ["#"] }],
+		queues: [{ name: "randomize", bindings: ["#"] }],
 	},
 	{
 		exchange: { name: "sum.events", type: "topic" },

@@ -7,7 +7,7 @@ export const rabbitQMTopology = [
 		},
 		queues: [
 			{
-				name: "randomizer",
+				name: "randomize",
 				bindings: ["#"],
 			},
 		],
@@ -110,22 +110,6 @@ export const rabbitQMTopology = [
 			{
 				name: "api.run.completed",
 				bindings: ["run.completed"],
-			},
-			{
-				name: "realtime.run.paused",
-				bindings: ["run.paused"],
-			},
-			{
-				name: "realtime.run.resumed",
-				bindings: ["run.resumed"],
-			},
-			{
-				name: "realtime.run.finalized",
-				bindings: ["run.finalized"],
-			},
-			{
-				name: "realtime.step.finished",
-				bindings: ["step.finished"],
 			},
 			// Execution requested events
 			{

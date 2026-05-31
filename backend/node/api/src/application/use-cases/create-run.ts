@@ -40,6 +40,8 @@ export class CreateRunUseCase {
 			{ headers: { realtime: true } },
 		);
 
+		console.log("passsou????");
+
 		return [run.getId(), undefined];
 	}
 }
