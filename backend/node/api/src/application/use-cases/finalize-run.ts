@@ -22,9 +22,13 @@ export class FinalizeRunUseCase {
 		const [, finalizeError] = run.finalize();
 		if (finalizeError) return [undefined, finalizeError];
 
-		await this.queue.publish("run.finalize-requested", {
-			runId: input.runId,
-		});
+		await this.queue.publish(
+			"run.finalize-requested",
+			{
+				runId: input.runId,
+			},
+			{ headers: { realtime: true } },
+		);
 
 		return [true, undefined];
 	}

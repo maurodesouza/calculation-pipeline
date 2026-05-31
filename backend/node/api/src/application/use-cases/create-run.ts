@@ -37,6 +37,7 @@ export class CreateRunUseCase {
 		await this.queue.publish(
 			"run.created",
 			RunCreatedMapper.toPayload(run, pipeline),
+			{ headers: { realtime: true } },
 		);
 
 		return [run.getId(), undefined];
