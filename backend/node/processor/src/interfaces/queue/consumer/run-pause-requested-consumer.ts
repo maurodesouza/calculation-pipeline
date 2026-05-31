@@ -6,7 +6,7 @@ type RunPausePayload = {
 	runId: string;
 };
 
-export class RunPauseConsumer {
+export class RunPauseRequestedConsumer {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
