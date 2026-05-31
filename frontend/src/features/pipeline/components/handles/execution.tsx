@@ -134,7 +134,7 @@ export function ExecutionHandle() {
 		[store],
 	);
 
-	const handleStepRequested = useCallback(
+	const handleStepStarted = useCallback(
 		({ runId, stepId }: StepRequestedPayload) => {
 			const state = store.state;
 
@@ -203,7 +203,7 @@ export function ExecutionHandle() {
 		const unsub7 = events.on("run.paused", handleRunPaused);
 		const unsub8 = events.on("run.resumed", handleRunResumed);
 		const unsub9 = events.on("run.finalized", handleRunFinalized);
-		const unsub4 = events.on("step.requested", handleStepRequested);
+		const unsub4 = events.on("step.started", handleStepStarted);
 		const unsub5 = events.on("step.finished", handleStepFinished);
 		const unsub6 = events.on(
 			PipelineEvents.EXECUTION_CLEAR,
@@ -228,7 +228,7 @@ export function ExecutionHandle() {
 		handleRunPaused,
 		handleRunResumed,
 		handleRunFinalized,
-		handleStepRequested,
+		handleStepStarted,
 		handleStepFinished,
 		handleClearExecution,
 	]);
