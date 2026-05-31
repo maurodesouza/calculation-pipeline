@@ -1,5 +1,5 @@
 import http from "node:http";
-import type { ClientRegistry } from "../../domain/run-registry";
+import type { ClientRegistry } from "./client-registry";
 
 export function createServer(registry: ClientRegistry): http.Server {
 	return http.createServer((req, res) => {
