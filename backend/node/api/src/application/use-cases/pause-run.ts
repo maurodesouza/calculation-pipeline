@@ -25,13 +25,9 @@ export class PauseRunUseCase {
 		const [, saveError] = await this.runRepository.update(run);
 		if (saveError) return [undefined, saveError];
 
-		await this.queue.publish(
-			"run.pause-requested",
-			{
-				runId: input.runId,
-			},
-			{ headers: { realtime: true } },
-		);
+		await this.queue.publish("run.pause-requested", {
+			runId: input.runId,
+		});
 
 		return [true, undefined];
 	}

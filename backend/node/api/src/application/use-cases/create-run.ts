@@ -37,7 +37,6 @@ export class CreateRunUseCase {
 		await this.queue.publish(
 			"run.created",
 			RunCreatedMapper.toPayload(run, pipeline),
-			{ headers: { realtime: true } },
 		);
 
 		console.log("passsou????");
