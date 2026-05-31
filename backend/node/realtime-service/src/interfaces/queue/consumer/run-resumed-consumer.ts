@@ -1,5 +1,5 @@
 import type { ClientRegistry } from "../../../domain/run-registry";
-import type { RabbitMQAdapter } from "../../../infra/queue/rabbitmq-adapter";
+import type { RabbitMQAdapter } from "../../../infra/queue/rabbitmq/rabbitmq-adapter";
 
 type RunResumedPayload = {
 	eventId: string;

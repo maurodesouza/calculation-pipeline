@@ -1,5 +1,6 @@
 import { ClientRegistry } from "./domain/run-registry";
-import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
+import { RabbitMQAdapter } from "./infra/queue/rabbitmq/rabbitmq-adapter";
+import { rabbitQMTopology } from "./infra/queue/rabbitmq/rabbitmq-topology";
 import { createServer } from "./interfaces/http/server";
 import { executionRequestedConsumer } from "./interfaces/queue/consumer/execution-requested-consumer";
 import { runCompletedConsumer } from "./interfaces/queue/consumer/run-completed-consumer";
@@ -14,63 +15,7 @@ async function main() {
 	const queue = new RabbitMQAdapter();
 	await queue.connect();
 
-	await Promise.all([
-		//#region CONSUMER | RUN ACTIONS QUEUES
-
-		queue.setup("processor.events", "realtime.run.started", {
-			type: "direct",
-			routingKey: "run.started",
-		}),
-		queue.setup("processor.events", "realtime.run.failed", {
-			type: "direct",
-			routingKey: "run.failed",
-		}),
-		queue.setup("processor.events", "realtime.run.completed", {
-			type: "direct",
-			routingKey: "run.completed",
-		}),
-		queue.setup("processor.events", "realtime.run.paused", {
-			type: "direct",
-			routingKey: "run.paused",
-		}),
-		queue.setup("processor.events", "realtime.run.resumed", {
-			type: "direct",
-			routingKey: "run.resumed",
-		}),
-		queue.setup("processor.events", "realtime.run.finalized", {
-			type: "direct",
-			routingKey: "run.finalized",
-		}),
-		//#endregion
-
-		//#region CONSUMER | STEP EXECUTION QUEUES
-
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.sum-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.subtraction-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.multiplication-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.division-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.unknown-requested",
-		}),
-		queue.setup("processor.events", "realtime.step.finished", {
-			type: "direct",
-			routingKey: "step.finished",
-		}),
-		//#endregion
-	]);
+	await queue.setup(rabbitQMTopology);
 
 	const registry = new ClientRegistry();
 
