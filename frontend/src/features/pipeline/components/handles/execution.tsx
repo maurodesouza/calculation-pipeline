@@ -189,7 +189,7 @@ export function ExecutionHandle() {
 	const handleClearExecution = useCallback(() => {
 		store.setState((prev) => ({
 			...prev,
-			run: { id: null, status: "idle" as const },
+			run: { ...prev.run, id: null, status: "idle" as const },
 			nodes: prev.nodes.map(
 				canvas.nodes.map.clearExecution(),
 			) as CanvasOperationNode[],
