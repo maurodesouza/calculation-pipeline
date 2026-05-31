@@ -17,7 +17,9 @@ export class RunResumedPublisher {
 	private initialize() {
 		this.processor.register(RunResumedEvent, async (event: RunResumedEvent) => {
 			const payload = event.getPayload();
-			await this.queue.publish("run.resumed", payload);
+			await this.queue.publish("run.resumed", payload, {
+				headers: { realtime: true },
+			});
 		});
 	}
 }

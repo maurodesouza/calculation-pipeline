@@ -17,7 +17,9 @@ export class RunStartedPublisher {
 	private initialize() {
 		this.processor.register(RunStartedEvent, async (event: RunStartedEvent) => {
 			const payload = event.getPayload();
-			await this.queue.publish("run.started", payload);
+			await this.queue.publish("run.started", payload, {
+				headers: { realtime: true },
+			});
 		});
 	}
 }

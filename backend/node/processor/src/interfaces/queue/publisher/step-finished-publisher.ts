@@ -19,7 +19,9 @@ export class StepFinishedPublisher {
 			StepFinishedEvent,
 			async (event: StepFinishedEvent) => {
 				const payload = event.getPayload();
-				await this.queue.publish("step.finished", payload);
+				await this.queue.publish("step.finished", payload, {
+					headers: { realtime: true },
+				});
 			},
 		);
 	}

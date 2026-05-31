@@ -20,7 +20,9 @@ export class ExecutionRequestedPublisher {
 			async (event: ExecuteStepEvent) => {
 				const payload = event.getPayload();
 				const eventKey = this.getEventKey(payload.operation);
-				await this.queue.publish(eventKey, payload);
+				await this.queue.publish(eventKey, payload, {
+					headers: { realtime: true },
+				});
 			},
 		);
 	}

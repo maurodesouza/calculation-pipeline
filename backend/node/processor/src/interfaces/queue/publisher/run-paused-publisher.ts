@@ -17,7 +17,9 @@ export class RunPausedPublisher {
 	private initialize() {
 		this.processor.register(RunPausedEvent, async (event: RunPausedEvent) => {
 			const payload = event.getPayload();
-			await this.queue.publish("run.paused", payload);
+			await this.queue.publish("run.paused", payload, {
+				headers: { realtime: true },
+			});
 		});
 	}
 }

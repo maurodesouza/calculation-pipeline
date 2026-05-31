@@ -19,7 +19,9 @@ export class RunCompletedPublisher {
 			RunCompletedEvent,
 			async (event: RunCompletedEvent) => {
 				const payload = event.getPayload();
-				await this.queue.publish("run.completed", payload);
+				await this.queue.publish("run.completed", payload, {
+					headers: { realtime: true },
+				});
 			},
 		);
 	}
