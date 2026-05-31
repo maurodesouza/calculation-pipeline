@@ -7,7 +7,7 @@ import {
 	Trash2,
 	X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { Field } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
@@ -42,8 +42,8 @@ export function EditNodePanel(props: EditNodePanelProps) {
 	const { id, initialData } = props;
 
 	const updateDataRef = useRef(
-		fn.debounce((payload) => {
-			updateData(payload);
+		fn.debounce((id, payload) => {
+			updateData(id, payload);
 		}, 500),
 	);
 
@@ -52,7 +52,7 @@ export function EditNodePanel(props: EditNodePanelProps) {
 
 	function handleOperationChange(value: Operation) {
 		setOperation(value);
-		updateDataRef.current({
+		updateDataRef.current(id, {
 			operation: value,
 			by,
 		});
@@ -61,13 +61,16 @@ export function EditNodePanel(props: EditNodePanelProps) {
 	function handleByChange(value: number) {
 		setBy(value);
 
-		updateDataRef.current({
+		updateDataRef.current(id, {
 			operation,
 			by: value,
 		});
 	}
 
-	function updateData(payload: { operation: Operation; by: number }) {
+	function updateData(
+		id: string,
+		payload: { operation: Operation; by: number },
+	) {
 		events.pipelines.canvas.nodes.updateData({
 			id,
 			data: {
@@ -91,6 +94,11 @@ export function EditNodePanel(props: EditNodePanelProps) {
 	function handleBackToSteps() {
 		events.pipelines.panel.show(() => <StepsPanel />);
 	}
+
+	useEffect(() => {
+		setOperation(initialData.props.operation);
+		setBy(initialData.props.by);
+	}, [id]);
 
 	return (
 		<>
