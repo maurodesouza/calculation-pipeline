@@ -71,6 +71,7 @@ export class RabbitMQAdapter implements Queue {
 			if (!msg) return;
 
 			const metadata = {
+				topic: msg.fields.exchange,
 				event: msg.fields.routingKey,
 			};
 

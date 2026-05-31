@@ -10,7 +10,7 @@ async function main() {
 	queue.consume<Record<string, unknown>>(
 		"randomize",
 		async (message, metadata, headers) => {
-			const exchange = metadata.event.split(".")[0] + ".events";
+			const exchange = `${metadata.topic.split(".")[0]}.events`;
 			const routingKey = metadata.event;
 
 			await applyChaos(queue, exchange, routingKey, message, headers);

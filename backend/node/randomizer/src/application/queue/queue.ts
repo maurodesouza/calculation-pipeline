@@ -2,9 +2,14 @@ export type PublishConfig = {
 	headers?: Record<string, string | number | boolean>;
 };
 
+export type MessageMetadata = {
+	event: string;
+	topic: string;
+};
+
 export type ConsumeCallback<T> = (
 	message: T,
-	metadata: { event: string },
+	metadata: MessageMetadata,
 	headers: Record<string, unknown>,
 ) => Promise<void>;
 
