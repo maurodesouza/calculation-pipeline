@@ -39,8 +39,6 @@ export class CreateRunUseCase {
 			RunCreatedMapper.toPayload(run, pipeline),
 		);
 
-		console.log("passsou????");
-
 		return [run.getId(), undefined];
 	}
 }
