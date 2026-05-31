@@ -21,9 +21,9 @@ export class ExecutionFinishedConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
-			"processor.execution.finished",
-			async (message: ExecutionFinishedPayload) => {
+		this.queue.consume<ExecutionFinishedPayload>(
+			"processor.step.finished",
+			async (message) => {
 				const { runId, stepId, result, error } = message;
 				this.processor.executed(runId, stepId, { result: result ?? 0, error });
 			},

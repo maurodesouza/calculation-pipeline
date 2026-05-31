@@ -40,6 +40,7 @@ type StepRequestedPayload = {
 
 type StepFinishedPayload = {
 	runId: string;
+	stepId: string;
 	result?: number;
 	error?: string;
 };
@@ -125,7 +126,7 @@ export function ExecutionHandle() {
 
 			store.setState((prev) => ({
 				...prev,
-				run: { id: null, status: "idle" as const },
+				run: { ...prev.run, id: null, status: "idle" as const },
 				nodes: prev.nodes.map(
 					canvas.nodes.map.clearExecution(),
 				) as CanvasOperationNode[],
@@ -134,11 +135,17 @@ export function ExecutionHandle() {
 		[store],
 	);
 
-	const handleStepRequested = useCallback(
+	const handleStepStarted = useCallback(
 		({ runId, stepId }: StepRequestedPayload) => {
 			const state = store.state;
 
 			if (state.run.id !== runId) return;
+
+			const node = state.nodes.find(canvas.nodes.find.byId(stepId)) as
+				| CanvasOperationNode
+				| undefined;
+
+			if (!node || node.data.execution?.state !== "pending") return;
 
 			store.setState((prev) => ({
 				...prev,
@@ -156,25 +163,29 @@ export function ExecutionHandle() {
 	);
 
 	const handleStepFinished = useCallback(
-		({ runId, result, error }: StepFinishedPayload) => {
+		({ runId, stepId, result, error }: StepFinishedPayload) => {
 			const state = store.state;
 
 			if (state.run.id !== runId) return;
 
-			const runningNode = state.nodes.find(
-				canvas.nodes.find.byExecutionState(runId, "running"),
-			) as CanvasOperationNode | undefined;
+			const node = state.nodes.find(canvas.nodes.find.byId(stepId)) as
+				| CanvasOperationNode
+				| undefined;
 
-			if (!runningNode) return;
+			if (
+				!node ||
+				!["pending", "running"].includes(node.data.execution?.state || "")
+			)
+				return;
 
 			const newState = error ? "failed" : "completed";
 
 			store.setState((prev) => ({
 				...prev,
 				nodes: prev.nodes.map(
-					canvas.nodes.map.updateData(runningNode.id, {
+					canvas.nodes.map.updateData(node.id, {
 						execution: {
-							state: newState as "completed" | "failed",
+							state: newState,
 							runId,
 							result,
 							error,
@@ -189,7 +200,7 @@ export function ExecutionHandle() {
 	const handleClearExecution = useCallback(() => {
 		store.setState((prev) => ({
 			...prev,
-			run: { id: null, status: "idle" as const },
+			run: { ...prev.run, id: null, status: "idle" as const },
 			nodes: prev.nodes.map(
 				canvas.nodes.map.clearExecution(),
 			) as CanvasOperationNode[],
@@ -203,7 +214,7 @@ export function ExecutionHandle() {
 		const unsub7 = events.on("run.paused", handleRunPaused);
 		const unsub8 = events.on("run.resumed", handleRunResumed);
 		const unsub9 = events.on("run.finalized", handleRunFinalized);
-		const unsub4 = events.on("step.requested", handleStepRequested);
+		const unsub4 = events.on("step.started", handleStepStarted);
 		const unsub5 = events.on("step.finished", handleStepFinished);
 		const unsub6 = events.on(
 			PipelineEvents.EXECUTION_CLEAR,
@@ -228,7 +239,7 @@ export function ExecutionHandle() {
 		handleRunPaused,
 		handleRunResumed,
 		handleRunFinalized,
-		handleStepRequested,
+		handleStepStarted,
 		handleStepFinished,
 		handleClearExecution,
 	]);

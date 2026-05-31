@@ -1,9 +1,12 @@
 import type { Queue } from "../../../application/queue/queue";
-import { RunFailedEvent } from "../../../domain/events/run-failed";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-export class ExecutionFailedPublisher {
+type RunPausePayload = {
+	runId: string;
+};
+
+export class RunPauseRequestedConsumer {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -15,11 +18,12 @@ export class ExecutionFailedPublisher {
 	}
 
 	private initialize() {
-		this.processor.register(RunFailedEvent, async (event: RunFailedEvent) => {
-			const payload = event.getPayload();
-			await this.queue.publish("processor.randomize", payload, {
-				routingKey: "execution.failed",
-			});
-		});
+		this.queue.consume<RunPausePayload>(
+			"processor.run.pause-requested",
+			async (message) => {
+				const { runId } = message;
+				this.processor.pause(runId);
+			},
+		);
 	}
 }

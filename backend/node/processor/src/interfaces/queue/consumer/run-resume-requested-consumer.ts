@@ -1,9 +1,12 @@
 import type { Queue } from "../../../application/queue/queue";
-import { ExecutionFinishedEvent } from "../../../domain/events/execution-finished";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-export class ExecutionFinishedPublisher {
+type RunResumePayload = {
+	runId: string;
+};
+
+export class RunResumeRequestedConsumer {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -15,13 +18,11 @@ export class ExecutionFinishedPublisher {
 	}
 
 	private initialize() {
-		this.processor.register(
-			ExecutionFinishedEvent,
-			async (event: ExecutionFinishedEvent) => {
-				const payload = event.getPayload();
-				await this.queue.publish("processor.randomize", payload, {
-					routingKey: "execution.finished",
-				});
+		this.queue.consume<RunResumePayload>(
+			"processor.run.resume-requested",
+			async (message) => {
+				const { runId } = message;
+				this.processor.resume(runId);
 			},
 		);
 	}

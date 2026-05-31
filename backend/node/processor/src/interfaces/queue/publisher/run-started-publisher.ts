@@ -1,9 +1,9 @@
 import type { Queue } from "../../../application/queue/queue";
-import { RunCompletedEvent } from "../../../domain/events/run-completed";
+import { RunStartedEvent } from "../../../domain/events/run-started";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-export class ExecutionCompletedPublisher {
+export class RunStartedPublisher {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -15,14 +15,11 @@ export class ExecutionCompletedPublisher {
 	}
 
 	private initialize() {
-		this.processor.register(
-			RunCompletedEvent,
-			async (event: RunCompletedEvent) => {
-				const payload = event.getPayload();
-				await this.queue.publish("processor.randomize", payload, {
-					routingKey: "execution.completed",
-				});
-			},
-		);
+		this.processor.register(RunStartedEvent, async (event: RunStartedEvent) => {
+			const payload = event.getPayload();
+			await this.queue.publish("run.started", payload, {
+				headers: { realtime: true },
+			});
+		});
 	}
 }

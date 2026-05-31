@@ -1,14 +1,15 @@
+import type { Queue } from "../../../application/queue/queue";
 import type { FailRunUseCase } from "../../../application/use-cases/fail-run";
 import { inject } from "../../../infra/DI/container";
 
-type ExecutionFailedPayload = {
+type RunFailedPayload = {
 	runId: string;
 	error: string;
 };
 
-export class ExecutionFailedConsumer {
+export class RunFailedConsumer {
 	@inject("queue")
-	private declare readonly queue: any;
+	private declare readonly queue: Queue;
 
 	@inject("fail-run-use-case")
 	private declare readonly failRunUseCase: FailRunUseCase;
@@ -18,12 +19,9 @@ export class ExecutionFailedConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
-			"api.execution.failed",
-			async (message: ExecutionFailedPayload) => {
-				const { runId, error } = message;
-				await this.failRunUseCase.execute({ runId, error });
-			},
-		);
+		this.queue.consume("api.run.failed", async (message: RunFailedPayload) => {
+			const { runId, error } = message;
+			await this.failRunUseCase.execute({ runId, error });
+		});
 	}
 }

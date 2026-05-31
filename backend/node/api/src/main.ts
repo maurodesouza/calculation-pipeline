@@ -13,7 +13,8 @@ import { UpdatePipelineUseCase } from "./application/use-cases/update-pipeline";
 import { Container } from "./infra/DI/container";
 import { PGPromiseAdapter } from "./infra/database/pg-promise-adapter";
 import { HttpAdapter } from "./infra/http/http-adapter";
-import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
+import { RabbitMQAdapter } from "./infra/queue/rabbitmq/rabbitmq-adapter";
+import { rabbitQMTopology } from "./infra/queue/rabbitmq/rabbitmq-topology";
 import { PipelineRepositoryDAO } from "./infra/repository/pipeline";
 import { RunRepositoryDAO } from "./infra/repository/run";
 import { HTTPInterface } from "./interfaces/http";
@@ -28,50 +29,7 @@ async function api() {
 
 	await Promise.all([pgPromiseAdapter.connect(), queue.connect()]);
 
-	await Promise.all([
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.created",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.pause",
-		}),
-		queue.setup("api.randomize", "randomizer", {
-			type: "direct",
-			routingKey: "run.resume",
-		}),
-
-		queue.setup("api.events", "processor.run.created", {
-			type: "direct",
-			routingKey: "run.created",
-		}),
-		queue.setup("api.events", "processor.run.pause", {
-			type: "direct",
-			routingKey: "run.pause",
-		}),
-		queue.setup("api.events", "processor.run.resume", {
-			type: "direct",
-			routingKey: "run.resume",
-		}),
-		queue.setup("api.events", "processor.run.finalize", {
-			type: "direct",
-			routingKey: "run.finalize-requested",
-		}),
-
-		queue.setup("processor.events", "api.execution.started", {
-			type: "direct",
-			routingKey: "execution.started",
-		}),
-		queue.setup("processor.events", "api.execution.failed", {
-			type: "direct",
-			routingKey: "execution.failed",
-		}),
-		queue.setup("processor.events", "api.execution.completed", {
-			type: "direct",
-			routingKey: "execution.completed",
-		}),
-	]);
+	await queue.setup(rabbitQMTopology);
 
 	const instance = Container.getInstance();
 

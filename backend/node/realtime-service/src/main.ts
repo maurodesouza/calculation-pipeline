@@ -1,89 +1,40 @@
-import { ClientRegistry } from "./domain/run-registry";
-import { RabbitMQAdapter } from "./infra/queue/rabbitmq-adapter";
-import { createServer } from "./interfaces/http/server";
-import { executionCompletedConsumer } from "./interfaces/queue/consumer/execution-completed-consumer";
-import { executionFailedConsumer } from "./interfaces/queue/consumer/execution-failed-consumer";
-import { executionFinishedConsumer } from "./interfaces/queue/consumer/execution-finished-consumer";
-import { executionRequestedConsumer } from "./interfaces/queue/consumer/execution-requested-consumer";
-import { executionStartedConsumer } from "./interfaces/queue/consumer/execution-started-consumer";
-import { runFinalizedConsumer } from "./interfaces/queue/consumer/run-finalized-consumer";
-import { runPausedConsumer } from "./interfaces/queue/consumer/run-paused-consumer";
-import { runResumedConsumer } from "./interfaces/queue/consumer/run-resumed-consumer";
+import { ClientRegistry } from "./client-registry";
+import { RabbitMQAdapter, type RabbitQMTopology } from "./queue";
+import { createServer } from "./server";
+
+const topology: RabbitQMTopology[] = [
+	{
+		exchange: { name: "api.events", type: "topic" },
+		queues: [{ name: "realtime", bindings: ["#"] }],
+	},
+	{
+		exchange: { name: "processor.events", type: "topic" },
+		queues: [{ name: "realtime", bindings: ["#"] }],
+	},
+];
 
 async function main() {
 	const queue = new RabbitMQAdapter();
 	await queue.connect();
-
-	await Promise.all([
-		queue.setup("processor.events", "realtime.execution.started", {
-			type: "direct",
-			routingKey: "execution.started",
-		}),
-		queue.setup("processor.events", "realtime.execution.failed", {
-			type: "direct",
-			routingKey: "execution.failed",
-		}),
-		queue.setup("processor.events", "realtime.execution.completed", {
-			type: "direct",
-			routingKey: "execution.completed",
-		}),
-		queue.setup("processor.events", "realtime.run.paused", {
-			type: "direct",
-			routingKey: "run.paused",
-		}),
-		queue.setup("processor.events", "realtime.run.resumed", {
-			type: "direct",
-			routingKey: "run.resumed",
-		}),
-		queue.setup("processor.events", "realtime.run.finalized", {
-			type: "direct",
-			routingKey: "run.finalized",
-		}),
-
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.sum-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.subtraction-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.multiplication-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.division-requested",
-		}),
-		queue.setup("processor.events", "realtime.execution.requested", {
-			type: "direct",
-			routingKey: "execution.unknown-requested",
-		}),
-
-		queue.setup("processor.events", "realtime.execution.finished", {
-			type: "direct",
-			routingKey: "execution.finished",
-		}),
-	]);
+	await queue.setup(topology);
 
 	const registry = new ClientRegistry();
-
-	await Promise.all([
-		executionStartedConsumer(queue, registry),
-		executionFailedConsumer(queue, registry),
-		executionCompletedConsumer(queue, registry),
-		executionRequestedConsumer(queue, registry),
-		executionFinishedConsumer(queue, registry),
-		runPausedConsumer(queue, registry),
-		runResumedConsumer(queue, registry),
-		runFinalizedConsumer(queue, registry),
-	]);
-
 	const server = createServer(registry);
 
+	queue.consume<Record<string, unknown>>(
+		"realtime",
+		async (message, metadata, headers) => {
+			if (headers.realtime !== true) return;
+
+			const eventId = message.eventId as string;
+			const eventName = metadata.event;
+
+			registry.emit(eventId, eventName, message);
+		},
+	);
+
 	server.listen(3500, () => {
-		console.log("🚀 realtime-service is running on port 3500");
+		console.log("🚀 realtime service is running on port 3500");
 	});
 }
 

@@ -1,13 +1,14 @@
+import type { Queue } from "../../../application/queue/queue";
 import type { InitializeRunUseCase } from "../../../application/use-cases/initialize-run";
 import { inject } from "../../../infra/DI/container";
 
-type ExecutionStartedPayload = {
+type RunStartedPayload = {
 	runId: string;
 };
 
-export class ExecutionStartedConsumer {
+export class RunStartedConsumer {
 	@inject("queue")
-	private declare readonly queue: any;
+	private declare readonly queue: Queue;
 
 	@inject("initialize-run-use-case")
 	private declare readonly initializeRunUseCase: InitializeRunUseCase;
@@ -18,8 +19,8 @@ export class ExecutionStartedConsumer {
 
 	private initialize() {
 		this.queue.consume(
-			"api.execution.started",
-			async (message: ExecutionStartedPayload) => {
+			"api.run.started",
+			async (message: RunStartedPayload) => {
 				const { runId } = message;
 				await this.initializeRunUseCase.execute({ runId });
 			},

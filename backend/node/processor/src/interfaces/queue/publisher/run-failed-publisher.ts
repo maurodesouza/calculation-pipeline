@@ -1,12 +1,9 @@
 import type { Queue } from "../../../application/queue/queue";
+import { RunFailedEvent } from "../../../domain/events/run-failed";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-type RunPausePayload = {
-	runId: string;
-};
-
-export class RunPauseConsumer {
+export class RunFailedPublisher {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -18,12 +15,11 @@ export class RunPauseConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
-			"processor.run.pause",
-			async (message: RunPausePayload) => {
-				const { runId } = message;
-				this.processor.pause(runId);
-			},
-		);
+		this.processor.register(RunFailedEvent, async (event: RunFailedEvent) => {
+			const payload = event.getPayload();
+			await this.queue.publish("run.failed", payload, {
+				headers: { realtime: true },
+			});
+		});
 	}
 }

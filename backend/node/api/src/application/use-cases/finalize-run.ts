@@ -22,11 +22,9 @@ export class FinalizeRunUseCase {
 		const [, finalizeError] = run.finalize();
 		if (finalizeError) return [undefined, finalizeError];
 
-		await this.queue.publish(
-			"api.randomize",
-			{ runId: input.runId },
-			{ routingKey: "run.finalize-requested" },
-		);
+		await this.queue.publish("run.finalize-requested", {
+			runId: input.runId,
+		});
 
 		return [true, undefined];
 	}

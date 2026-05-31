@@ -25,11 +25,9 @@ export class ResumeRunUseCase {
 		const [, saveError] = await this.runRepository.update(run);
 		if (saveError) return [undefined, saveError];
 
-		await this.queue.publish(
-			"api.randomize",
-			{ runId: input.runId },
-			{ routingKey: "run.resume" },
-		);
+		await this.queue.publish("run.resume-requested", {
+			runId: input.runId,
+		});
 
 		return [true, undefined];
 	}

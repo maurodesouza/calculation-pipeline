@@ -1,12 +1,9 @@
 import type { Queue } from "../../../application/queue/queue";
+import { RunCompletedEvent } from "../../../domain/events/run-completed";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-type RunFinalizePayload = {
-	runId: string;
-};
-
-export class RunFinalizeConsumer {
+export class RunCompletedPublisher {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -18,11 +15,13 @@ export class RunFinalizeConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
-			"processor.run.finalize",
-			async (message: RunFinalizePayload) => {
-				const { runId } = message;
-				void this.processor.finalize(runId);
+		this.processor.register(
+			RunCompletedEvent,
+			async (event: RunCompletedEvent) => {
+				const payload = event.getPayload();
+				await this.queue.publish("run.completed", payload, {
+					headers: { realtime: true },
+				});
 			},
 		);
 	}

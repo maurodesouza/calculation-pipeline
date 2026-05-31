@@ -1,21 +1,11 @@
 import amqp from "amqplib";
 
-export type PublishConfig = {
-	headers?: Record<string, string | number | boolean>;
-};
-
-export type ConsumeCallback<T> = (
-	message: T,
-	metadata: { event: string },
-	headers: Record<string, unknown>,
-) => Promise<void>;
-
-export type Queue = {
-	connect(): Promise<void>;
-	setup(topology: unknown): Promise<void>;
-	publish(event: string, message: unknown, config?: PublishConfig): Promise<void>;
-	consume<T = unknown>(queue: string, callback: ConsumeCallback<T>): Promise<void>;
-};
+import type {
+	ConsumeCallback,
+	PublishConfig,
+	Queue,
+} from "../../../application/queue/queue";
+import type { RabbitQMTopology } from "./rabbitmq-types";
 
 export class RabbitMQAdapter implements Queue {
 	connection!: amqp.ChannelModel;
@@ -54,7 +44,7 @@ export class RabbitMQAdapter implements Queue {
 		config?: PublishConfig,
 	): Promise<void> {
 		this.channel.publish(
-			"sum.randomize",
+			"api.randomize",
 			event,
 			Buffer.from(JSON.stringify(message)),
 			config,
@@ -68,7 +58,10 @@ export class RabbitMQAdapter implements Queue {
 		await this.channel.consume(queue, async (msg) => {
 			if (!msg) return;
 
-			const metadata = { event: msg.fields.routingKey };
+			const metadata = {
+				event: msg.fields.routingKey,
+			};
+
 			const headers = msg.properties.headers ?? {};
 
 			try {
@@ -81,22 +74,3 @@ export class RabbitMQAdapter implements Queue {
 		});
 	}
 }
-
-type ExchangeType = "direct" | "topic" | "headers" | "fanout";
-
-type Exchange = {
-	name: string;
-	type: ExchangeType;
-	config?: amqp.Options.AssertExchange;
-};
-
-type QueueDef = {
-	name: string;
-	config?: amqp.Options.AssertQueue;
-	bindings: string[];
-};
-
-export type RabbitQMTopology = {
-	exchange: Exchange;
-	queues: QueueDef[];
-};

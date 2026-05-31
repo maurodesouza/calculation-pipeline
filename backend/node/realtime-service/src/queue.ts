@@ -53,12 +53,8 @@ export class RabbitMQAdapter implements Queue {
 		message: unknown,
 		config?: PublishConfig,
 	): Promise<void> {
-		this.channel.publish(
-			"sum.randomize",
-			event,
-			Buffer.from(JSON.stringify(message)),
-			config,
-		);
+		// Realtime service is consumer-only
+		console.warn("publish() called on consumer-only realtime service");
 	}
 
 	async consume<T = unknown>(

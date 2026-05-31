@@ -2,11 +2,11 @@ import type { Queue } from "../../../application/queue/queue";
 import type { Processor } from "../../../domain/processor";
 import { inject } from "../../../infra/DI/container";
 
-type RunResumePayload = {
+type RunFinalizePayload = {
 	runId: string;
 };
 
-export class RunResumeConsumer {
+export class RunFinalizeRequestedConsumer {
 	@inject("queue")
 	private declare readonly queue: Queue;
 
@@ -18,11 +18,11 @@ export class RunResumeConsumer {
 	}
 
 	private initialize() {
-		this.queue.consume(
-			"processor.run.resume",
-			async (message: RunResumePayload) => {
+		this.queue.consume<RunFinalizePayload>(
+			"processor.run.finalize-requested",
+			async (message) => {
 				const { runId } = message;
-				this.processor.resume(runId);
+				void this.processor.finalize(runId);
 			},
 		);
 	}
