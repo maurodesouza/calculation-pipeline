@@ -2,8 +2,6 @@
 
 A distributed system built to explore RabbitMQ messaging patterns, with a focus on simulating and handling **duplicate and delayed (out-of-order) events** — ensuring the system remains resilient and consistent despite chaos introduced intentionally in the message flow.
 
----
-
 ## Motivation
 
 The core idea was to build a simple pipeline that executes mathematical operations step by step. Each step is dispatched to a dedicated calculation service via RabbitMQ. The twist: **every message passes through a "randomizer" service** that may delay it, duplicate it, or send it multiple times with varying intervals — simulating real-world network instability.
@@ -11,8 +9,6 @@ The core idea was to build a simple pipeline that executes mathematical operatio
 The system must detect and ignore duplicate events, handle out-of-order delivery, and keep the pipeline state consistent throughout.
 
 A secondary goal is to implement the **exact same backend in three languages** — Node.js (done), Go (planned), and Rust (planned) — to have a meaningful, real-world baseline for comparing performance, ergonomics, and ecosystem across runtimes.
-
----
 
 ## How It Works
 
@@ -41,8 +37,6 @@ The **Realtime Service** subscribes to `api.events` and `processor.events` excha
 
 Only messages with the `realtime: true` header are forwarded to SSE clients, so internal control messages are filtered out automatically.
 
----
-
 ## Services
 
 | Service | Description |
@@ -55,8 +49,6 @@ Only messages with the `realtime: true` header are forwarded to SSE clients, so 
 | **multiply-service** | Executes multiplication steps. |
 | **divide-service** | Executes division steps. |
 | **realtime-service** | SSE server. Forwards filtered RabbitMQ events to connected browser clients. Runs on port `3500`. |
-
----
 
 ## Message Flow
 
@@ -92,8 +84,6 @@ Client
                                                                       └──► [processor] (step.finished)
 ```
 
----
-
 ## Tech Stack
 
 - **Runtime**: Node.js with TypeScript (`tsx`)
@@ -101,8 +91,6 @@ Client
 - **Database**: PostgreSQL (API only)
 - **Realtime**: Server-Sent Events (SSE)
 - **Frontend**: React + TanStack Router + TailwindCSS
-
----
 
 ## Running Locally
 
@@ -150,8 +138,6 @@ Services and their default ports:
 ### RabbitMQ Management
 
 Access the RabbitMQ dashboard at [http://localhost:15672](http://localhost:15672) with credentials `guest / guest` to inspect exchanges, queues, and message flow in real time.
-
----
 
 ## Frontend
 
