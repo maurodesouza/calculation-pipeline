@@ -32,7 +32,7 @@ type NewStepPayload struct {
 }
 
 func NewStep(payload NewStepPayload) (*Step, error) {
-	now := time.Now().String()
+	now := time.Now().Format(time.RFC3339)
 
 	id, err := getStepId(payload.ID)
 	if err != nil {
