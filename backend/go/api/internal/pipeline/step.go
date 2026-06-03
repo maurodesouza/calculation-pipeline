@@ -10,15 +10,15 @@ import (
 var VALID_OPERATIONS = []string{"sum", "subtract", "multiply", "divide"}
 
 type Step struct {
-	ID          vo.UUID
-	PipelineID  vo.UUID
-	Name        string
-	Description string
-	NextStepID  vo.UUID
-	Operation   string
-	By          int
-	CreatedAt   string
-	UpdatedAt   string
+	id          vo.UUID
+	pipelineID  vo.UUID
+	name        string
+	description string
+	nextStepID  vo.UUID
+	operation   string
+	by          int
+	createdAt   string
+	updatedAt   string
 }
 
 type NewStepPayload struct {
@@ -58,15 +58,15 @@ func NewStep(payload NewStepPayload) (*Step, error) {
 	}
 
 	return &Step{
-		ID:          id,
-		PipelineID:  pipelineId,
-		Name:        *payload.Name,
-		Description: *payload.Description,
-		NextStepID:  *nextStepId,
-		Operation:   payload.Operation,
-		By:          payload.By,
-		CreatedAt:   now,
-		UpdatedAt:   now,
+		id:          id,
+		pipelineID:  pipelineId,
+		name:        *payload.Name,
+		description: *payload.Description,
+		nextStepID:  *nextStepId,
+		operation:   payload.Operation,
+		by:          payload.By,
+		createdAt:   now,
+		updatedAt:   now,
 	}, nil
 }
 
@@ -103,52 +103,52 @@ func RestoreStep(payload RestorePayload) (*Step, error) {
 	}
 
 	return &Step{
-		ID:          id,
-		PipelineID:  pipelineId,
-		Name:        *payload.Name,
-		Description: *payload.Description,
-		NextStepID:  *nextStepId,
-		Operation:   payload.Operation,
-		By:          payload.By,
-		CreatedAt:   payload.CreatedAt,
-		UpdatedAt:   payload.UpdatedAt,
+		id:          id,
+		pipelineID:  pipelineId,
+		name:        *payload.Name,
+		description: *payload.Description,
+		nextStepID:  *nextStepId,
+		operation:   payload.Operation,
+		by:          payload.By,
+		createdAt:   payload.CreatedAt,
+		updatedAt:   payload.UpdatedAt,
 	}, nil
 }
 
 func (entity *Step) GetId() string {
-	return entity.ID.GetValue()
+	return entity.id.GetValue()
 }
 
 func (entity *Step) GetPipelineId() string {
-	return entity.PipelineID.GetValue()
+	return entity.pipelineID.GetValue()
 }
 
 func (entity *Step) GetName() string {
-	return entity.Name
+	return entity.name
 }
 
 func (entity *Step) GetDescription() string {
-	return entity.Description
+	return entity.description
 }
 
 func (entity *Step) GetNextStepId() string {
-	return entity.NextStepID.GetValue()
+	return entity.nextStepID.GetValue()
 }
 
 func (entity *Step) GetOperation() string {
-	return entity.Operation
+	return entity.operation
 }
 
 func (entity *Step) GetBy() int {
-	return entity.By
+	return entity.by
 }
 
 func (entity *Step) GetCreatedAt() string {
-	return entity.CreatedAt
+	return entity.createdAt
 }
 
 func (entity *Step) GetUpdatedAt() string {
-	return entity.UpdatedAt
+	return entity.updatedAt
 }
 
 func getStepId(value *string) (vo.UUID, error) {
