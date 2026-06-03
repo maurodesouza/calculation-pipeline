@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/vo"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/utils"
 )
 
 type Pipeline struct {
@@ -249,15 +250,18 @@ func validateStepChain(steps []Step) error {
 		isLast := index == len(steps)-1
 
 		if isLast {
-			if step.GetNextStepId() != "" {
-				return InvalidStateTransitionError("step", step.GetNextStepId(), "last step should not have nextStepId")
+			nextStepId := step.GetNextStepId()
+
+			if !utils.IsStringNilOrEmpty(&nextStepId) {
+				return InvalidStateTransitionError("step", nextStepId, "last step should not have nextStepId")
 			}
 		}
 
 		nextStep := steps[index+1]
+		nextStepId := step.GetNextStepId()
 
-		if step.GetNextStepId() != nextStep.GetId() {
-			return InvalidStateTransitionError("step", step.GetNextStepId(), nextStep.GetId())
+		if nextStepId != nextStep.GetId() {
+			return InvalidStateTransitionError("step", nextStepId, nextStep.GetId())
 		}
 	}
 
@@ -303,7 +307,7 @@ func getInitialStepIDFromSteps(steps []Step) (*vo.UUID, error) {
 }
 
 func getCanvas(value *string) string {
-	if value == nil || *value == "" {
+	if utils.IsStringNilOrEmpty(value) {
 		return "{}"
 	}
 

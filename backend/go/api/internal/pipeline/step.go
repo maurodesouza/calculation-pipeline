@@ -4,7 +4,9 @@ import (
 	"slices"
 	"time"
 
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/vo"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/utils"
 )
 
 var VALID_OPERATIONS = []string{"sum", "subtract", "multiply", "divide"}
@@ -43,8 +45,8 @@ func NewStep(payload NewStepPayload) (*Step, error) {
 		return nil, err
 	}
 
-	if payload.PipelineID == nil {
-		return nil, RequiredOperationError
+	if utils.IsStringNilOrEmpty(payload.PipelineID) {
+		return nil, errors.RequiredPipelineIdError
 	}
 
 	pipelineId, err := vo.RestoreUUID(payload.PipelineID)
@@ -161,35 +163,36 @@ func (entity *Step) GetUpdatedAt() string {
 }
 
 func getStepId(value *string) (vo.UUID, error) {
-	if value != nil {
-		id, err := vo.RestoreUUID(value)
-
-		if err != nil {
-			return vo.UUID{}, err
-		}
-
-		return id, nil
+	if utils.IsStringNilOrEmpty(value) {
+		return vo.NewUUID(), nil
 	}
 
-	return vo.NewUUID(), nil
+	id, err := vo.RestoreUUID(value)
+
+	if err != nil {
+		return vo.UUID{}, err
+	}
+
+	return id, nil
+
 }
 
 func getNextStepId(value *string) (*vo.UUID, error) {
-	if value != nil {
-		id, err := vo.RestoreUUID(value)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return &id, nil
+	if utils.IsStringNilOrEmpty(value) {
+		return nil, nil
 	}
 
-	return nil, nil
+	id, err := vo.RestoreUUID(value)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &id, nil
 }
 
 func validateOperation(operation *string) error {
-	if operation == nil {
+	if utils.IsStringNilOrEmpty(operation) {
 		return RequiredOperationError
 	}
 
