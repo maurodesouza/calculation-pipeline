@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/vo"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/utils"
 )
@@ -253,7 +254,7 @@ func validateStepChain(steps []Step) error {
 			nextStepId := step.GetNextStepId()
 
 			if !utils.IsStringNilOrEmpty(&nextStepId) {
-				return InvalidStateTransitionError("step", nextStepId, "last step should not have nextStepId")
+				return errors.InvalidStateTransitionError("step", nextStepId, "last step should not have nextStepId")
 			}
 		}
 
@@ -261,7 +262,7 @@ func validateStepChain(steps []Step) error {
 		nextStepId := step.GetNextStepId()
 
 		if nextStepId != nextStep.GetId() {
-			return InvalidStateTransitionError("step", nextStepId, nextStep.GetId())
+			return errors.InvalidStateTransitionError("step", nextStepId, nextStep.GetId())
 		}
 	}
 

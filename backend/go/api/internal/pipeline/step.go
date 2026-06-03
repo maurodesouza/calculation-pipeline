@@ -193,11 +193,11 @@ func getNextStepId(value *string) (*vo.UUID, error) {
 
 func validateOperation(operation *string) error {
 	if utils.IsStringNilOrEmpty(operation) {
-		return RequiredOperationError
+		return errors.RequiredOperationError
 	}
 
 	if !slices.Contains(VALID_OPERATIONS, *operation) {
-		return InvalidOperationError
+		return errors.InvalidOperationError
 	}
 
 	return nil
