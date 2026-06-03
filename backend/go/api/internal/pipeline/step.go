@@ -70,7 +70,7 @@ func NewStep(payload NewStepPayload) (*Step, error) {
 	}, nil
 }
 
-type RestorePayload struct {
+type RestoreStepPayload struct {
 	ID          string
 	PipelineID  string
 	Name        *string
@@ -82,7 +82,7 @@ type RestorePayload struct {
 	UpdatedAt   string
 }
 
-func RestoreStep(payload RestorePayload) (*Step, error) {
+func RestoreStep(payload RestoreStepPayload) (*Step, error) {
 	id, err := vo.RestoreUUID(&payload.ID)
 	if err != nil {
 		return nil, err
