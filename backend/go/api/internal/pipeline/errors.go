@@ -11,3 +11,7 @@ var (
 	InvalidOperationError   = fmt.Errorf("%w: operation is invalid", errors.DOMAIN_ERROR)
 	RequiredOperationError  = fmt.Errorf("%w: operation is required", errors.DOMAIN_ERROR)
 )
+
+func InvalidStateTransitionError(entity string, currentStatus string, expectedStatus string) error {
+	return fmt.Errorf("[%s]: invalid state transition, current status is \"%s\", expected \"%s\"", entity, currentStatus, expectedStatus)
+}
