@@ -17,8 +17,8 @@ type Step struct {
 	nextStepID  vo.UUID
 	operation   string
 	by          int
-	createdAt   string
-	updatedAt   string
+	createdAt   time.Time
+	updatedAt   time.Time
 }
 
 type NewStepPayload struct {
@@ -32,8 +32,7 @@ type NewStepPayload struct {
 }
 
 func NewStep(payload NewStepPayload) (*Step, error) {
-	now := time.Now().Format(time.RFC3339)
-
+	now := time.Now()
 	id, err := getStepId(payload.ID)
 	if err != nil {
 		return nil, err
@@ -102,6 +101,16 @@ func RestoreStep(payload RestoreStepPayload) (*Step, error) {
 		return nil, err
 	}
 
+	createdAt, err := time.Parse(time.RFC3339, payload.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAt, err := time.Parse(time.RFC3339, payload.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Step{
 		id:          id,
 		pipelineID:  pipelineId,
@@ -110,8 +119,8 @@ func RestoreStep(payload RestoreStepPayload) (*Step, error) {
 		nextStepID:  *nextStepId,
 		operation:   payload.Operation,
 		by:          payload.By,
-		createdAt:   payload.CreatedAt,
-		updatedAt:   payload.UpdatedAt,
+		createdAt:   createdAt,
+		updatedAt:   updatedAt,
 	}, nil
 }
 
@@ -144,11 +153,11 @@ func (entity *Step) GetBy() int {
 }
 
 func (entity *Step) GetCreatedAt() string {
-	return entity.createdAt
+	return entity.createdAt.Format(time.RFC3339)
 }
 
 func (entity *Step) GetUpdatedAt() string {
-	return entity.updatedAt
+	return entity.updatedAt.Format(time.RFC3339)
 }
 
 func getStepId(value *string) (vo.UUID, error) {

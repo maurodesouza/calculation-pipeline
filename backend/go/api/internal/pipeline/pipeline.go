@@ -15,8 +15,8 @@ type Pipeline struct {
 	initialStepId *vo.UUID
 	steps         []Step
 	canvas        string
-	createdAt     string
-	updatedAt     string
+	createdAt     time.Time
+	updatedAt     time.Time
 }
 
 type NewPipelinePayload struct {
@@ -38,7 +38,7 @@ func NewPipeline(payload NewPipelinePayload) (*Pipeline, error) {
 	}
 
 	id := vo.NewUUID()
-	now := time.Now().Format(time.RFC3339)
+	now := time.Now()
 
 	return &Pipeline{
 		id:            id,
@@ -78,6 +78,16 @@ func RestorePipeline(payload RestorePipelinePayload) (*Pipeline, error) {
 		return nil, err
 	}
 
+	createdAt, err := time.Parse(time.RFC3339, payload.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAt, err := time.Parse(time.RFC3339, payload.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Pipeline{
 		id:            id,
 		name:          payload.Name,
@@ -85,8 +95,8 @@ func RestorePipeline(payload RestorePipelinePayload) (*Pipeline, error) {
 		initialStepId: initialStepId,
 		steps:         payload.Steps,
 		canvas:        canvas,
-		createdAt:     payload.CreatedAt,
-		updatedAt:     payload.UpdatedAt,
+		createdAt:     createdAt,
+		updatedAt:     updatedAt,
 	}, nil
 }
 
@@ -159,12 +169,12 @@ func RestoreSteps(pipeline *Pipeline, stepInputs []StepInput) ([]Step, error) {
 
 func (entity *Pipeline) SetName(value *string) {
 	entity.name = value
-	entity.updatedAt = time.Now().Format(time.RFC3339)
+	entity.updatedAt = time.Now()
 }
 
 func (entity *Pipeline) SetDescription(value *string) {
 	entity.description = value
-	entity.updatedAt = time.Now().Format(time.RFC3339)
+	entity.updatedAt = time.Now()
 }
 
 func (entity *Pipeline) SetCanvas(value *string) error {
@@ -175,7 +185,7 @@ func (entity *Pipeline) SetCanvas(value *string) error {
 	}
 
 	entity.canvas = *value
-	entity.updatedAt = time.Now().Format(time.RFC3339)
+	entity.updatedAt = time.Now()
 
 	return nil
 }
@@ -193,7 +203,7 @@ func (entity *Pipeline) SetSteps(steps []Step) error {
 
 	entity.steps = steps
 	entity.initialStepId = initialStepId
-	entity.updatedAt = time.Now().Format(time.RFC3339)
+	entity.updatedAt = time.Now()
 
 	return nil
 }
@@ -219,11 +229,11 @@ func (entity *Pipeline) GetInitialStepId() *string {
 }
 
 func (entity *Pipeline) GetCreatedAt() string {
-	return entity.createdAt
+	return entity.createdAt.Format(time.RFC3339)
 }
 
 func (entity *Pipeline) GetUpdatedAt() string {
-	return entity.updatedAt
+	return entity.updatedAt.Format(time.RFC3339)
 }
 
 func (entity *Pipeline) GetSteps() []Step {
