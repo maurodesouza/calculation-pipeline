@@ -1,56 +1,56 @@
 export const rabbitQMTopology = [
 	{
 		exchange: {
-			name: "api.events",
+			name: "node.api.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "processor.run.created",
+				name: "node.processor.run.created",
 				bindings: ["run.created"],
 			},
 			{
-				name: "processor.run.pause-requested",
+				name: "node.processor.run.pause-requested",
 				bindings: ["run.pause-requested"],
 			},
 			{
-				name: "processor.run.resume-requested",
+				name: "node.processor.run.resume-requested",
 				bindings: ["run.resume-requested"],
 			},
 			{
-				name: "processor.run.finalize-requested",
+				name: "node.processor.run.finalize-requested",
 				bindings: ["run.finalize-requested"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "api.randomize",
+			name: "node.api.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "processor.events",
+			name: "node.processor.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "api.run.started",
+				name: "node.api.run.started",
 				bindings: ["run.started"],
 			},
 			{
-				name: "api.run.failed",
+				name: "node.api.run.failed",
 				bindings: ["run.failed"],
 			},
 			{
-				name: "api.run.completed",
+				name: "node.api.run.completed",
 				bindings: ["run.completed"],
 			},
 		],

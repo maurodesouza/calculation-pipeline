@@ -4,12 +4,12 @@ import { createServer } from "./server";
 
 const topology: RabbitQMTopology[] = [
 	{
-		exchange: { name: "api.events", type: "topic" },
-		queues: [{ name: "realtime", bindings: ["#"] }],
+		exchange: { name: "node.api.events", type: "topic" },
+		queues: [{ name: "node.realtime", bindings: ["#"] }],
 	},
 	{
-		exchange: { name: "processor.events", type: "topic" },
-		queues: [{ name: "realtime", bindings: ["#"] }],
+		exchange: { name: "node.processor.events", type: "topic" },
+		queues: [{ name: "node.realtime", bindings: ["#"] }],
 	},
 ];
 
@@ -22,7 +22,7 @@ async function main() {
 	const server = createServer(registry);
 
 	queue.consume<Record<string, unknown>>(
-		"realtime",
+		"node.realtime",
 		async (message, metadata, headers) => {
 			if (headers.realtime !== true) return;
 

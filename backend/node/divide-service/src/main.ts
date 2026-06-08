@@ -2,21 +2,23 @@ import { RabbitMQAdapter, type RabbitQMTopology } from "./queue";
 
 const topology: RabbitQMTopology[] = [
 	{
-		exchange: { name: "processor.events", type: "topic" },
+		exchange: { name: "node.processor.events", type: "topic" },
 		queues: [
 			{
-				name: "divide.execution.requested",
+				name: "node.divide.execution.requested",
 				bindings: ["execution.division-requested"],
 			},
 		],
 	},
 	{
-		exchange: { name: "divide.randomize", type: "topic" },
-		queues: [{ name: "randomize", bindings: ["#"] }],
+		exchange: { name: "node.divide.randomize", type: "topic" },
+		queues: [{ name: "node.randomize", bindings: ["#"] }],
 	},
 	{
-		exchange: { name: "divide.events", type: "topic" },
-		queues: [{ name: "processor.step.finished", bindings: ["step.finished"] }],
+		exchange: { name: "node.divide.events", type: "topic" },
+		queues: [
+			{ name: "node.processor.step.finished", bindings: ["step.finished"] },
+		],
 	},
 ];
 
@@ -35,7 +37,7 @@ async function main() {
 	await queue.setup(topology);
 
 	queue.consume<DividePayload>(
-		"divide.execution.requested",
+		"node.divide.execution.requested",
 		async (message) => {
 			const { runId, value, by, stepId } = message;
 

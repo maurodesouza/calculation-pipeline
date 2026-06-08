@@ -2,21 +2,23 @@ import { RabbitMQAdapter, type RabbitQMTopology } from "./queue";
 
 const topology: RabbitQMTopology[] = [
 	{
-		exchange: { name: "processor.events", type: "topic" },
+		exchange: { name: "node.processor.events", type: "topic" },
 		queues: [
 			{
-				name: "multiply.execution.requested",
+				name: "node.multiply.execution.requested",
 				bindings: ["execution.multiplication-requested"],
 			},
 		],
 	},
 	{
-		exchange: { name: "multiply.randomize", type: "topic" },
-		queues: [{ name: "randomize", bindings: ["#"] }],
+		exchange: { name: "node.multiply.randomize", type: "topic" },
+		queues: [{ name: "node.randomize", bindings: ["#"] }],
 	},
 	{
-		exchange: { name: "multiply.events", type: "topic" },
-		queues: [{ name: "processor.step.finished", bindings: ["step.finished"] }],
+		exchange: { name: "node.multiply.events", type: "topic" },
+		queues: [
+			{ name: "node.processor.step.finished", bindings: ["step.finished"] },
+		],
 	},
 ];
 
@@ -35,7 +37,7 @@ async function main() {
 	await queue.setup(topology);
 
 	queue.consume<MultiplyPayload>(
-		"multiply.execution.requested",
+		"node.multiply.execution.requested",
 		async (message) => {
 			const { runId, value, by, stepId } = message;
 

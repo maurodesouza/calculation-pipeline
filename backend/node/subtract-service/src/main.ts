@@ -2,21 +2,23 @@ import { RabbitMQAdapter, type RabbitQMTopology } from "./queue";
 
 const topology: RabbitQMTopology[] = [
 	{
-		exchange: { name: "processor.events", type: "topic" },
+		exchange: { name: "node.processor.events", type: "topic" },
 		queues: [
 			{
-				name: "subtract.execution.requested",
+				name: "node.subtract.execution.requested",
 				bindings: ["execution.subtraction-requested"],
 			},
 		],
 	},
 	{
-		exchange: { name: "subtract.randomize", type: "topic" },
-		queues: [{ name: "randomize", bindings: ["#"] }],
+		exchange: { name: "node.subtract.randomize", type: "topic" },
+		queues: [{ name: "node.randomize", bindings: ["#"] }],
 	},
 	{
-		exchange: { name: "subtract.events", type: "topic" },
-		queues: [{ name: "processor.step.finished", bindings: ["step.finished"] }],
+		exchange: { name: "node.subtract.events", type: "topic" },
+		queues: [
+			{ name: "node.processor.step.finished", bindings: ["step.finished"] },
+		],
 	},
 ];
 
@@ -35,7 +37,7 @@ async function main() {
 	await queue.setup(topology);
 
 	queue.consume<SubtractPayload>(
-		"subtract.execution.requested",
+		"node.subtract.execution.requested",
 		async (message) => {
 			const { runId, value, by, stepId } = message;
 

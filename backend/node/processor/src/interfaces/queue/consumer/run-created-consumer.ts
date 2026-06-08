@@ -26,7 +26,7 @@ export class RunCreatedConsumer {
 
 	private initialize() {
 		this.queue.consume<RunCreatedPayload>(
-			"processor.run.created",
+			"node.processor.run.created",
 			async (message) => {
 				const { runId, payload, steps } = message;
 				this.processor.initialize(runId, payload, steps);

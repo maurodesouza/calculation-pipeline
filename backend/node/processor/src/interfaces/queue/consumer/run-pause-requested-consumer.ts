@@ -19,7 +19,7 @@ export class RunPauseRequestedConsumer {
 
 	private initialize() {
 		this.queue.consume<RunPausePayload>(
-			"processor.run.pause-requested",
+			"node.processor.run.pause-requested",
 			async (message) => {
 				const { runId } = message;
 				this.processor.pause(runId);

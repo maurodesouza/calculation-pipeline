@@ -2,21 +2,23 @@ import { RabbitMQAdapter, type RabbitQMTopology } from "./queue";
 
 const topology: RabbitQMTopology[] = [
 	{
-		exchange: { name: "processor.events", type: "topic" },
+		exchange: { name: "node.processor.events", type: "topic" },
 		queues: [
 			{
-				name: "sum.execution.requested",
+				name: "node.sum.execution.requested",
 				bindings: ["execution.sum-requested"],
 			},
 		],
 	},
 	{
-		exchange: { name: "sum.randomize", type: "topic" },
-		queues: [{ name: "randomize", bindings: ["#"] }],
+		exchange: { name: "node.sum.randomize", type: "topic" },
+		queues: [{ name: "node.randomize", bindings: ["#"] }],
 	},
 	{
-		exchange: { name: "sum.events", type: "topic" },
-		queues: [{ name: "processor.step.finished", bindings: ["step.finished"] }],
+		exchange: { name: "node.sum.events", type: "topic" },
+		queues: [
+			{ name: "node.processor.step.finished", bindings: ["step.finished"] },
+		],
 	},
 ];
 
@@ -34,7 +36,7 @@ async function main() {
 
 	await queue.setup(topology);
 
-	queue.consume<SumPayload>("sum.execution.requested", async (message) => {
+	queue.consume<SumPayload>("node.sum.execution.requested", async (message) => {
 		const { runId, value, by, stepId } = message;
 
 		const operationResult = await executeSum(value, by);

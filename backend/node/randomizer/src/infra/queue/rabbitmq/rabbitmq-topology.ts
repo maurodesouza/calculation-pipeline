@@ -1,72 +1,72 @@
 export const rabbitQMTopology = [
 	{
 		exchange: {
-			name: "api.randomize",
+			name: "node.api.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "processor.randomize",
+			name: "node.processor.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "multiply.randomize",
+			name: "node.multiply.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "sum.randomize",
+			name: "node.sum.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "divide.randomize",
+			name: "node.divide.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "subtract.randomize",
+			name: "node.subtract.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],

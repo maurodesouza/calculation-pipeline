@@ -2,12 +2,12 @@ export const rabbitQMTopology = [
 	//#region Publish: Randomizer
 	{
 		exchange: {
-			name: "processor.randomize",
+			name: "node.processor.randomize",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "randomize",
+				name: "node.randomize",
 				bindings: ["#"],
 			},
 		],
@@ -17,24 +17,24 @@ export const rabbitQMTopology = [
 	//#region Consume: API events
 	{
 		exchange: {
-			name: "api.events",
+			name: "node.api.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "processor.run.created",
+				name: "node.processor.run.created",
 				bindings: ["run.created"],
 			},
 			{
-				name: "processor.run.pause-requested",
+				name: "node.processor.run.pause-requested",
 				bindings: ["run.pause-requested"],
 			},
 			{
-				name: "processor.run.resume-requested",
+				name: "node.processor.run.resume-requested",
 				bindings: ["run.resume-requested"],
 			},
 			{
-				name: "processor.run.finalize-requested",
+				name: "node.processor.run.finalize-requested",
 				bindings: ["run.finalize-requested"],
 			},
 		],
@@ -44,48 +44,48 @@ export const rabbitQMTopology = [
 	//#region Consume: Calculation service responses
 	{
 		exchange: {
-			name: "multiply.events",
+			name: "node.multiply.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "processor.step.finished",
+				name: "node.processor.step.finished",
 				bindings: ["step.finished"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "sum.events",
+			name: "node.sum.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "processor.step.finished",
+				name: "node.processor.step.finished",
 				bindings: ["step.finished"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "divide.events",
+			name: "node.divide.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "processor.step.finished",
+				name: "node.processor.step.finished",
 				bindings: ["step.finished"],
 			},
 		],
 	},
 	{
 		exchange: {
-			name: "subtract.events",
+			name: "node.subtract.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "processor.step.finished",
+				name: "node.processor.step.finished",
 				bindings: ["step.finished"],
 			},
 		],
@@ -95,41 +95,41 @@ export const rabbitQMTopology = [
 	//#region Publish: Run actions to realtime and randomize
 	{
 		exchange: {
-			name: "processor.events",
+			name: "node.processor.events",
 			type: "topic" as const,
 		},
 		queues: [
 			{
-				name: "api.run.started",
+				name: "node.api.run.started",
 				bindings: ["run.started"],
 			},
 			{
-				name: "api.run.failed",
+				name: "node.api.run.failed",
 				bindings: ["run.failed"],
 			},
 			{
-				name: "api.run.completed",
+				name: "node.api.run.completed",
 				bindings: ["run.completed"],
 			},
 			// Execution requested events
 			{
-				name: "sum.execution.requested",
+				name: "node.sum.execution.requested",
 				bindings: ["execution.sum-requested"],
 			},
 			{
-				name: "subtract.execution.requested",
+				name: "node.subtract.execution.requested",
 				bindings: ["execution.subtraction-requested"],
 			},
 			{
-				name: "multiply.execution.requested",
+				name: "node.multiply.execution.requested",
 				bindings: ["execution.multiplication-requested"],
 			},
 			{
-				name: "divide.execution.requested",
+				name: "node.divide.execution.requested",
 				bindings: ["execution.division-requested"],
 			},
 			{
-				name: "api.unknown-execution.requested",
+				name: "node.api.unknown-execution.requested",
 				bindings: ["execution.unknown-requested"],
 			},
 		],

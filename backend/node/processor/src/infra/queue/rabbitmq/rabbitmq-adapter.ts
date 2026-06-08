@@ -44,7 +44,7 @@ export class RabbitMQAdapter implements Queue {
 		config?: PublishConfig,
 	): Promise<void> {
 		this.channel.publish(
-			"processor.randomize",
+			"node.processor.randomize",
 			event,
 			Buffer.from(JSON.stringify(message)),
 			config,
