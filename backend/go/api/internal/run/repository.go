@@ -51,22 +51,46 @@ func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 		WHERE id = $1
 	`
 
-	var run Run
+	var row struct {
+		ID         string
+		PipelineID string
+		Payload    float64
+		Result     *float64
+		Status     string
+		Error      *string
+		CreatedAt  string
+		UpdatedAt  string
+	}
+
 	err := r.pool.QueryRow(ctx, query, id).Scan(
-		&run.id,
-		&run.pipelineID,
-		&run.payload,
-		&run.result,
-		&run.status,
-		&run.error,
-		&run.createdAt,
-		&run.updatedAt,
+		&row.ID,
+		&row.PipelineID,
+		&row.Payload,
+		&row.Result,
+		&row.Status,
+		&row.Error,
+		&row.CreatedAt,
+		&row.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 
+		return nil, err
+	}
+
+	run, err := RestoreRun(RestoreRunPayload{
+		ID:         row.ID,
+		PipelineID: row.PipelineID,
+		Payload:    row.Payload,
+		Result:     row.Result,
+		Status:     row.Status,
+		Error:      row.Error,
+		CreatedAt:  row.CreatedAt,
+		UpdatedAt:  row.UpdatedAt,
+	})
+	if err != nil {
 		return nil, err
 	}
 
@@ -81,28 +105,49 @@ func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) 
 		ORDER BY created_at DESC
 	`
 
-	var runs []Run
 	rows, err := r.pool.Query(ctx, query, pipelineID)
-
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
+	var runs []Run
 	for rows.Next() {
-		var run Run
-		err := rows.Scan(
-			&run.id,
-			&run.pipelineID,
-			&run.payload,
-			&run.result,
-			&run.status,
-			&run.error,
-			&run.createdAt,
-			&run.updatedAt,
-		)
+		var row struct {
+			ID         string
+			PipelineID string
+			Payload    float64
+			Result     *float64
+			Status     string
+			Error      *string
+			CreatedAt  string
+			UpdatedAt  string
+		}
 
+		err := rows.Scan(
+			&row.ID,
+			&row.PipelineID,
+			&row.Payload,
+			&row.Result,
+			&row.Status,
+			&row.Error,
+			&row.CreatedAt,
+			&row.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		run, err := RestoreRun(RestoreRunPayload{
+			ID:         row.ID,
+			PipelineID: row.PipelineID,
+			Payload:    row.Payload,
+			Result:     row.Result,
+			Status:     row.Status,
+			Error:      row.Error,
+			CreatedAt:  row.CreatedAt,
+			UpdatedAt:  row.UpdatedAt,
+		})
 		if err != nil {
 			return nil, err
 		}
