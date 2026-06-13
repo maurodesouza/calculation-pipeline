@@ -1,5 +1,5 @@
-import { Run } from "../../domain/entities/run";
 import { Pipeline } from "../../domain/entities/pipeline";
+import { Run } from "../../domain/entities/run";
 
 export class RunCreatedMapper {
 	static toPayload(run: Run, pipeline: Pipeline) {
