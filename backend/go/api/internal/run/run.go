@@ -116,7 +116,7 @@ func RestoreRun(payload RestoreRunPayload) (Run, error) {
 	}, nil
 }
 
-func (entity *Run) Initialize() error {
+func (entity *Run) Start() error {
 	if entity.status != RunStatusPending {
 		return errors.InvalidStateTransitionError("run", string(entity.status), string(RunStatusPending))
 	}
