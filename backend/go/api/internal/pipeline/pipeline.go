@@ -22,18 +22,13 @@ type Pipeline struct {
 }
 
 type NewPipelinePayload struct {
-	ID            *string
-	Name          *string
-	Description   *string
-	InitialStepId *string
-	Canvas        *string
+	Name        *string
+	Description *string
+	Canvas      *string
 }
 
 func NewPipeline(payload NewPipelinePayload) (*Pipeline, error) {
-	initialStepId, err := getInitialStepID(payload.InitialStepId)
-	if err != nil {
-		return nil, err
-	}
+
 	canvas := getCanvas(payload.Canvas)
 	if err := validateCanvas(canvas); err != nil {
 		return nil, err
@@ -46,7 +41,7 @@ func NewPipeline(payload NewPipelinePayload) (*Pipeline, error) {
 		id:            id,
 		name:          payload.Name,
 		description:   payload.Description,
-		initialStepId: initialStepId,
+		initialStepId: nil,
 		steps:         []Step{},
 		canvas:        canvas,
 		createdAt:     now,
