@@ -6,6 +6,7 @@ import (
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/queue"
 	runPkg "github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/run"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
 )
 
 type CreateRunUseCaseDependencies struct {
@@ -33,6 +34,10 @@ func (u *CreateRunUseCase) Execute(input CreateRunInput) error {
 	pipeline, err := u.PipelineRepository.GetByID(context.Background(), *input.PipelineId)
 	if err != nil {
 		return err
+	}
+
+	if pipeline == nil {
+		return errors.PipelineNotFoundError(*input.PipelineId)
 	}
 
 	run, err := runPkg.NewRun(runPkg.NewRunPayload{
