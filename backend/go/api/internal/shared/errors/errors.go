@@ -24,3 +24,7 @@ func InvalidStatusError(entity string, currentStatus string, validStatus []strin
 func InvalidStateTransitionError(entity string, currentStatus string, expectedStatus string) error {
 	return fmt.Errorf("[%s]: invalid state transition, current status is \"%s\", expected \"%s\"", entity, currentStatus, expectedStatus)
 }
+
+func PipelineNotFoundError(id string) error {
+	return fmt.Errorf("%w: pipeline with id \"%s\" not found", NOT_FOUND_ERROR, id)
+}
