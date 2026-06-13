@@ -75,8 +75,8 @@ type RestoreRunPayload struct {
 	Result     *float64
 	Status     string
 	Error      *string
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	CreatedAt  string
+	UpdatedAt  string
 }
 
 func RestoreRun(payload RestoreRunPayload) (Run, error) {
@@ -94,12 +94,12 @@ func RestoreRun(payload RestoreRunPayload) (Run, error) {
 		return Run{}, errors.InvalidStatusError("run", payload.Status, VALID_STATUS)
 	}
 
-	createdAt, err := time.Parse(time.RFC3339, payload.CreatedAt.Format(time.RFC3339))
+	createdAt, err := time.Parse(time.RFC3339, payload.CreatedAt)
 	if err != nil {
 		return Run{}, err
 	}
 
-	updatedAt, err := time.Parse(time.RFC3339, payload.UpdatedAt.Format(time.RFC3339))
+	updatedAt, err := time.Parse(time.RFC3339, payload.UpdatedAt)
 	if err != nil {
 		return Run{}, err
 	}
