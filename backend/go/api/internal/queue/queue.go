@@ -1,6 +1,8 @@
 package queue
 
 import (
+	"encoding/json"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -67,15 +69,21 @@ type PublishConfig struct {
 	Headers *amqp.Table
 }
 
-func (r *RabbitMQ) Publish(routingKey string, message string, config PublishConfig) error {
-	err := r.channel.Publish(
+func (r *RabbitMQ) Publish(routingKey string, message any, config PublishConfig) error {
+	body, err := json.Marshal(message)
+
+	if err != nil {
+		return err
+	}
+
+	err = r.channel.Publish(
 		"api.randomize", // exchange
 		routingKey,      // routing key
 		false,           // mandatory
 		false,           // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body:        []byte(message),
+			Body:        body,
 			Headers:     *config.Headers,
 		})
 
