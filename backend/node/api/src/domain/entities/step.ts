@@ -12,7 +12,6 @@ type CreatePayload = {
 	nextStepId?: string;
 	operation: string;
 	by: number;
-	source?: string;
 };
 
 type RestorePayload = {
@@ -98,7 +97,7 @@ export class Step {
 			id,
 			pipelineId,
 			nextStepId: stepId,
-			source: payload.source ?? BACKEND_SOURCE,
+			source: BACKEND_SOURCE,
 			createdAt: now,
 			updatedAt: now,
 		};

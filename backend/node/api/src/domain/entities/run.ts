@@ -15,7 +15,6 @@ enum RUNS_STATUS {
 type CreatePayload = {
 	pipelineId: string;
 	payload: number;
-	source?: string;
 };
 
 type RestorePayload = {
@@ -81,7 +80,7 @@ export class Run {
 			id,
 			status: RUNS_STATUS.PENDING,
 			pipelineId,
-			source: payload.source ?? BACKEND_SOURCE,
+			source: BACKEND_SOURCE,
 			createdAt: now,
 			updatedAt: now,
 		};

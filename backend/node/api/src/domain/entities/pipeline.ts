@@ -21,7 +21,6 @@ type CreatePayload = {
 	description?: string;
 	initialStepId?: string;
 	canvas?: string;
-	source?: string;
 };
 
 type RestorePayload = {
@@ -104,7 +103,7 @@ export class Pipeline {
 			initialStepId: stepId,
 			steps: [],
 			canvas,
-			source: payload.source ?? BACKEND_SOURCE,
+			source: BACKEND_SOURCE,
 			createdAt: now,
 			updatedAt: now,
 		};
