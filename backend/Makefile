@@ -1,9 +1,11 @@
-.PHONY: help install dev stop dev-foreground
+.PHONY: help install install-go dev dev-go stop dev-foreground
 
 help:
 	@echo "Available commands:"
-	@echo "  make install      - Install dependencies for all services"
-	@echo "  make dev          - Start all services in background"
+	@echo "  make install      - Install dependencies for all Node.js services"
+	@echo "  make install-go   - Install dependencies for all Go services"
+	@echo "  make dev          - Start all Node.js services in background"
+	@echo "  make dev-go       - Start all Go services in background"
 	@echo "  make dev-foreground - Start all services in foreground (requires multiple terminals)"
 	@echo "  make stop         - Stop all background services"
 
@@ -24,10 +26,21 @@ install:
 	@cd node/sum-service && pnpm install
 	@echo "Installing dependencies for realtime-service..."
 	@cd node/realtime-service && pnpm install
-	@echo "All dependencies installed successfully!"
+	@echo "All Node.js dependencies installed successfully!"
+
+install-go:
+	@echo "Installing dependencies for go divide-service..."
+	@cd go/divide-service && go mod tidy
+	@echo "Installing dependencies for go multiply-service..."
+	@cd go/multiply-service && go mod tidy
+	@echo "Installing dependencies for go subtract-service..."
+	@cd go/subtract-service && go mod tidy
+	@echo "Installing dependencies for go sum-service..."
+	@cd go/sum-service && go mod tidy
+	@echo "All Go dependencies installed successfully!"
 
 dev:
-	@echo "Starting all services in background..."
+	@echo "Starting all Node.js services in background..."
 	@mkdir -p logs
 	@cd node/api && nohup pnpm dev > ../../logs/api.log 2>&1 &
 	@cd node/divide-service && nohup pnpm dev > ../../logs/divide-service.log 2>&1 &
@@ -37,9 +50,20 @@ dev:
 	@cd node/subtract-service && nohup pnpm dev > ../../logs/subtract-service.log 2>&1 &
 	@cd node/sum-service && nohup pnpm dev > ../../logs/sum-service.log 2>&1 &
 	@cd node/realtime-service && nohup pnpm dev > ../../logs/realtime-service.log 2>&1 &
-	@echo "All services started in background!"
+	@echo "All Node.js services started in background!"
 	@echo "Check logs with: tail -f backend/logs/<service>.log"
 	@echo "Stop services with: pkill -f 'tsx'"
+
+dev-go:
+	@echo "Starting all Go services in background..."
+	@mkdir -p logs
+	@cd go/divide-service && nohup go run . > ../../logs/go-divide-service.log 2>&1 &
+	@cd go/multiply-service && nohup go run . > ../../logs/go-multiply-service.log 2>&1 &
+	@cd go/subtract-service && nohup go run . > ../../logs/go-subtract-service.log 2>&1 &
+	@cd go/sum-service && nohup go run . > ../../logs/go-sum-service.log 2>&1 &
+	@echo "All Go services started in background!"
+	@echo "Check logs with: tail -f backend/logs/<service>.log"
+	@echo "Stop services with: pkill -f 'go run'"
 
 dev-foreground:
 	@echo "To start services in foreground, run in separate terminals:"
@@ -51,8 +75,13 @@ dev-foreground:
 	@echo "  cd backend/node/subtract-service && pnpm dev"
 	@echo "  cd backend/node/sum-service && pnpm dev"
 	@echo "  cd backend/node/realtime-service && pnpm dev"
+	@echo "  cd backend/go/divide-service && go run ."
+	@echo "  cd backend/go/multiply-service && go run ."
+	@echo "  cd backend/go/subtract-service && go run ."
+	@echo "  cd backend/go/sum-service && go run ."
 
 stop:
 	@echo "Stopping all services..."
 	@pkill -f 'tsx'
+	@pkill -f 'go run'
 	@echo "All services stopped!"
