@@ -19,8 +19,8 @@ export class RunRepositoryDAO implements RunRepository {
 
 	async save(run: Run): Promise<[undefined, undefined] | [undefined, Error]> {
 		const query = `
-			INSERT INTO cp.runs (id, pipeline_id, payload, result, status, error, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			INSERT INTO cp.runs (id, pipeline_id, payload, result, status, error, source, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		`;
 
 		const values = [
@@ -30,6 +30,7 @@ export class RunRepositoryDAO implements RunRepository {
 			run.getResult() || null,
 			run.getStatus(),
 			run.getError() || null,
+			run.getSource(),
 			run.getCreatedAt(),
 			run.getUpdatedAt(),
 		];
@@ -44,7 +45,7 @@ export class RunRepositoryDAO implements RunRepository {
 		id: string,
 	): Promise<[Run | undefined, undefined] | [undefined, Error]> {
 		const query = `
-			SELECT id, pipeline_id, payload, result, status, error, created_at, updated_at
+			SELECT id, pipeline_id, payload, result, status, error, source, created_at, updated_at
 			FROM cp.runs
 			WHERE id = $1
 		`;
@@ -62,6 +63,7 @@ export class RunRepositoryDAO implements RunRepository {
 			result: row.result ? Number(row.result) : undefined,
 			status: row.status,
 			error: row.error,
+			source: row.source,
 			createdAt: row.created_at,
 			updatedAt: row.updated_at,
 		});
@@ -75,7 +77,7 @@ export class RunRepositoryDAO implements RunRepository {
 		pipelineId: string,
 	): Promise<[Run[], undefined] | [undefined, Error]> {
 		const query = `
-			SELECT id, pipeline_id, payload, result, status, error, created_at, updated_at
+			SELECT id, pipeline_id, payload, result, status, error, source, created_at, updated_at
 			FROM cp.runs
 			WHERE pipeline_id = $1
 			ORDER BY created_at DESC
@@ -95,6 +97,7 @@ export class RunRepositoryDAO implements RunRepository {
 				result: row.result ? Number(row.result) : undefined,
 				status: row.status,
 				error: row.error,
+				source: row.source,
 				createdAt: row.created_at,
 				updatedAt: row.updated_at,
 			});

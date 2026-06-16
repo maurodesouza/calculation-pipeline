@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/source"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/vo"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/utils"
 )
@@ -34,6 +35,7 @@ type Run struct {
 	result     *float64
 	status     RunStatus
 	error      *string
+	source     string
 	createdAt  time.Time
 	updatedAt  time.Time
 }
@@ -63,6 +65,7 @@ func NewRun(payload NewRunPayload) (*Run, error) {
 		pipelineID: pipelineID,
 		payload:    payload.Payload,
 		status:     RunStatusPending,
+		source:     source.Backend,
 		createdAt:  now,
 		updatedAt:  now,
 	}, nil
@@ -75,6 +78,7 @@ type RestoreRunPayload struct {
 	Result     *float64
 	Status     string
 	Error      *string
+	Source     string
 	CreatedAt  string
 	UpdatedAt  string
 }
@@ -111,6 +115,7 @@ func RestoreRun(payload RestoreRunPayload) (Run, error) {
 		result:     payload.Result,
 		status:     RunStatus(payload.Status),
 		error:      payload.Error,
+		source:     payload.Source,
 		createdAt:  createdAt,
 		updatedAt:  updatedAt,
 	}, nil
@@ -202,6 +207,10 @@ func (entity *Run) GetStatus() string {
 
 func (entity *Run) GetError() *string {
 	return entity.error
+}
+
+func (entity *Run) GetSource() string {
+	return entity.source
 }
 
 func (entity *Run) GetCreatedAt() string {

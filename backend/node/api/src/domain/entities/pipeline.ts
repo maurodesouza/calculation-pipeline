@@ -1,3 +1,4 @@
+import { BACKEND_SOURCE } from "../constants";
 import {
 	InvalidCanvasError,
 	InvalidStateTransitionError,
@@ -20,6 +21,7 @@ type CreatePayload = {
 	description?: string;
 	initialStepId?: string;
 	canvas?: string;
+	source?: string;
 };
 
 type RestorePayload = {
@@ -29,6 +31,7 @@ type RestorePayload = {
 	initialStepId?: string;
 	steps?: Step[];
 	canvas?: string;
+	source?: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -40,6 +43,7 @@ type ConstructorPayload = {
 	initialStepId?: UUID;
 	steps: Step[];
 	canvas: string;
+	source: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -51,6 +55,7 @@ export class Pipeline {
 	private initialStepId?: UUID;
 	private steps: Step[];
 	private canvas: string;
+	private source: string;
 	private createdAt: Date;
 	private updatedAt: Date;
 
@@ -61,6 +66,7 @@ export class Pipeline {
 		this.initialStepId = payload.initialStepId;
 		this.steps = payload.steps || [];
 		this.canvas = payload.canvas;
+		this.source = payload.source;
 		this.createdAt = payload.createdAt;
 		this.updatedAt = payload.updatedAt;
 	}
@@ -85,7 +91,7 @@ export class Pipeline {
 		const [stepId, stepIdError] = payload.initialStepId
 			? UUID.restore(payload.initialStepId)
 			: [undefined, undefined];
-		if (!!stepIdError) return [undefined, stepIdError];
+		if (stepIdError) return [undefined, stepIdError];
 
 		const canvas = payload.canvas || JSON.stringify({});
 
@@ -98,6 +104,7 @@ export class Pipeline {
 			initialStepId: stepId,
 			steps: [],
 			canvas,
+			source: payload.source ?? BACKEND_SOURCE,
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -113,8 +120,8 @@ export class Pipeline {
 			? UUID.restore(payload.initialStepId)
 			: [undefined, undefined];
 
-		if (!!idError) return [undefined, idError];
-		if (!!initialStepIdError) return [undefined, initialStepIdError];
+		if (idError) return [undefined, idError];
+		if (initialStepIdError) return [undefined, initialStepIdError];
 
 		const canvas = payload.canvas || JSON.stringify({});
 
@@ -128,6 +135,7 @@ export class Pipeline {
 				initialStepId,
 				steps: payload.steps || [],
 				canvas,
+				source: payload.source ?? BACKEND_SOURCE,
 			}),
 			undefined,
 		];
@@ -190,6 +198,7 @@ export class Pipeline {
 				const [step, restoreError] = Step.restore({
 					...stepInput,
 					pipelineId,
+					source: existingStep.getSource(),
 					createdAt: existingStep.getCreatedAt(),
 					updatedAt: new Date(),
 				});
@@ -274,6 +283,10 @@ export class Pipeline {
 
 	getCanvas() {
 		return this.canvas;
+	}
+
+	getSource() {
+		return this.source;
 	}
 
 	setCanvas(canvas: string): [undefined, undefined] | [undefined, Error] {

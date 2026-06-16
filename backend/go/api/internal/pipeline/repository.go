@@ -39,8 +39,8 @@ func NewPipelineRepository(pool *pgxpool.Pool) *PipelineRepository {
 
 func (r *PipelineRepository) Save(ctx context.Context, pipeline *Pipeline) error {
 	query := `
-		INSERT INTO cp.pipelines (id, name, description, initial_step_id, canvas, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO cp.pipelines (id, name, description, initial_step_id, canvas, source, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
 	_, err := r.pool.Exec(
@@ -51,6 +51,7 @@ func (r *PipelineRepository) Save(ctx context.Context, pipeline *Pipeline) error
 		pipeline.GetDescription(),
 		pipeline.GetInitialStepId(),
 		pipeline.GetCanvas(),
+		pipeline.GetSource(),
 		pipeline.GetCreatedAt(),
 		pipeline.GetUpdatedAt(),
 	)
@@ -63,7 +64,7 @@ func (r *PipelineRepository) Save(ctx context.Context, pipeline *Pipeline) error
 }
 
 func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*Pipeline, error) {
-	query := `SELECT id, name, description, initial_step_id, canvas, created_at, updated_at FROM cp.pipelines WHERE id = $1`
+	query := `SELECT id, name, description, initial_step_id, canvas, source, created_at, updated_at FROM cp.pipelines WHERE id = $1`
 
 	var row struct {
 		ID            string
@@ -71,6 +72,7 @@ func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*Pipeline,
 		Description   *string
 		InitialStepID *string `db:"initial_step_id"`
 		Canvas        string
+		Source        string
 		CreatedAt     string `db:"created_at"`
 		UpdatedAt     string `db:"updated_at"`
 	}
@@ -81,6 +83,7 @@ func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*Pipeline,
 		&row.Description,
 		&row.InitialStepID,
 		&row.Canvas,
+		&row.Source,
 		&row.CreatedAt,
 		&row.UpdatedAt,
 	)
@@ -104,6 +107,7 @@ func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*Pipeline,
 		InitialStepId: row.InitialStepID,
 		Steps:         steps,
 		Canvas:        &row.Canvas,
+		Source:        row.Source,
 		CreatedAt:     row.CreatedAt,
 		UpdatedAt:     row.UpdatedAt,
 	})
@@ -228,7 +232,7 @@ func (r *PipelineRepository) List(ctx context.Context, filters ListFilters) ([]P
 		sortBy = "created_at"
 	}
 
-	query := "SELECT id, name, description, initial_step_id, canvas, created_at, updated_at FROM cp.pipelines"
+	query := "SELECT id, name, description, initial_step_id, canvas, source, created_at, updated_at FROM cp.pipelines"
 	var conditions []string
 	var params []interface{}
 	paramIndex := 1
@@ -264,6 +268,7 @@ func (r *PipelineRepository) List(ctx context.Context, filters ListFilters) ([]P
 		Description   *string
 		InitialStepID *string
 		Canvas        string
+		Source        string
 		CreatedAt     string
 		UpdatedAt     string
 	}
@@ -276,11 +281,12 @@ func (r *PipelineRepository) List(ctx context.Context, filters ListFilters) ([]P
 			Description   *string
 			InitialStepID *string
 			Canvas        string
+			Source        string
 			CreatedAt     string
 			UpdatedAt     string
 		}
 
-		err := rows.Scan(&row.ID, &row.Name, &row.Description, &row.InitialStepID, &row.Canvas, &row.CreatedAt, &row.UpdatedAt)
+		err := rows.Scan(&row.ID, &row.Name, &row.Description, &row.InitialStepID, &row.Canvas, &row.Source, &row.CreatedAt, &row.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -309,6 +315,7 @@ func (r *PipelineRepository) List(ctx context.Context, filters ListFilters) ([]P
 			InitialStepId: row.InitialStepID,
 			Steps:         steps,
 			Canvas:        &row.Canvas,
+			Source:        row.Source,
 			CreatedAt:     row.CreatedAt,
 			UpdatedAt:     row.UpdatedAt,
 		})
@@ -354,7 +361,7 @@ func (r *PipelineRepository) Count(ctx context.Context, filters CountFilters) (i
 }
 
 func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([]Step, error) {
-	query := `SELECT id, pipeline_id, name, description, operation, by, next_step_id, created_at, updated_at FROM cp.steps WHERE pipeline_id = $1 ORDER BY created_at`
+	query := `SELECT id, pipeline_id, name, description, operation, by, next_step_id, source, created_at, updated_at FROM cp.steps WHERE pipeline_id = $1 ORDER BY created_at`
 
 	rows, err := r.pool.Query(ctx, query, pipelineID)
 	if err != nil {
@@ -372,11 +379,12 @@ func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([
 			Operation   string
 			By          int
 			NextStepID  *string `db:"next_step_id"`
-			CreatedAt   string  `db:"created_at"`
-			UpdatedAt   string  `db:"updated_at"`
+			Source      string
+			CreatedAt   string `db:"created_at"`
+			UpdatedAt   string `db:"updated_at"`
 		}
 
-		err := rows.Scan(&row.ID, &row.PipelineID, &row.Name, &row.Description, &row.Operation, &row.By, &row.NextStepID, &row.CreatedAt, &row.UpdatedAt)
+		err := rows.Scan(&row.ID, &row.PipelineID, &row.Name, &row.Description, &row.Operation, &row.By, &row.NextStepID, &row.Source, &row.CreatedAt, &row.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -389,6 +397,7 @@ func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([
 			Operation:   row.Operation,
 			By:          row.By,
 			NextStepID:  row.NextStepID,
+			Source:      row.Source,
 			CreatedAt:   row.CreatedAt,
 			UpdatedAt:   row.UpdatedAt,
 		})
@@ -418,7 +427,7 @@ func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipeline
 		params[i] = id
 	}
 
-	query := "SELECT id, pipeline_id, name, description, operation, by, next_step_id, created_at, updated_at FROM cp.steps WHERE pipeline_id IN (" + strings.Join(placeholders, ", ") + ") ORDER BY created_at"
+	query := "SELECT id, pipeline_id, name, description, operation, by, next_step_id, source, created_at, updated_at FROM cp.steps WHERE pipeline_id IN (" + strings.Join(placeholders, ", ") + ") ORDER BY created_at"
 
 	rows, err := r.pool.Query(ctx, query, params...)
 	if err != nil {
@@ -437,11 +446,12 @@ func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipeline
 			Operation   string
 			By          int
 			NextStepID  *string
+			Source      string
 			CreatedAt   string
 			UpdatedAt   string
 		}
 
-		err := rows.Scan(&row.ID, &row.PipelineID, &row.Name, &row.Description, &row.Operation, &row.By, &row.NextStepID, &row.CreatedAt, &row.UpdatedAt)
+		err := rows.Scan(&row.ID, &row.PipelineID, &row.Name, &row.Description, &row.Operation, &row.By, &row.NextStepID, &row.Source, &row.CreatedAt, &row.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -454,6 +464,7 @@ func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipeline
 			Operation:   row.Operation,
 			By:          row.By,
 			NextStepID:  row.NextStepID,
+			Source:      row.Source,
 			CreatedAt:   row.CreatedAt,
 			UpdatedAt:   row.UpdatedAt,
 		})
@@ -473,8 +484,8 @@ func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipeline
 
 func (r *PipelineRepository) saveStepWithTx(ctx context.Context, tx pgx.Tx, step Step) error {
 	query := `
-		INSERT INTO cp.steps (id, pipeline_id, name, description, operation, by, next_step_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO cp.steps (id, pipeline_id, name, description, operation, by, next_step_id, source, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`
 
 	_, err := tx.Exec(
@@ -487,6 +498,7 @@ func (r *PipelineRepository) saveStepWithTx(ctx context.Context, tx pgx.Tx, step
 		step.GetOperation(),
 		step.GetBy(),
 		step.GetNextStepId(),
+		step.GetSource(),
 		step.GetCreatedAt(),
 		step.GetUpdatedAt(),
 	)

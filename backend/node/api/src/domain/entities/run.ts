@@ -1,3 +1,4 @@
+import { BACKEND_SOURCE } from "../constants";
 import { InvalidStateTransitionError } from "../errors/invalid-state-transition-error";
 import { InvalidStatusError } from "../errors/invalid-status-error";
 import { RequiredPipelineIdError } from "../errors/required-pipeline-id-error";
@@ -14,6 +15,7 @@ enum RUNS_STATUS {
 type CreatePayload = {
 	pipelineId: string;
 	payload: number;
+	source?: string;
 };
 
 type RestorePayload = {
@@ -23,6 +25,7 @@ type RestorePayload = {
 	result?: number;
 	status: string;
 	error?: string;
+	source?: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -34,6 +37,7 @@ type ConstructorPayload = {
 	result?: number;
 	status: RUNS_STATUS;
 	error?: string;
+	source: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -45,6 +49,7 @@ export class Run {
 	private result?: number;
 	private status: RUNS_STATUS;
 	private error?: string;
+	private source: string;
 	private createdAt: Date;
 	private updatedAt: Date;
 
@@ -55,6 +60,7 @@ export class Run {
 		this.result = payload.result;
 		this.status = payload.status;
 		this.error = payload.error;
+		this.source = payload.source;
 		this.createdAt = payload.createdAt;
 		this.updatedAt = payload.updatedAt;
 	}
@@ -68,13 +74,14 @@ export class Run {
 		}
 
 		const [pipelineId, pipelineIdError] = UUID.restore(payload.pipelineId);
-		if (!!pipelineIdError) return [undefined, pipelineIdError];
+		if (pipelineIdError) return [undefined, pipelineIdError];
 
 		const objPayload: ConstructorPayload = {
 			...payload,
 			id,
 			status: RUNS_STATUS.PENDING,
 			pipelineId,
+			source: payload.source ?? BACKEND_SOURCE,
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -86,10 +93,10 @@ export class Run {
 		payload: RestorePayload,
 	): [Run, undefined] | [undefined, Error] {
 		const [id, idError] = UUID.restore(payload.id);
-		if (!!idError) return [undefined, idError];
+		if (idError) return [undefined, idError];
 
 		const [pipelineId, pipelineIdError] = UUID.restore(payload.pipelineId);
-		if (!!pipelineIdError) return [undefined, pipelineIdError];
+		if (pipelineIdError) return [undefined, pipelineIdError];
 
 		if (!Run.validateStatus(payload.status)) {
 			return [
@@ -108,6 +115,7 @@ export class Run {
 				id,
 				pipelineId,
 				status: payload.status as RUNS_STATUS,
+				source: payload.source ?? BACKEND_SOURCE,
 			}),
 			undefined,
 		];
@@ -229,6 +237,10 @@ export class Run {
 
 	getError() {
 		return this.error;
+	}
+
+	getSource() {
+		return this.source;
 	}
 
 	getCreatedAt() {

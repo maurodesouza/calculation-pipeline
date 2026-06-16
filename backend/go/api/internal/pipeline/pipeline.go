@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/source"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/vo"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/utils"
 )
@@ -17,6 +18,7 @@ type Pipeline struct {
 	initialStepId *vo.UUID
 	steps         []Step
 	canvas        string
+	source        string
 	createdAt     time.Time
 	updatedAt     time.Time
 }
@@ -44,6 +46,7 @@ func NewPipeline(payload NewPipelinePayload) (*Pipeline, error) {
 		initialStepId: nil,
 		steps:         []Step{},
 		canvas:        canvas,
+		source:        source.Backend,
 		createdAt:     now,
 		updatedAt:     now,
 	}, nil
@@ -56,6 +59,7 @@ type RestorePipelinePayload struct {
 	InitialStepId *string
 	Steps         []Step
 	Canvas        *string
+	Source        string
 	CreatedAt     string
 	UpdatedAt     string
 }
@@ -92,6 +96,7 @@ func RestorePipeline(payload RestorePipelinePayload) (*Pipeline, error) {
 		initialStepId: initialStepId,
 		steps:         payload.Steps,
 		canvas:        canvas,
+		source:        payload.Source,
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,
 	}, nil
@@ -133,6 +138,7 @@ func RestoreSteps(pipeline *Pipeline, stepInputs []StepInput) ([]Step, error) {
 				By:          stepInput.By,
 				NextStepID:  stepInput.NextStepId,
 				PipelineID:  pipelineId,
+				Source:      existingStep.GetSource(),
 				CreatedAt:   existingStep.GetCreatedAt(),
 				UpdatedAt:   time.Now().Format(time.RFC3339),
 			})
@@ -239,6 +245,10 @@ func (entity *Pipeline) GetSteps() []Step {
 
 func (entity *Pipeline) GetCanvas() string {
 	return entity.canvas
+}
+
+func (entity *Pipeline) GetSource() string {
+	return entity.source
 }
 
 func validateStepChain(steps []Step) error {

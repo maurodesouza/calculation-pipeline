@@ -11,6 +11,8 @@ CREATE TABLE cp.pipelines (
 
     initial_step_id UUID,
 
+    source VARCHAR(255) NOT NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -28,6 +30,8 @@ CREATE TABLE cp.steps (
 
     next_step_id UUID,
 
+    source VARCHAR(255) NOT NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -42,6 +46,8 @@ CREATE TABLE cp.runs (
 
     status VARCHAR(255) NOT NULL,
     error TEXT,
+
+    source VARCHAR(255) NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

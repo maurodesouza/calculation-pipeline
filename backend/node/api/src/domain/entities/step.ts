@@ -1,3 +1,4 @@
+import { BACKEND_SOURCE } from "../constants";
 import { InvalidOperationError } from "../errors/invalid-operation-error";
 import { RequiredOperationError } from "../errors/required-operation-error";
 import { RequiredPipelineIdError } from "../errors/required-pipeline-id-error";
@@ -11,6 +12,7 @@ type CreatePayload = {
 	nextStepId?: string;
 	operation: string;
 	by: number;
+	source?: string;
 };
 
 type RestorePayload = {
@@ -21,6 +23,7 @@ type RestorePayload = {
 	nextStepId?: string;
 	operation: string;
 	by: number;
+	source?: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -33,6 +36,7 @@ type ConstructorPayload = {
 	nextStepId?: UUID;
 	operation: string;
 	by: number;
+	source: string;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -47,6 +51,7 @@ export class Step {
 	private nextStepId?: UUID;
 	private operation: string;
 	private by: number;
+	private source: string;
 	private createdAt: Date;
 	private updatedAt: Date;
 
@@ -58,6 +63,7 @@ export class Step {
 		this.nextStepId = payload.nextStepId;
 		this.operation = payload.operation;
 		this.by = payload.by;
+		this.source = payload.source;
 		this.createdAt = payload.createdAt;
 		this.updatedAt = payload.updatedAt;
 	}
@@ -80,18 +86,19 @@ export class Step {
 		if (operationValidation) return [undefined, operationValidation];
 
 		const [pipelineId, pipelineIdError] = UUID.restore(payload.pipelineId);
-		if (!!pipelineIdError) return [undefined, pipelineIdError];
+		if (pipelineIdError) return [undefined, pipelineIdError];
 
 		const [stepId, stepIdError] = payload.nextStepId
 			? UUID.restore(payload.nextStepId)
 			: [undefined, undefined];
-		if (!!stepIdError) return [undefined, stepIdError];
+		if (stepIdError) return [undefined, stepIdError];
 
 		const objPayload: ConstructorPayload = {
 			...payload,
 			id,
 			pipelineId,
 			nextStepId: stepId,
+			source: payload.source ?? BACKEND_SOURCE,
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -103,15 +110,15 @@ export class Step {
 		payload: RestorePayload,
 	): [Step, undefined] | [undefined, Error] {
 		const [id, idError] = UUID.restore(payload.id);
-		if (!!idError) return [undefined, idError];
+		if (idError) return [undefined, idError];
 
 		const [pipelineId, pipelineIdError] = UUID.restore(payload.pipelineId);
-		if (!!pipelineIdError) return [undefined, pipelineIdError];
+		if (pipelineIdError) return [undefined, pipelineIdError];
 
 		const [nextStepId, nextStepIdError] = payload.nextStepId
 			? UUID.restore(payload.nextStepId)
 			: [undefined, undefined];
-		if (!!nextStepIdError) return [undefined, nextStepIdError];
+		if (nextStepIdError) return [undefined, nextStepIdError];
 
 		const operationValidation = Step.validateOperation(payload.operation);
 		if (operationValidation) return [undefined, operationValidation];
@@ -122,6 +129,7 @@ export class Step {
 				id,
 				pipelineId,
 				nextStepId,
+				source: payload.source ?? BACKEND_SOURCE,
 			}),
 			undefined,
 		];
@@ -165,6 +173,10 @@ export class Step {
 
 	getBy() {
 		return this.by;
+	}
+
+	getSource() {
+		return this.source;
 	}
 
 	getCreatedAt() {
