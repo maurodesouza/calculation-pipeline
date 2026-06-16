@@ -1,15 +1,25 @@
-.PHONY: help install install-go dev dev-go stop dev-foreground
+.PHONY: help install install-node install-go dev dev-node dev-go stop stop-node stop-go dev-foreground
 
 help:
 	@echo "Available commands:"
-	@echo "  make install      - Install dependencies for all Node.js services"
+	@echo "  make install      - Install dependencies for all services"
+	@echo "  make install-node - Install dependencies for all Node.js services"
 	@echo "  make install-go   - Install dependencies for all Go services"
-	@echo "  make dev          - Start all Node.js services in background"
+	@echo "  make dev          - Start all services in background"
+	@echo "  make dev-node     - Start all Node.js services in background"
 	@echo "  make dev-go       - Start all Go services in background"
 	@echo "  make dev-foreground - Start all services in foreground (requires multiple terminals)"
 	@echo "  make stop         - Stop all background services"
+	@echo "  make stop-node    - Stop Node.js services"
+	@echo "  make stop-go      - Stop Go services"
 
 install:
+	@echo "Installing dependencies for all services..."
+	@$(MAKE) install-node
+	@$(MAKE) install-go
+	@echo "All dependencies installed successfully!"
+
+install-node:
 	@echo "Installing dependencies for api..."
 	@cd node/api && pnpm install
 	@echo "Installing dependencies for divide-service..."
@@ -40,6 +50,12 @@ install-go:
 	@echo "All Go dependencies installed successfully!"
 
 dev:
+	@echo "Starting all services in background..."
+	@$(MAKE) dev-node
+	@$(MAKE) dev-go
+	@echo "All services started in background!"
+
+dev-node:
 	@echo "Starting all Node.js services in background..."
 	@mkdir -p logs
 	@cd node/api && nohup pnpm dev > ../../logs/api.log 2>&1 &
@@ -82,6 +98,16 @@ dev-foreground:
 
 stop:
 	@echo "Stopping all services..."
-	@pkill -f 'tsx'
-	@pkill -f 'go run'
+	@$(MAKE) stop-node
+	@$(MAKE) stop-go
 	@echo "All services stopped!"
+
+stop-node:
+	@echo "Stopping Node.js services..."
+	@pkill -f 'tsx'
+	@echo "Node.js services stopped!"
+
+stop-go:
+	@echo "Stopping Go services..."
+	@pkill -f 'go run'
+	@echo "Go services stopped!"
