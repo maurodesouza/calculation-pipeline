@@ -39,13 +39,14 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 		pipeline: Pipeline,
 	): Promise<[undefined, undefined] | [undefined, Error]> {
 		const [, error] = await this.sql.query(
-			"INSERT INTO cp.pipelines (id, name, description, initial_step_id, canvas, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+			"INSERT INTO cp.pipelines (id, name, description, initial_step_id, canvas, source, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 			[
 				pipeline.getId(),
 				pipeline.getName(),
 				pipeline.getDescription(),
 				pipeline.getInitialStepId(),
 				pipeline.getCanvas(),
+				pipeline.getSource(),
 				pipeline.getCreatedAt(),
 				pipeline.getUpdatedAt(),
 			],
@@ -100,6 +101,7 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 				typeof row.canvas === "object"
 					? JSON.stringify(row.canvas)
 					: row.canvas,
+			source: row.source,
 			steps,
 			createdAt: row.created_at,
 			updatedAt: row.updated_at,
@@ -201,6 +203,7 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 				nextStepId: row.next_step_id,
 				operation: row.operation,
 				by: Number(row.by),
+				source: row.source,
 				createdAt: row.created_at,
 				updatedAt: row.updated_at,
 			});
@@ -216,7 +219,7 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 		step: Step,
 	): Promise<[undefined, undefined] | [undefined, Error]> {
 		const [, error] = await this.sql.query(
-			"INSERT INTO cp.steps (id, pipeline_id, name, description, operation, by, next_step_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+			"INSERT INTO cp.steps (id, pipeline_id, name, description, operation, by, next_step_id, source, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
 			[
 				step.getId(),
 				step.getPipelineId(),
@@ -225,6 +228,7 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 				step.getOperation(),
 				step.getBy(),
 				step.getNextStepId(),
+				step.getSource(),
 				step.getCreatedAt(),
 				step.getUpdatedAt(),
 			],
@@ -318,6 +322,7 @@ export class PipelineRepositoryDAO implements PipelineRepository {
 					typeof row.canvas === "object"
 						? JSON.stringify(row.canvas)
 						: row.canvas,
+				source: row.source,
 				steps,
 				createdAt: row.created_at,
 				updatedAt: row.updated_at,

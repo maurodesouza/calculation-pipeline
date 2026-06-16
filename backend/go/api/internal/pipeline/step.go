@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/source"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/vo"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/utils"
 )
@@ -19,6 +20,7 @@ type Step struct {
 	nextStepID  vo.UUID
 	operation   string
 	by          int
+	source      string
 	createdAt   time.Time
 	updatedAt   time.Time
 }
@@ -66,6 +68,7 @@ func NewStep(payload NewStepPayload) (*Step, error) {
 		nextStepID:  *nextStepId,
 		operation:   payload.Operation,
 		by:          payload.By,
+		source:      source.Backend,
 		createdAt:   now,
 		updatedAt:   now,
 	}, nil
@@ -79,6 +82,7 @@ type RestoreStepPayload struct {
 	NextStepID  *string
 	Operation   string
 	By          int
+	Source      string
 	CreatedAt   string
 	UpdatedAt   string
 }
@@ -121,6 +125,7 @@ func RestoreStep(payload RestoreStepPayload) (*Step, error) {
 		nextStepID:  *nextStepId,
 		operation:   payload.Operation,
 		by:          payload.By,
+		source:      payload.Source,
 		createdAt:   createdAt,
 		updatedAt:   updatedAt,
 	}, nil
@@ -152,6 +157,10 @@ func (entity *Step) GetOperation() string {
 
 func (entity *Step) GetBy() int {
 	return entity.by
+}
+
+func (entity *Step) GetSource() string {
+	return entity.source
 }
 
 func (entity *Step) GetCreatedAt() string {

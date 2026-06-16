@@ -20,8 +20,8 @@ func NewRunRepository(pool *pgxpool.Pool) *RunRepository {
 
 func (r *RunRepository) Save(ctx context.Context, run *Run) error {
 	query := `
-		INSERT INTO runs (id, pipeline_id, payload, result, status, error, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO runs (id, pipeline_id, payload, result, status, error, source, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 
 	_, err := r.pool.Exec(
@@ -33,6 +33,7 @@ func (r *RunRepository) Save(ctx context.Context, run *Run) error {
 		run.GetResult(),
 		run.GetStatus(),
 		run.GetError(),
+		run.GetSource(),
 		run.GetCreatedAt(),
 		run.GetUpdatedAt(),
 	)
@@ -46,7 +47,7 @@ func (r *RunRepository) Save(ctx context.Context, run *Run) error {
 
 func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 	query := `
-		SELECT id, pipeline_id, payload, result, status, error, created_at, updated_at
+		SELECT id, pipeline_id, payload, result, status, error, source, created_at, updated_at
 		FROM runs
 		WHERE id = $1
 	`
@@ -58,6 +59,7 @@ func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 		Result     *float64
 		Status     string
 		Error      *string
+		Source     string
 		CreatedAt  string
 		UpdatedAt  string
 	}
@@ -69,6 +71,7 @@ func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 		&row.Result,
 		&row.Status,
 		&row.Error,
+		&row.Source,
 		&row.CreatedAt,
 		&row.UpdatedAt,
 	)
@@ -87,6 +90,7 @@ func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 		Result:     row.Result,
 		Status:     row.Status,
 		Error:      row.Error,
+		Source:     row.Source,
 		CreatedAt:  row.CreatedAt,
 		UpdatedAt:  row.UpdatedAt,
 	})
@@ -99,7 +103,7 @@ func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 
 func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) ([]Run, error) {
 	query := `
-		SELECT id, pipeline_id, payload, result, status, error, created_at, updated_at
+		SELECT id, pipeline_id, payload, result, status, error, source, created_at, updated_at
 		FROM runs
 		WHERE pipeline_id = $1
 		ORDER BY created_at DESC
@@ -120,6 +124,7 @@ func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) 
 			Result     *float64
 			Status     string
 			Error      *string
+			Source     string
 			CreatedAt  string
 			UpdatedAt  string
 		}
@@ -131,6 +136,7 @@ func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) 
 			&row.Result,
 			&row.Status,
 			&row.Error,
+			&row.Source,
 			&row.CreatedAt,
 			&row.UpdatedAt,
 		)
@@ -145,6 +151,7 @@ func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) 
 			Result:     row.Result,
 			Status:     row.Status,
 			Error:      row.Error,
+			Source:     row.Source,
 			CreatedAt:  row.CreatedAt,
 			UpdatedAt:  row.UpdatedAt,
 		})
