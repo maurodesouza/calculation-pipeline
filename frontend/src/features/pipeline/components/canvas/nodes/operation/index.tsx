@@ -105,9 +105,9 @@ export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 					className={executionClassName}
 					onClick={() =>
 						actions.pipelines.panel.show(
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															pipelines.panel.show(() => (
-							<EditNodePanel id={id} initialData={data} />
-						))
+							() => <EditNodePanel id={id} initialData={data} />,
+							{ instanceId },
+						)
 					}
 				>
 					<Canvas.Node.IconWrapper variant={iconVariant as never}>
@@ -125,7 +125,9 @@ export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 			</ContextMenu.Trigger>
 			<ContextMenu.Content>
 				<ContextMenu.Item
-					onClick={() => events.pipelines.canvas.nodes.duplicate(id)}
+					onClick={() =>
+						actions.pipelines.canvas.nodes.duplicate(id, { instanceId })
+					}
 				>
 					<Copy data-icon="inline-start" />
 					Duplicate
@@ -133,7 +135,9 @@ export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 				<ContextMenu.Separator />
 				<ContextMenu.Item
 					tone="danger"
-					onClick={() => events.pipelines.canvas.nodes.remove(id)}
+					onClick={() =>
+						actions.pipelines.canvas.nodes.remove(id, { instanceId })
+					}
 				>
 					<Trash2 data-icon="inline-start" />
 					Delete
