@@ -1,52 +1,23 @@
 import { useCallback, useEffect } from "react";
-import { events } from "#/events";
-import { PipelineEvents } from "#/features/pipeline/events";
+import { useSelector } from "@tanstack/react-store";
 import { usePipelineContext } from "#/features/pipeline/store";
 import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
 import { canvas } from "#/features/pipeline/utils/canvas";
-
-type RunStartedPayload = {
-	runId: string;
-};
-
-type RunCompletedPayload = {
-	runId: string;
-};
-
-type RunFailedPayload = {
-	runId: string;
-	error?: string;
-};
-
-type RunPausedPayload = {
-	runId: string;
-};
-
-type RunResumedPayload = {
-	runId: string;
-};
-
-type RunFinalizedPayload = {
-	runId: string;
-};
-
-type StepRequestedPayload = {
-	runId: string;
-	stepId: string;
-	operation: string;
-	value: number;
-	by: number;
-};
-
-type StepFinishedPayload = {
-	runId: string;
-	stepId: string;
-	result?: number;
-	error?: string;
-};
+import { command } from "#/lib/command/index";
+import type {
+	RunStartedPayload,
+	RunCompletedPayload,
+	RunFailedPayload,
+	RunPausedPayload,
+	RunResumedPayload,
+	ExecutionRunFinalizedPayload,
+	StepStartedPayload,
+	StepFinishedPayload,
+} from "#/features/pipeline/commands";
 
 export function ExecutionHandle() {
 	const { store } = usePipelineContext();
+	const pipelineId = useSelector(store, (state) => state.id);
 
 	const handleRunStarted = useCallback(
 		({ runId }: RunStartedPayload) => {
@@ -119,7 +90,7 @@ export function ExecutionHandle() {
 	);
 
 	const handleRunFinalized = useCallback(
-		({ runId }: RunFinalizedPayload) => {
+		({ runId }: ExecutionRunFinalizedPayload) => {
 			const state = store.state;
 
 			if (state.run.id !== runId) return;
@@ -136,7 +107,7 @@ export function ExecutionHandle() {
 	);
 
 	const handleStepStarted = useCallback(
-		({ runId, stepId }: StepRequestedPayload) => {
+		({ runId, stepId }: StepStartedPayload) => {
 			const state = store.state;
 
 			if (state.run.id !== runId) return;
@@ -208,31 +179,119 @@ export function ExecutionHandle() {
 	}, [store]);
 
 	useEffect(() => {
-		const unsub1 = events.on("run.started", handleRunStarted);
-		const unsub2 = events.on("run.completed", handleRunCompleted);
-		const unsub3 = events.on("run.failed", handleRunFailed);
-		const unsub7 = events.on("run.paused", handleRunPaused);
-		const unsub8 = events.on("run.resumed", handleRunResumed);
-		const unsub9 = events.on("run.finalized", handleRunFinalized);
-		const unsub4 = events.on("step.started", handleStepStarted);
-		const unsub5 = events.on("step.finished", handleStepFinished);
-		const unsub6 = events.on(
-			PipelineEvents.EXECUTION_CLEAR,
-			handleClearExecution,
+		// Command handlers for execution events
+		const disposeRunStarted = command.handle(
+			"pipelines.execution.run.started",
+			async (payload: unknown) => {
+				handleRunStarted(payload as RunStartedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeRunCompleted = command.handle(
+			"pipelines.execution.run.completed",
+			async (payload: unknown) => {
+				handleRunCompleted(payload as RunCompletedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeRunFailed = command.handle(
+			"pipelines.execution.run.failed",
+			async (payload: unknown) => {
+				handleRunFailed(payload as RunFailedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeRunPaused = command.handle(
+			"pipelines.execution.run.paused",
+			async (payload: unknown) => {
+				handleRunPaused(payload as RunPausedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeRunResumed = command.handle(
+			"pipelines.execution.run.resumed",
+			async (payload: unknown) => {
+				handleRunResumed(payload as RunResumedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeRunFinalized = command.handle(
+			"pipelines.execution.run.finalized",
+			async (payload: unknown) => {
+				handleRunFinalized(payload as ExecutionRunFinalizedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeStepStarted = command.handle(
+			"pipelines.execution.step.started",
+			async (payload: unknown) => {
+				handleStepStarted(payload as StepStartedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeStepFinished = command.handle(
+			"pipelines.execution.step.finished",
+			async (payload: unknown) => {
+				handleStepFinished(payload as StepFinishedPayload);
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+
+		const disposeClearExecution = command.handle(
+			"pipelines.execution.clear",
+			async () => {
+				handleClearExecution();
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
 		);
 
 		return () => {
-			unsub1();
-			unsub2();
-			unsub3();
-			unsub4();
-			unsub5();
-			unsub6();
-			unsub7();
-			unsub8();
-			unsub9();
+			disposeRunStarted();
+			disposeRunCompleted();
+			disposeRunFailed();
+			disposeRunPaused();
+			disposeRunResumed();
+			disposeRunFinalized();
+			disposeStepStarted();
+			disposeStepFinished();
+			disposeClearExecution();
 		};
 	}, [
+		pipelineId,
 		handleRunStarted,
 		handleRunCompleted,
 		handleRunFailed,

@@ -5,7 +5,6 @@ import { TransitionStore } from "./transitions-store";
 import type { CommandMeta, Config, Dispose, Handler } from "./types";
 
 export type { Actions } from "./global";
-export type { Action, ScopedAction } from "./types";
 
 export class Command {
 	private $commandBus: CommandBus;

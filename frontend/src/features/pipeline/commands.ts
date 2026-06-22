@@ -34,6 +34,46 @@ export type NodeUpdateDataPayload = {
 	data: Partial<CanvasOperationNode["data"]>;
 };
 
+export type RunStartedPayload = {
+	runId: string;
+};
+
+export type RunCompletedPayload = {
+	runId: string;
+};
+
+export type RunFailedPayload = {
+	runId: string;
+	error?: string;
+};
+
+export type RunPausedPayload = {
+	runId: string;
+};
+
+export type RunResumedPayload = {
+	runId: string;
+};
+
+export type ExecutionRunFinalizedPayload = {
+	runId: string;
+};
+
+export type StepStartedPayload = {
+	runId: string;
+	stepId: string;
+	operation: string;
+	value: number;
+	by: number;
+};
+
+export type StepFinishedPayload = {
+	runId: string;
+	stepId: string;
+	result?: number;
+	error?: string;
+};
+
 declare module "#/lib/command/global" {
 	interface Actions {
 		pipelines: {
@@ -60,6 +100,18 @@ declare module "#/lib/command/global" {
 
 			execution: {
 				clear: ScopedAction<undefined, void>;
+				run: {
+					started: ScopedAction<RunStartedPayload, void>;
+					completed: ScopedAction<RunCompletedPayload, void>;
+					failed: ScopedAction<RunFailedPayload, void>;
+					paused: ScopedAction<RunPausedPayload, void>;
+					resumed: ScopedAction<RunResumedPayload, void>;
+					finalized: ScopedAction<ExecutionRunFinalizedPayload, void>;
+				};
+				step: {
+					started: ScopedAction<StepStartedPayload, void>;
+					finished: ScopedAction<StepFinishedPayload, void>;
+				};
 			};
 
 			canvas: {
