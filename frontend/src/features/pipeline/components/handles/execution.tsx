@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { useSelector } from "@tanstack/react-store";
 import { events } from "#/events";
 import { usePipelineContext } from "#/features/pipeline/store";
 import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
@@ -47,7 +48,7 @@ type StepFinishedPayload = {
 
 export function ExecutionHandle() {
 	const { store } = usePipelineContext();
-	const pipelineId = store.state.id;
+	const pipelineId = useSelector(store, (state) => state.id);
 
 	const handleRunStarted = useCallback(
 		({ runId }: RunStartedPayload) => {
@@ -209,6 +210,7 @@ export function ExecutionHandle() {
 	}, [store]);
 
 	useEffect(() => {
+		// Event subscriptions for run lifecycle events (out of scope for this issue)
 		const unsub1 = events.on("run.started", handleRunStarted);
 		const unsub2 = events.on("run.completed", handleRunCompleted);
 		const unsub3 = events.on("run.failed", handleRunFailed);
@@ -218,6 +220,7 @@ export function ExecutionHandle() {
 		const unsub4 = events.on("step.started", handleStepStarted);
 		const unsub5 = events.on("step.finished", handleStepFinished);
 
+		// Replace EXECUTION_CLEAR event subscription with command handler
 		const disposeClearExecution = command.handle(
 			"pipelines.execution.clear",
 			async () => {
