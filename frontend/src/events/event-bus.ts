@@ -10,7 +10,9 @@ export type Unsubscribe = () => void;
 
 type TransitionKey = unknown[];
 
-export type SequenceStep<T = unknown> = (input?: T | void) => Promise<T> | void;
+export type SequenceStep<T = unknown> = (
+	input?: T | undefined,
+) => Promise<T> | undefined;
 
 export type SequenceConfig = {
 	transition?: TransitionKey;
