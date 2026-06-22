@@ -1,1 +1,1 @@
-export interface Actions {}
+export type Actions = Record<string, never>;
