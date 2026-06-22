@@ -1,9 +1,8 @@
 import { createRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Page } from "#/components/ui/page";
 import { Panel } from "#/components/ui/panel";
 import { Separator } from "#/components/ui/separator";
-import { InstanceRegistry } from "#/lib/command/instance-registry";
 import { Route as RootRoute } from "#/routes/__root";
 import { Canvas } from "../components/canvas";
 import { Handles } from "../components/handles";
@@ -32,19 +31,6 @@ function PipelineCanvas() {
 	if (!storeRef.current) {
 		storeRef.current = createPipelineStore(pipeline);
 	}
-
-	useEffect(() => {
-		const instanceId = storeRef.current?.getState().instanceId;
-		const name = storeRef.current?.getState().name;
-		if (!instanceId) return;
-
-		const registry = InstanceRegistry.getInstance();
-		registry.add("pipeline", { id: instanceId, label: name });
-
-		return () => {
-			registry.remove("pipeline", instanceId);
-		};
-	}, []);
 
 	return (
 		<Page.Container>
