@@ -1,7 +1,7 @@
 import type { Connection, EdgeChange, NodeChange } from "@xyflow/react";
+import type { Action, ScopedAction } from "#/lib/command/types";
 import type { Renderable } from "#/types/renderable";
 import type { CanvasNode, CanvasOperationNode } from "./types/canvas-node";
-import type { Config, DispatchConfig } from "#/lib/command/types";
 
 export type CreateRunPayload = {
 	payload: number;
@@ -37,55 +37,43 @@ export type NodeUpdateDataPayload = {
 declare module "#/lib/command/global" {
 	interface Actions {
 		pipelines: {
-			save: (config?: DispatchConfig) => Promise<{ pipelineId: string }[]>;
+			save: Action<undefined, { pipelineId: string }[]>;
 			update: {
-				name: (name: string, config?: DispatchConfig) => void;
+				name: Action<string, void>;
 			};
 
 			panel: {
-				show: (panel: Renderable, config: Config) => void;
-				clear: (config: Config) => void;
+				show: ScopedAction<Renderable, void>;
+				clear: ScopedAction<undefined, void>;
 			};
 
 			run: {
-				create: (
-					payload: CreateRunPayload,
-					config: Config,
-				) => Promise<{ runId: string }[]>;
-				pause: (
-					payload: PauseRunPayload,
-					config: Config,
-				) => Promise<{ success: boolean }[]>;
-				resume: (
-					payload: ResumeRunPayload,
-					config: Config,
-				) => Promise<{ success: boolean }[]>;
-				finalize: (
-					payload: FinalizeRunPayload,
-					config: Config,
-				) => Promise<{ success: boolean }[]>;
-				finalized: (payload: RunFinalizedPayload, config: Config) => void;
+				create: ScopedAction<CreateRunPayload, { runId: string }[]>;
+				pause: ScopedAction<PauseRunPayload, { success: boolean }[]>;
+				resume: ScopedAction<ResumeRunPayload, { success: boolean }[]>;
+				finalize: ScopedAction<FinalizeRunPayload, { success: boolean }[]>;
+				finalized: ScopedAction<RunFinalizedPayload, void>;
 				update: {
-					payload: (payload: RunUpdatePayloadPayload, config: Config) => void;
+					payload: ScopedAction<RunUpdatePayloadPayload, void>;
 				};
 			};
 
 			execution: {
-				clear: (config: Config) => void;
+				clear: ScopedAction<undefined, void>;
 			};
 
 			canvas: {
 				nodes: {
-					add: (payload: CanvasNode | CanvasNode[], config: Config) => void;
-					remove: (payload: string | string[], config: Config) => void;
-					change: (payload: NodeChange[], config: Config) => void;
-					duplicate: (payload: string, config: Config) => void;
-					updateData: (payload: NodeUpdateDataPayload, config: Config) => void;
+					add: ScopedAction<CanvasNode | CanvasNode[], void>;
+					remove: ScopedAction<string | string[], void>;
+					change: ScopedAction<NodeChange[], void>;
+					duplicate: ScopedAction<string, void>;
+					updateData: ScopedAction<NodeUpdateDataPayload, void>;
 				};
 				edges: {
-					connect: (payload: Connection, config: Config) => void;
-					change: (payload: EdgeChange[], config: Config) => void;
-					remove: (payload: string | string[], config: Config) => void;
+					connect: ScopedAction<Connection, void>;
+					change: ScopedAction<EdgeChange[], void>;
+					remove: ScopedAction<string | string[], void>;
 				};
 			};
 		};

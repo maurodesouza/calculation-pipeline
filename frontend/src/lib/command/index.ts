@@ -2,10 +2,17 @@ import { CommandBus } from "./command-bus";
 import type { Actions } from "./global";
 import { InstanceRegistry } from "./instance-registry";
 import { TransitionStore } from "./transitions-store";
-import type { CommandMeta, Config, Dispose, Handler } from "./types";
+import type {
+	Action,
+	CommandMeta,
+	Config,
+	Dispose,
+	Handler,
+	ScopedAction,
+} from "./types";
 
 export type { Actions } from "./global";
-export type { Action } from "./types";
+export type { Action, ScopedAction } from "./types";
 
 export class Command {
 	private $commandBus: CommandBus;
