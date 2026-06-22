@@ -3,9 +3,7 @@ import { X } from "lucide-react";
 import { Activity, useCallback, useEffect, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { ResizablePanel } from "#/components/ui/resizable-panel";
-import { events } from "#/events/index";
-import { actions } from "#/lib/command";
-import { PipelineEvents } from "../../events";
+import { actions, command } from "#/lib/command";
 import { usePipelineContext } from "../../store";
 import { Controls } from "./controls";
 import { RunTable } from "./table";
@@ -15,29 +13,33 @@ export function RunPanel() {
 	const instanceId = useSelector(store, (state) => state.instanceId);
 	const [isOpen, setIsOpen] = useState(false);
 
-	const onOpenPanel = useCallback(() => {
+	const onOpenPanel = useCallback(async () => {
 		setIsOpen(true);
 	}, []);
 
-	const onClosePanel = useCallback(() => {
+	const onClosePanel = useCallback(async () => {
 		setIsOpen(false);
 	}, []);
 
 	useEffect(() => {
-		const unsubscribeOpen = events.on(
-			PipelineEvents.RUN_PANEL_OPEN,
+		const config = { instanceId };
+
+		const disposeOpen = command.handle(
+			"pipelines.panel.open",
 			onOpenPanel,
+			config,
 		);
-		const unsubscribeClose = events.on(
-			PipelineEvents.RUN_PANEL_CLOSE,
+		const disposeClose = command.handle(
+			"pipelines.panel.close",
 			onClosePanel,
+			config,
 		);
 
 		return () => {
-			unsubscribeOpen();
-			unsubscribeClose();
+			disposeOpen();
+			disposeClose();
 		};
-	}, [onOpenPanel, onClosePanel]);
+	}, [instanceId, onOpenPanel, onClosePanel]);
 
 	return (
 		<Activity mode={isOpen ? "visible" : "hidden"}>
@@ -54,7 +56,7 @@ export function RunPanel() {
 							variant="icon"
 							size="icon"
 							onClick={() =>
-								actions.pipelines.panel.clear(undefined, {
+								actions.pipelines.panel.close(undefined, {
 									instanceId,
 								})
 							}

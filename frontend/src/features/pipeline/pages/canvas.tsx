@@ -5,7 +5,10 @@ import { Panel } from "#/components/ui/panel";
 import { Separator } from "#/components/ui/separator";
 import { Route as RootRoute } from "#/routes/__root";
 import { Canvas } from "../components/canvas";
-import { Handles } from "../components/handles";
+import { CanvasHandle } from "../components/handles/canvas";
+import { ExecutionHandle } from "../components/handles/execution";
+import { PipelineHandle } from "../components/handles/pipeline";
+import { RunHandle } from "../components/handles/run";
 import { Header } from "../components/header";
 import { StepsPanel } from "../components/panels/steps";
 import { RunPanel } from "../components/run";
@@ -61,7 +64,10 @@ function PipelineCanvas() {
 					</div>
 				</div>
 
-				<Handles />
+				<RunHandle />
+				<PipelineHandle />
+				<CanvasHandle />
+				<ExecutionHandle />
 			</PipelineStoreProvider>
 		</Page.Container>
 	);
