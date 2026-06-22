@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
 import { events } from "#/events";
-import { PipelineEvents } from "#/features/pipeline/events";
 import { usePipelineContext } from "#/features/pipeline/store";
 import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
 import { canvas } from "#/features/pipeline/utils/canvas";
+import { command } from "#/lib/command/index";
 
 type RunStartedPayload = {
 	runId: string;
@@ -47,6 +47,7 @@ type StepFinishedPayload = {
 
 export function ExecutionHandle() {
 	const { store } = usePipelineContext();
+	const pipelineId = store.state.id;
 
 	const handleRunStarted = useCallback(
 		({ runId }: RunStartedPayload) => {
@@ -216,9 +217,16 @@ export function ExecutionHandle() {
 		const unsub9 = events.on("run.finalized", handleRunFinalized);
 		const unsub4 = events.on("step.started", handleStepStarted);
 		const unsub5 = events.on("step.finished", handleStepFinished);
-		const unsub6 = events.on(
-			PipelineEvents.EXECUTION_CLEAR,
-			handleClearExecution,
+
+		const disposeClearExecution = command.handle(
+			"pipelines.execution.clear",
+			async () => {
+				handleClearExecution();
+			},
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
 		);
 
 		return () => {
@@ -227,12 +235,13 @@ export function ExecutionHandle() {
 			unsub3();
 			unsub4();
 			unsub5();
-			unsub6();
+			disposeClearExecution();
 			unsub7();
 			unsub8();
 			unsub9();
 		};
 	}, [
+		pipelineId,
 		handleRunStarted,
 		handleRunCompleted,
 		handleRunFailed,
