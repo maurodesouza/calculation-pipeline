@@ -85,6 +85,8 @@ declare module "#/lib/command/global" {
 			panel: {
 				show: ScopedAction<Renderable, void>;
 				clear: ScopedAction<undefined, void>;
+				open: ScopedAction<undefined, void>;
+				close: ScopedAction<undefined, void>;
 			};
 
 			run: {
