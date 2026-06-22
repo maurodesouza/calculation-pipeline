@@ -182,8 +182,8 @@ export function ExecutionHandle() {
 		// Command handlers for execution events
 		const disposeRunStarted = command.handle(
 			"pipelines.execution.run.started",
-			async (payload: RunStartedPayload) => {
-				handleRunStarted(payload);
+			async (payload: unknown) => {
+				handleRunStarted(payload as RunStartedPayload);
 			},
 			{
 				instanceId: pipelineId,
@@ -193,8 +193,8 @@ export function ExecutionHandle() {
 
 		const disposeRunCompleted = command.handle(
 			"pipelines.execution.run.completed",
-			async (payload: RunCompletedPayload) => {
-				handleRunCompleted(payload);
+			async (payload: unknown) => {
+				handleRunCompleted(payload as RunCompletedPayload);
 			},
 			{
 				instanceId: pipelineId,
@@ -204,8 +204,8 @@ export function ExecutionHandle() {
 
 		const disposeRunFailed = command.handle(
 			"pipelines.execution.run.failed",
-			async (payload: RunFailedPayload) => {
-				handleRunFailed(payload);
+			async (payload: unknown) => {
+				handleRunFailed(payload as RunFailedPayload);
 			},
 			{
 				instanceId: pipelineId,
@@ -215,8 +215,8 @@ export function ExecutionHandle() {
 
 		const disposeRunPaused = command.handle(
 			"pipelines.execution.run.paused",
-			async (payload: RunPausedPayload) => {
-				handleRunPaused(payload);
+			async (payload: unknown) => {
+				handleRunPaused(payload as RunPausedPayload);
 			},
 			{
 				instanceId: pipelineId,
@@ -226,8 +226,8 @@ export function ExecutionHandle() {
 
 		const disposeRunResumed = command.handle(
 			"pipelines.execution.run.resumed",
-			async (payload: RunResumedPayload) => {
-				handleRunResumed(payload);
+			async (payload: unknown) => {
+				handleRunResumed(payload as RunResumedPayload);
 			},
 			{
 				instanceId: pipelineId,
@@ -237,8 +237,8 @@ export function ExecutionHandle() {
 
 		const disposeRunFinalized = command.handle(
 			"pipelines.execution.run.finalized",
-			async (payload: ExecutionRunFinalizedPayload) => {
-				handleRunFinalized(payload);
+			async (payload: unknown) => {
+				handleRunFinalized(payload as ExecutionRunFinalizedPayload);
 			},
 			{
 				instanceId: pipelineId,
@@ -248,8 +248,8 @@ export function ExecutionHandle() {
 
 		const disposeStepStarted = command.handle(
 			"pipelines.execution.step.started",
-			async (payload: StepStartedPayload) => {
-				handleStepStarted(payload);
+			async (payload: unknown) => {
+				handleStepStarted(payload as StepStartedPayload);
 			},
 			{
 				instanceId: pipelineId,
@@ -259,8 +259,8 @@ export function ExecutionHandle() {
 
 		const disposeStepFinished = command.handle(
 			"pipelines.execution.step.finished",
-			async (payload: StepFinishedPayload) => {
-				handleStepFinished(payload);
+			async (payload: unknown) => {
+				handleStepFinished(payload as StepFinishedPayload);
 			},
 			{
 				instanceId: pipelineId,
