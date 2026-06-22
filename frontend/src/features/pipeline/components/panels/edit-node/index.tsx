@@ -105,7 +105,7 @@ export function EditNodePanel(props: EditNodePanelProps) {
 	useEffect(() => {
 		setOperation(initialData.props.operation);
 		setBy(initialData.props.by);
-	}, [id]);
+	}, [initialData.props.operation, initialData.props.by]);
 
 	return (
 		<>

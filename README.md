@@ -143,6 +143,34 @@ Access the RabbitMQ dashboard at [http://localhost:15672](http://localhost:15672
 
 The frontend connects to the API and the SSE stream, rendering the pipeline canvas and reflecting state changes live as events arrive — including step executions, delays, and duplicates being silently discarded.
 
+### Architecture
+
+The frontend uses a **Command System architecture** for all application actions. This provides:
+
+- **Centralized command handling**: All actions are dispatched through a single `actions` object with nested domains
+- **Strong typing**: Commands are fully typed with payloads and return values
+- **Observability**: Built-in transition tracking for loading states
+- **Instance scoping**: Support for domain-specific instances (editors, modals, etc.)
+- **Framework-agnostic**: Commands can be invoked from anywhere (React components, stores, modules)
+
+Commands are defined in `src/lib/command/global.ts` and registered using the `command.handle()` method. Components dispatch actions via the `actions` proxy or `command.dispatch()`.
+
+### Styling System
+
+The project uses a **token-based, context-driven styling system** with:
+
+- **Tailwind CSS v4** as the utility engine
+- **CSS variables** as design tokens
+- **Theme classes** (`.theme-dark`, `.theme-light`) for global theming
+- **Context classes**:
+  - `base-*` → neutral tokens for surfaces
+  - `tone` → enables tone-related tokens
+  - `palette-*` → injects color into tone tokens
+
+This system allows for consistent theming and flexible component variants.
+
+### Running the Frontend
+
 ```bash
 cd frontend
 pnpm dev

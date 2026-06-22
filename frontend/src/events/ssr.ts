@@ -39,7 +39,9 @@ export class SSE {
 
 		if (this.queue.length > this.maxIds) {
 			const oldest = this.queue.shift();
-			this.processed.delete(oldest!);
+			if (oldest) {
+				this.processed.delete(oldest);
+			}
 		}
 
 		return true;

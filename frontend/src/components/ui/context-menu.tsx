@@ -1,6 +1,6 @@
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
-import * as React from "react";
+import type * as React from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 import { cn } from "#/utils/tailwind";
 
