@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useSelector } from "@tanstack/react-store";
 import { useCallback, useEffect } from "react";
 import type {
 	CreateRunPayload,
@@ -23,7 +24,7 @@ export function RunHandle() {
 	const pauseRunMutation = useMutation(pauseRunMutationOptions());
 	const resumeRunMutation = useMutation(resumeRunMutationOptions());
 
-	const pipelineId = store.state.id;
+	const pipelineId = useSelector(store, (state) => state.id);
 
 	const createRun = useCallback(
 		async (payload: CreateRunPayload) => {
@@ -69,7 +70,7 @@ export function RunHandle() {
 	);
 
 	const updatePayload = useCallback(
-		({ payload }: RunUpdatePayloadPayload) => {
+		async ({ payload }: RunUpdatePayloadPayload) => {
 			store.setState((prev) => ({
 				...prev,
 				run: { ...prev.run, payload },
@@ -79,33 +80,23 @@ export function RunHandle() {
 	);
 
 	useEffect(() => {
-		const dispose1 = command.handle("pipelines.run.create", createRun as any, {
+		const config = {
 			instanceId: pipelineId,
 			meta: { label: `Pipeline ${pipelineId}` },
-		});
-		const dispose2 = command.handle("pipelines.run.pause", pauseRun as any, {
-			instanceId: pipelineId,
-			meta: { label: `Pipeline ${pipelineId}` },
-		});
-		const dispose3 = command.handle("pipelines.run.resume", resumeRun as any, {
-			instanceId: pipelineId,
-			meta: { label: `Pipeline ${pipelineId}` },
-		});
+		};
+
+		const dispose1 = command.handle("pipelines.run.create", createRun, config);
+		const dispose2 = command.handle("pipelines.run.pause", pauseRun, config);
+		const dispose3 = command.handle("pipelines.run.resume", resumeRun, config);
 		const dispose4 = command.handle(
 			"pipelines.run.finalize",
-			finalizeRun as any,
-			{
-				instanceId: pipelineId,
-				meta: { label: `Pipeline ${pipelineId}` },
-			},
+			finalizeRun,
+			config,
 		);
 		const dispose5 = command.handle(
 			"pipelines.run.update.payload",
-			updatePayload as any,
-			{
-				instanceId: pipelineId,
-				meta: { label: `Pipeline ${pipelineId}` },
-			},
+			updatePayload,
+			config,
 		);
 
 		return () => {

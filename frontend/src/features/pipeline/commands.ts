@@ -1,5 +1,5 @@
 import type { Connection, EdgeChange, NodeChange } from "@xyflow/react";
-import type { Action, ScopedAction } from "#/lib/command/types";
+import type { ScopedAction } from "#/lib/command/types";
 import type { Renderable } from "#/types/renderable";
 import type { CanvasNode, CanvasOperationNode } from "./types/canvas-node";
 
@@ -77,9 +77,9 @@ export type StepFinishedPayload = {
 declare module "#/lib/command/global" {
 	interface Actions {
 		pipelines: {
-			save: Action<undefined, { pipelineId: string }[]>;
+			save: ScopedAction<undefined, { pipelineId: string }[]>;
 			update: {
-				name: Action<string, void>;
+				name: ScopedAction<string, void>;
 			};
 
 			panel: {
@@ -88,10 +88,10 @@ declare module "#/lib/command/global" {
 			};
 
 			run: {
-				create: ScopedAction<CreateRunPayload, { runId: string }[]>;
-				pause: ScopedAction<PauseRunPayload, { success: boolean }[]>;
-				resume: ScopedAction<ResumeRunPayload, { success: boolean }[]>;
-				finalize: ScopedAction<FinalizeRunPayload, { success: boolean }[]>;
+				create: ScopedAction<CreateRunPayload, { runId: string }>;
+				pause: ScopedAction<PauseRunPayload, void>;
+				resume: ScopedAction<ResumeRunPayload, void>;
+				finalize: ScopedAction<FinalizeRunPayload, void>;
 				finalized: ScopedAction<RunFinalizedPayload, void>;
 				update: {
 					payload: ScopedAction<RunUpdatePayloadPayload, void>;

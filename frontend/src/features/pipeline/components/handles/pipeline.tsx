@@ -1,9 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { useSelector } from "@tanstack/react-store";
 import { useCallback, useEffect } from "react";
 import { z } from "zod";
-import { command } from "#/lib/command";
 import { queryClient } from "#/integrations/tanstack-query/root-provider";
+import { command } from "#/lib/command";
 import { getPipelineQueryOptions } from "../../lib/react-query/get-pipeline-query-options";
 import { getPipelinesQueryOptions } from "../../lib/react-query/get-pipelines-query-options";
 import { savePipelineMutationOptions } from "../../lib/react-query/save-pipeline-mutation-options";
@@ -16,6 +17,7 @@ const nameSchema = z.string().max(50, "Name must be at most 50 characters");
 
 export function PipelineHandle() {
 	const { store } = usePipelineContext();
+	const pipelineId = useSelector(store, (state) => state.id);
 	const navigate = useNavigate({ from: "/pipelines/$id" as never });
 
 	const savePipelineMutation = useMutation(savePipelineMutationOptions());
@@ -83,17 +85,20 @@ export function PipelineHandle() {
 	);
 
 	useEffect(() => {
+		const config = { instanceId: pipelineId };
+
 		const dispose1 = command.handle(
 			"pipelines.update.name",
-			onUpdateName as any,
+			onUpdateName,
+			config,
 		);
-		const dispose2 = command.handle("pipelines.save", savePipeline as any);
+		const dispose2 = command.handle("pipelines.save", savePipeline, config);
 
 		return () => {
 			dispose1();
 			dispose2();
 		};
-	}, [onUpdateName, savePipeline]);
+	}, [pipelineId, onUpdateName, savePipeline]);
 
 	return null;
 }

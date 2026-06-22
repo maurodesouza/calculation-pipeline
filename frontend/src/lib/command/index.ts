@@ -1,172 +1,128 @@
+import type { DeepKeys } from "#/types/helpers";
 import { CommandBus } from "./command-bus";
 import type { Actions } from "./global";
 import { InstanceRegistry } from "./instance-registry";
 import { TransitionStore } from "./transitions-store";
-import type { CommandMeta, Config, Dispose, Handler } from "./types";
+import type {
+	ActionPath,
+	ActionPayload,
+	ActionReturn,
+	CommandMeta,
+	Config,
+	Handler,
+	ScopedCommands,
+	UnscopedCommands,
+} from "./types";
 
 export type { Actions } from "./global";
+export type {
+	Action,
+	HandleConfig,
+	IsScopedCommand,
+	ScopedAction,
+	UnscopedCommands,
+} from "./types";
 
 export class Command {
 	private $commandBus: CommandBus;
 	private $transitions: TransitionStore;
-	private $registry: InstanceRegistry;
+	private $instanceRegistry: InstanceRegistry;
 
 	constructor() {
 		this.$transitions = TransitionStore.getInstance();
-		this.$registry = InstanceRegistry.getInstance();
 		this.$commandBus = new CommandBus(this.$transitions);
+		this.$instanceRegistry = InstanceRegistry.getInstance();
 	}
 
-	get bus() {
-		return this.$commandBus;
+	handle<TCommand extends ScopedCommands>(
+		command: TCommand,
+		handler: Handler<ActionPayload<TCommand>, ActionReturn<TCommand>>,
+		config: {
+			instanceId: string;
+			meta?: CommandMeta;
+		},
+	): () => void;
+	handle<TCommand extends UnscopedCommands>(
+		command: TCommand,
+		handler: Handler<ActionPayload<TCommand>, ActionReturn<TCommand>>,
+		config?: {
+			meta?: CommandMeta;
+		},
+	): () => void;
+	handle<TCommand extends ActionPath>(
+		command: TCommand,
+		handler: Handler<ActionPayload<TCommand>, ActionReturn<TCommand>>,
+		config?: {
+			instanceId?: string;
+			meta?: CommandMeta;
+		},
+	) {
+		const result = this.parseCommand(command, config?.instanceId);
+		const { domain, key, instanceId } = result;
+
+		if (domain && instanceId) {
+			this.$instanceRegistry.add(domain, {
+				id: instanceId,
+				label: config?.meta?.label,
+			});
+		}
+
+		const dispose = this.$commandBus.handle<
+			ActionPayload<TCommand>,
+			ActionReturn<TCommand>
+		>(key, handler);
+
+		return () => {
+			if (domain && instanceId)
+				this.$instanceRegistry.remove(domain, instanceId);
+			dispose();
+		};
 	}
 
-	get transitions() {
-		return this.$transitions;
-	}
-
-	get registry() {
-		return this.$registry;
-	}
-
-	handle(
-		command: string,
-		handler: Handler,
-		_config?: { instanceId?: string; meta?: CommandMeta },
-	): Dispose {
-		return this.$commandBus.handle(command, handler);
-	}
-
-	dispatch(
-		command: string,
-		payload?: unknown,
+	dispatch<TCommand extends ActionPath>(
+		command: TCommand,
+		payload?: ActionPayload<TCommand>,
 		config?: Config,
-	): Promise<unknown> {
-		return this.$commandBus.dispatch(command, payload, config);
+	) {
+		const result = this.parseCommand(command, config?.instanceId);
+		return this.$commandBus.dispatch<ActionPayload<TCommand>>(
+			result.key,
+			payload,
+			config,
+		);
 	}
 
-	scoped(instanceId: string) {
-		return new ScopedCommandProxy(this, instanceId);
-	}
-
-	createProxy(path: string[] = []): unknown {
+	getActionsProxy(path: DeepKeys<Actions>[] = []): Actions {
 		const self = this;
+
 		return new Proxy(() => {}, {
-			get(_target, prop: string) {
-				if (prop === "handle") {
-					return (
-						command: string,
-						handler: Handler,
-						config?: { instanceId?: string; meta?: CommandMeta },
-					) => self.handle(command, handler, config);
-				}
-
-				if (prop === "dispatch") {
-					return (command: string, payload?: unknown, config?: Config) =>
-						self.dispatch(command, payload, config);
-				}
-
-				if (prop === "scoped") {
-					return (instanceId: string) => self.scoped(instanceId);
-				}
-
-				if (prop === "bus") {
-					return self.$commandBus;
-				}
-
-				if (prop === "transitions") {
-					return self.$transitions;
-				}
-
-				if (prop === "registry") {
-					return self.$registry;
-				}
-
-				return self.createProxy([...path, prop]);
+			get(_target, prop: DeepKeys<Actions>) {
+				return self.getActionsProxy([...path, prop]);
 			},
 
-			apply(_target, _thisArg, args: unknown[]) {
-				const command = path.join(".");
-				const payload = args[0];
-				const config = args[1] as Config | undefined;
-
-				return self.dispatch(command, payload, config);
+			apply(_target, _thisArg, args: [ActionPayload<ActionPath>, Config?]) {
+				const commandName = path.join(".") as ActionPath;
+				return self.dispatch(commandName, args[0], args[1]);
 			},
-		});
+		}) as unknown as Actions;
+	}
+
+	private parseCommand(command: ActionPath, instanceId?: string) {
+		const parts = command.split(".");
+		const hasDomain = parts.length > 1;
+
+		if (!hasDomain) {
+			return { domain: undefined, instanceId, key: command };
+		}
+
+		const domain = parts[0];
+		const path = parts.slice(1).join(".");
+		const key = instanceId ? `${instanceId}:${domain}.${path}` : command;
+
+		return { domain, instanceId, key };
 	}
 }
 
-class ScopedCommandProxy {
-	private $command: Command;
-	private $instanceId: string;
+export const command = new Command();
 
-	constructor(command: Command, instanceId: string) {
-		this.$command = command;
-		this.$instanceId = instanceId;
-	}
-
-	createProxy(path: string[] = []): unknown {
-		const self = this;
-		return new Proxy(() => {}, {
-			get(_target, prop: string) {
-				if (prop === "handle") {
-					return (
-						command: string,
-						handler: Handler,
-						config?: { meta?: CommandMeta },
-					) =>
-						self.$command.handle(command, handler, {
-							instanceId: self.$instanceId,
-							...config,
-						});
-				}
-
-				if (prop === "dispatch") {
-					return (
-						command: string,
-						payload?: unknown,
-						config?: Omit<Config, "instanceId">,
-					) =>
-						self.$command.dispatch(command, payload, {
-							...config,
-							instanceId: self.$instanceId,
-						});
-				}
-
-				return self.createProxy([...path, prop]);
-			},
-
-			apply(_target, _thisArg, args: unknown[]) {
-				const command = path.join(".");
-				const payload = args[0];
-				const config = args[1] as Omit<Config, "instanceId"> | undefined;
-
-				return self.$command.dispatch(command, payload, {
-					...config,
-					instanceId: self.$instanceId,
-				});
-			},
-		});
-	}
-}
-
-const command = new Command();
-
-export const commands = command.createProxy() as Actions & {
-	handle: (
-		command: string,
-		handler: Handler,
-		config?: { instanceId?: string; meta?: CommandMeta },
-	) => Dispose;
-	dispatch: (
-		command: string,
-		payload?: unknown,
-		config?: Config,
-	) => Promise<unknown>;
-	scoped: (instanceId: string) => unknown;
-	bus: CommandBus;
-	transitions: TransitionStore;
-	registry: InstanceRegistry;
-};
-
-export { command };
+export const actions = command.getActionsProxy();
