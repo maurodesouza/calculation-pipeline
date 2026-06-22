@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 import { Page } from "#/components/ui/page";
 import { Panel } from "#/components/ui/panel";
 import { Separator } from "#/components/ui/separator";
-import { Command } from "#/lib/command";
 import { InstanceRegistry } from "#/lib/command/instance-registry";
 import { Route as RootRoute } from "#/routes/__root";
 import { Canvas } from "../components/canvas";
@@ -29,14 +28,9 @@ function PipelineCanvas() {
 	const pipeline = PipelineCanvasRoute.useLoaderData();
 
 	const storeRef = useRef<ReturnType<typeof createPipelineStore>>(null);
-	const commandRef = useRef<Command | null>(null);
 
 	if (!storeRef.current) {
 		storeRef.current = createPipelineStore(pipeline);
-	}
-
-	if (!commandRef.current) {
-		commandRef.current = new Command();
 	}
 
 	useEffect(() => {
@@ -54,9 +48,7 @@ function PipelineCanvas() {
 
 	return (
 		<Page.Container>
-			<PipelineStoreProvider
-				value={{ store: storeRef.current, command: commandRef.current }}
-			>
+			<PipelineStoreProvider value={{ store: storeRef.current }}>
 				<div className="flex flex-col w-full h-full">
 					<Header.Container>
 						<Header.Wrapper>

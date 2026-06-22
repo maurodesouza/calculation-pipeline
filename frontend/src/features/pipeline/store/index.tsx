@@ -1,7 +1,6 @@
 import type { Store } from "@tanstack/react-store";
 import { createStore, createStoreContext } from "@tanstack/react-store";
 import type { Edge } from "@xyflow/react";
-import { Command } from "#/lib/command";
 import { json } from "#/utils/json";
 import { random } from "#/utils/random";
 import type { CanvasNode } from "../types/canvas-node";
@@ -58,7 +57,7 @@ export function createPipelineStore(pipeline?: Pipeline) {
 	const name = pipeline?.name || `new-pipeline-${random.id(5)}`;
 	const instanceId = random.id(16);
 
-	const store = createStore({
+	return createStore({
 		rawPipeline: pipeline || {},
 
 		id,
@@ -70,21 +69,13 @@ export function createPipelineStore(pipeline?: Pipeline) {
 		nodes: canvas?.nodes || [],
 		edges: canvas?.edges || [],
 	});
-
-	return store;
 }
 
 type PipelineStoreContextValue = {
 	store: Store<PipelineStore>;
-	command: Command;
 };
 
 export const {
 	StoreProvider: PipelineStoreProvider,
 	useStoreContext: usePipelineContext,
 } = createStoreContext<PipelineStoreContextValue>();
-
-export function useCommand() {
-	const { command } = usePipelineContext();
-	return command;
-}
