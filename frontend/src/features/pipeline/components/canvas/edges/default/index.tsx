@@ -6,7 +6,8 @@ import {
 } from "@xyflow/react";
 import { Trash2 } from "lucide-react";
 import { Clickable } from "#/components/ui/clickable";
-import { events } from "#/events";
+import { usePipelineContext } from "#/features/pipeline/store";
+import { actions } from "#/lib/command";
 
 export function DefaultEdge({
 	id,
@@ -19,6 +20,8 @@ export function DefaultEdge({
 	sourcePosition,
 	targetPosition,
 }: EdgeProps) {
+	const { store } = usePipelineContext();
+	const instanceId = store.state.instanceId;
 	const [edgePath, labelX, labelY] = getBezierPath({
 		sourceX,
 		sourceY,
@@ -51,7 +54,7 @@ export function DefaultEdge({
 						transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
 						pointerEvents: "all",
 					}}
-					onClick={() => events.pipelines.canvas.edges.remove(id)}
+					onClick={() => actions.pipelines.canvas.edges.remove(id, { instanceId })}
 				>
 					<Trash2 size={16} />
 				</Clickable.Button>

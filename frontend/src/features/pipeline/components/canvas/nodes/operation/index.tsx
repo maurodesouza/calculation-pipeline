@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
 import { ContextMenu } from "#/components/ui/context-menu";
-import { events } from "#/events";
 import { EditNodePanel } from "#/features/pipeline/components/panels/edit-node";
+import { usePipelineContext } from "#/features/pipeline/store";
 import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
+import { actions } from "#/lib/command";
 
 const operationIcons = {
 	sum: Plus,
@@ -84,6 +85,8 @@ function getExecutionVisuals(
 
 export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 	const { data, id, selected } = props;
+	const { store } = usePipelineContext();
+	const instanceId = store.state.instanceId;
 
 	const operation = data.props.operation;
 	const Icon = operationIcons[operation];
@@ -101,7 +104,8 @@ export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 					variant={selected ? "brand" : "none"}
 					className={executionClassName}
 					onClick={() =>
-						events.pipelines.panel.show(() => (
+						actions.pipelines.panel.show(
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															pipelines.panel.show(() => (
 							<EditNodePanel id={id} initialData={data} />
 						))
 					}
