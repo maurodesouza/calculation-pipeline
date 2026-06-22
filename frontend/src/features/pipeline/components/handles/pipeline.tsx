@@ -83,7 +83,10 @@ export function PipelineHandle() {
 	);
 
 	useEffect(() => {
-		const dispose1 = command.handle("pipelines.update.name", onUpdateName as any);
+		const dispose1 = command.handle(
+			"pipelines.update.name",
+			onUpdateName as any,
+		);
 		const dispose2 = command.handle("pipelines.save", savePipeline as any);
 
 		return () => {

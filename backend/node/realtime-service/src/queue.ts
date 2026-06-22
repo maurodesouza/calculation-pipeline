@@ -13,8 +13,15 @@ export type ConsumeCallback<T> = (
 export type Queue = {
 	connect(): Promise<void>;
 	setup(topology: unknown): Promise<void>;
-	publish(event: string, message: unknown, config?: PublishConfig): Promise<void>;
-	consume<T = unknown>(queue: string, callback: ConsumeCallback<T>): Promise<void>;
+	publish(
+		event: string,
+		message: unknown,
+		config?: PublishConfig,
+	): Promise<void>;
+	consume<T = unknown>(
+		queue: string,
+		callback: ConsumeCallback<T>,
+	): Promise<void>;
 };
 
 export class RabbitMQAdapter implements Queue {
