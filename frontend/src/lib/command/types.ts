@@ -68,10 +68,7 @@ export type ActionReturn<TCommand extends ActionPath> = ReturnFromAction<
 >;
 
 export type IsScopedCommand<TCommand extends ActionPath> =
-	ActionValue<TCommand> extends (
-		payload: any,
-		config: Config,
-	) => Promise<any>
+	ActionValue<TCommand> extends (payload: any, config: Config) => Promise<any>
 		? true
 		: false;
 
