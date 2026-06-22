@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import {
 	BaseEdge,
 	EdgeLabelRenderer,
@@ -21,7 +22,7 @@ export function DefaultEdge({
 	targetPosition,
 }: EdgeProps) {
 	const { store } = usePipelineContext();
-	const instanceId = store.state.instanceId;
+	const instanceId = useSelector(store, (state) => state.instanceId);
 	const [edgePath, labelX, labelY] = getBezierPath({
 		sourceX,
 		sourceY,
@@ -54,7 +55,9 @@ export function DefaultEdge({
 						transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
 						pointerEvents: "all",
 					}}
-					onClick={() => actions.pipelines.canvas.edges.remove(id, { instanceId })}
+					onClick={() =>
+						actions.pipelines.canvas.edges.remove(id, { instanceId })
+					}
 				>
 					<Trash2 size={16} />
 				</Clickable.Button>

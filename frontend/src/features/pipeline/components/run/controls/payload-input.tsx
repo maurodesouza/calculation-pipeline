@@ -1,15 +1,16 @@
 import { useSelector } from "@tanstack/react-store";
 import { Field } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
-import { events } from "#/events";
+import { actions } from "#/lib/command";
 import { usePipelineContext } from "../../../store";
 
 export function PayloadInput() {
 	const { store } = usePipelineContext();
 	const payload = useSelector(store, (state) => state.run.payload);
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	const handleChange = (value: number) => {
-		events.pipelines.run.update.payload({ payload: value });
+		actions.pipelines.run.update.payload({ payload: value }, { instanceId });
 	};
 
 	return (

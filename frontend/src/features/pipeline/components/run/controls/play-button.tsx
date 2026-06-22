@@ -2,8 +2,8 @@ import { useSelector } from "@tanstack/react-store";
 import { Loader, Play } from "lucide-react";
 import { useCallback } from "react";
 import { Clickable } from "#/components/ui/clickable";
-import { events } from "#/events/index";
 import { useTransition } from "#/hooks/use-transition";
+import { actions } from "#/lib/command";
 import { usePipelineContext } from "../../../store";
 
 export function PlayButton() {
@@ -13,18 +13,15 @@ export function PlayButton() {
 	const runStatus = useSelector(store, (state) => state.run.status);
 	const isRunning = runStatus === "pending" || runStatus === "started";
 	const isPaused = runStatus === "paused";
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
-	const onCreateRun = useCallback(() => {
-		events
-			.sequence(undefined, {
-				transition: ["creating-run"],
-			})
-			.step(() => events.pipelines.save())
-			.step(([{ pipelineId }]) =>
-				events.pipelines.run.create({ pipelineId, payload }),
-			)
-			.run();
-	}, [payload]);
+	const onCreateRun = useCallback(async () => {
+		const [{ pipelineId }] = await actions.pipelines.save(undefined, {
+			transition: ["creating-run"],
+			instanceId,
+		});
+		await actions.pipelines.run.create({ pipelineId, payload }, { instanceId });
+	}, [payload, instanceId]);
 
 	const disabled = isCreating || isRunning || isPaused;
 

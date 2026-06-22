@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import {
 	ChevronLeft,
 	Copy,
@@ -15,8 +16,9 @@ import { Panel } from "#/components/ui/panel";
 import { Select } from "#/components/ui/select";
 import { Separator } from "#/components/ui/separator";
 import { Text } from "#/components/ui/text";
-import { events } from "#/events";
+import { usePipelineContext } from "#/features/pipeline/store";
 import type { Operation } from "#/features/pipeline/types/canvas-node";
+import { actions } from "#/lib/command";
 import { fn } from "#/utils/fn";
 import { StepsPanel } from "../steps";
 
@@ -40,6 +42,8 @@ type EditNodePanelProps = {
 
 export function EditNodePanel(props: EditNodePanelProps) {
 	const { id, initialData } = props;
+	const { store } = usePipelineContext();
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	const updateDataRef = useRef(
 		fn.debounce((id, payload) => {
@@ -71,28 +75,31 @@ export function EditNodePanel(props: EditNodePanelProps) {
 		id: string,
 		payload: { operation: Operation; by: number },
 	) {
-		events.pipelines.canvas.nodes.updateData({
-			id,
-			data: {
-				props: {
-					operation: payload.operation,
-					by: payload.by,
+		actions.pipelines.canvas.nodes.updateData(
+			{
+				id,
+				data: {
+					props: {
+						operation: payload.operation,
+						by: payload.by,
+					},
 				},
 			},
-		});
+			{ instanceId },
+		);
 	}
 
 	function handleDelete() {
-		events.pipelines.canvas.nodes.remove(id);
+		actions.pipelines.canvas.nodes.remove(id, { instanceId });
 		handleBackToSteps();
 	}
 
 	function handleDuplicate() {
-		events.pipelines.canvas.nodes.duplicate(id);
+		actions.pipelines.canvas.nodes.duplicate(id, { instanceId });
 	}
 
 	function handleBackToSteps() {
-		events.pipelines.panel.show(() => <StepsPanel />);
+		actions.pipelines.panel.show(() => <StepsPanel />, { instanceId });
 	}
 
 	useEffect(() => {

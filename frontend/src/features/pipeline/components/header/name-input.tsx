@@ -1,8 +1,9 @@
+import { useSelector } from "@tanstack/react-store";
 import { useRef, useState } from "react";
 import { z } from "zod";
 import { Field } from "#/components/ui/field";
 import { Input } from "#/components/ui/input";
-import { events } from "#/events/index";
+import { actions } from "#/lib/command";
 import { fn } from "#/utils/fn";
 import { usePipelineContext } from "../../store";
 
@@ -14,6 +15,7 @@ const nameSchema = z
 export function NameInput() {
 	const { store } = usePipelineContext();
 	const state = store.state;
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	const [name, setName] = useState(state.name);
 	const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function NameInput() {
 			const result = nameSchema.safeParse(value);
 			if (result.success) {
 				setError(null);
-				events.pipelines.update.name(result.data);
+				actions.pipelines.update.name(result.data, { instanceId });
 			} else {
 				const pretty = z.prettifyError(result.error);
 				setError(pretty);

@@ -1,7 +1,7 @@
 import { useSelector } from "@tanstack/react-store";
 import { Pause, Play } from "lucide-react";
 import { Clickable } from "#/components/ui/clickable";
-import { events } from "#/events/index";
+import { actions } from "#/lib/command";
 import { usePipelineContext } from "../../../store";
 
 export function ToggleButton() {
@@ -10,6 +10,7 @@ export function ToggleButton() {
 	const runStatus = useSelector(store, (state) => state.run.status);
 	const isRunning = runStatus === "pending" || runStatus === "started";
 	const isPaused = runStatus === "paused";
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	if (isPaused) {
 		return (
@@ -17,7 +18,9 @@ export function ToggleButton() {
 				tone="brand"
 				variant="ghost"
 				size="icon"
-				onClick={() => runId && events.pipelines.run.resume({ runId })}
+				onClick={() =>
+					runId && actions.pipelines.run.resume({ runId }, { instanceId })
+				}
 				title="Resume run"
 			>
 				<Play size={16} />
@@ -30,7 +33,9 @@ export function ToggleButton() {
 			tone="warning"
 			variant="ghost"
 			size="icon"
-			onClick={() => runId && events.pipelines.run.pause({ runId })}
+			onClick={() =>
+				runId && actions.pipelines.run.pause({ runId }, { instanceId })
+			}
 			disabled={!isRunning}
 			title="Pause run"
 		>
