@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import { useRef, useState } from "react";
 import { z } from "zod";
 import { Field } from "#/components/ui/field";
@@ -14,7 +15,7 @@ const nameSchema = z
 export function NameInput() {
 	const { store } = usePipelineContext();
 	const state = store.state;
-	const instanceId = state.instanceId;
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	const [name, setName] = useState(state.name);
 	const [error, setError] = useState<string | null>(null);

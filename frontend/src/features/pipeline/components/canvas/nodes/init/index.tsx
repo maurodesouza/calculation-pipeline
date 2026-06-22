@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import type { NodeProps } from "@xyflow/react";
 import { Play } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
@@ -7,7 +8,7 @@ import { actions } from "#/lib/command";
 
 export function InitNode(_props: NodeProps<CanvasInitNode>) {
 	const { store } = usePipelineContext();
-	const instanceId = store.state.instanceId;
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	return (
 		<Canvas.Node.IconWrapper

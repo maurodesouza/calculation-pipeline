@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import { X } from "lucide-react";
 import { Activity, useCallback, useEffect, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
@@ -11,6 +12,7 @@ import { RunTable } from "./table";
 
 export function RunPanel() {
 	const { store } = usePipelineContext();
+	const instanceId = useSelector(store, (state) => state.instanceId);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const onOpenPanel = useCallback(() => {
@@ -53,7 +55,7 @@ export function RunPanel() {
 							size="icon"
 							onClick={() =>
 								actions.pipelines.panel.clear(undefined, {
-									instanceId: store.state.instanceId,
+									instanceId,
 								})
 							}
 							className="absolute top-2 right-2 z-20"

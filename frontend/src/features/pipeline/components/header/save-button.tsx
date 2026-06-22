@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import { Clickable } from "#/components/ui/clickable";
 import { useTransition } from "#/hooks/use-transition";
 import { actions } from "#/lib/command";
@@ -7,7 +8,7 @@ export function SaveButton() {
 	const { store } = usePipelineContext();
 	const isSaving = useTransition(["pipelines.save"]);
 	const isCreatingRun = useTransition(["creating-run"]);
-	const instanceId = store.state.instanceId;
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	return (
 		<Clickable.Button

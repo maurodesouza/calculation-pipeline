@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import type { NodeProps } from "@xyflow/react";
 import {
 	Check,
@@ -86,7 +87,7 @@ function getExecutionVisuals(
 export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 	const { data, id, selected } = props;
 	const { store } = usePipelineContext();
-	const instanceId = store.state.instanceId;
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	const operation = data.props.operation;
 	const Icon = operationIcons[operation];
