@@ -1,17 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
-import { events } from "#/events";
-import {
-	type CreateRunEventPayload,
-	type FinalizeRunEventPayload,
-	type PauseRunEventPayload,
-	PipelineEvents,
-	type ResumeRunEventPayload,
-	type RunUpdatePayloadEventPayload,
-} from "#/features/pipeline/events";
+import type {
+	CreateRunPayload,
+	FinalizeRunPayload,
+	PauseRunPayload,
+	ResumeRunPayload,
+	RunUpdatePayloadPayload,
+} from "#/features/pipeline/commands";
 import { usePipelineContext } from "#/features/pipeline/store";
 import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
 import { canvas } from "#/features/pipeline/utils/canvas";
+import { command } from "#/lib/command";
 import { createRunMutationOptions } from "../../lib/react-query/create-run-mutation-options";
 import { finalizeRunMutationOptions } from "../../lib/react-query/finalize-run-mutation-options";
 import { pauseRunMutationOptions } from "../../lib/react-query/pause-run-mutation-options";
@@ -24,8 +23,10 @@ export function RunHandle() {
 	const pauseRunMutation = useMutation(pauseRunMutationOptions());
 	const resumeRunMutation = useMutation(resumeRunMutationOptions());
 
+	const pipelineId = store.state.id;
+
 	const createRun = useCallback(
-		async (payload: CreateRunEventPayload) => {
+		async (payload: CreateRunPayload) => {
 			const { id } = await createRunMutation.mutateAsync(payload);
 
 			store.setState((state) => ({
@@ -47,28 +48,28 @@ export function RunHandle() {
 	);
 
 	const pauseRun = useCallback(
-		async (payload: PauseRunEventPayload) => {
+		async (payload: PauseRunPayload) => {
 			await pauseRunMutation.mutateAsync({ runId: payload.runId });
 		},
 		[pauseRunMutation],
 	);
 
 	const resumeRun = useCallback(
-		async (payload: ResumeRunEventPayload) => {
+		async (payload: ResumeRunPayload) => {
 			await resumeRunMutation.mutateAsync({ runId: payload.runId });
 		},
 		[resumeRunMutation],
 	);
 
 	const finalizeRun = useCallback(
-		async (payload: FinalizeRunEventPayload) => {
+		async (payload: FinalizeRunPayload) => {
 			await finalizeRunMutation.mutateAsync({ runId: payload.runId });
 		},
 		[finalizeRunMutation],
 	);
 
 	const updatePayload = useCallback(
-		({ payload }: RunUpdatePayloadEventPayload) => {
+		({ payload }: RunUpdatePayloadPayload) => {
 			store.setState((prev) => ({
 				...prev,
 				run: { ...prev.run, payload },
@@ -78,23 +79,43 @@ export function RunHandle() {
 	);
 
 	useEffect(() => {
-		const unsubscribe1 = events.on(PipelineEvents.CREATE_RUN, createRun);
-		const unsubscribe2 = events.on(PipelineEvents.RUN_PAUSE, pauseRun);
-		const unsubscribe3 = events.on(PipelineEvents.RUN_RESUME, resumeRun);
-		const unsubscribe4 = events.on(PipelineEvents.RUN_FINALIZE, finalizeRun);
-		const unsubscribe5 = events.on(
-			PipelineEvents.RUN_UPDATE_PAYLOAD,
-			updatePayload,
+		const dispose1 = command.handle("pipelines.run.create", createRun as any, {
+			instanceId: pipelineId,
+			meta: { label: `Pipeline ${pipelineId}` },
+		});
+		const dispose2 = command.handle("pipelines.run.pause", pauseRun as any, {
+			instanceId: pipelineId,
+			meta: { label: `Pipeline ${pipelineId}` },
+		});
+		const dispose3 = command.handle("pipelines.run.resume", resumeRun as any, {
+			instanceId: pipelineId,
+			meta: { label: `Pipeline ${pipelineId}` },
+		});
+		const dispose4 = command.handle(
+			"pipelines.run.finalize",
+			finalizeRun as any,
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
+		);
+		const dispose5 = command.handle(
+			"pipelines.run.update.payload",
+			updatePayload as any,
+			{
+				instanceId: pipelineId,
+				meta: { label: `Pipeline ${pipelineId}` },
+			},
 		);
 
 		return () => {
-			unsubscribe1();
-			unsubscribe2();
-			unsubscribe3();
-			unsubscribe4();
-			unsubscribe5();
+			dispose1();
+			dispose2();
+			dispose3();
+			dispose4();
+			dispose5();
 		};
-	}, [createRun, pauseRun, resumeRun, finalizeRun, updatePayload]);
+	}, [createRun, pauseRun, resumeRun, finalizeRun, updatePayload, pipelineId]);
 
 	return null;
 }
