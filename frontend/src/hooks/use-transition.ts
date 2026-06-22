@@ -1,12 +1,9 @@
 import { useSyncExternalStore } from "react";
-import { events } from "#/events/index";
+import { TransitionStore } from "#/lib/command/transitions-store";
 
 export function useTransition(key: unknown[]) {
-	const transitionKey = JSON.stringify(key);
-
 	return useSyncExternalStore(
-		(callback) => events.subscribe(callback),
-
-		() => events.isExecuting(transitionKey),
+		(callback) => TransitionStore.getInstance().subscribe(callback),
+		() => TransitionStore.getInstance().isExecuting(key),
 	);
 }
