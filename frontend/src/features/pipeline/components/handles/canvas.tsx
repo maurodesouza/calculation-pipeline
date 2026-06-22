@@ -9,8 +9,7 @@ import {
 	type NodeChange,
 } from "@xyflow/react";
 import { useCallback, useEffect } from "react";
-import { events } from "#/events";
-import { PipelineEvents } from "#/features/pipeline/events";
+import { commands } from "#/lib/command";
 import { array } from "#/utils/array";
 import { usePipelineContext } from "../../store";
 import type { CanvasNode, CanvasOperationNode } from "../../types/canvas-node";
@@ -18,6 +17,7 @@ import { canvas } from "../../utils/canvas";
 
 export function CanvasHandle() {
 	const { store } = usePipelineContext();
+	const pipelineId = store.use((state) => state.id);
 
 	const onAddNode = useCallback(
 		(node: CanvasNode | CanvasNode[]) => {
@@ -139,47 +139,57 @@ export function CanvasHandle() {
 	);
 
 	useEffect(() => {
-		const unsubscribe1 = events.on(PipelineEvents.CANVAS_NODES_ADD, onAddNode);
-		const unsubscribe2 = events.on(
-			PipelineEvents.CANVAS_NODES_CHANGE,
+		const dispose1 = commands.handle("pipelines.canvas.nodes.add", onAddNode, {
+			instanceId: pipelineId,
+		});
+		const dispose2 = commands.handle(
+			"pipelines.canvas.nodes.change",
 			onChangeNodes,
+			{ instanceId: pipelineId },
 		);
-		const unsubscribe3 = events.on(
-			PipelineEvents.CANVAS_NODES_REMOVE,
+		const dispose3 = commands.handle(
+			"pipelines.canvas.nodes.remove",
 			onRemoveNode,
+			{ instanceId: pipelineId },
 		);
-		const unsubscribe4 = events.on(
-			PipelineEvents.CANVAS_NODES_DUPLICATE,
+		const dispose4 = commands.handle(
+			"pipelines.canvas.nodes.duplicate",
 			onDuplicateNode,
+			{ instanceId: pipelineId },
 		);
-		const unsubscribe5 = events.on(
-			PipelineEvents.CANVAS_NODES_UPDATE_DATA,
+		const dispose5 = commands.handle(
+			"pipelines.canvas.nodes.updateData",
 			onUpdateNodeData,
+			{ instanceId: pipelineId },
 		);
-		const unsubscribe6 = events.on(
-			PipelineEvents.CANVAS_EDGES_CONNECT,
+		const dispose6 = commands.handle(
+			"pipelines.canvas.edges.connect",
 			onEdgeConnect,
+			{ instanceId: pipelineId },
 		);
-		const unsubscribe7 = events.on(
-			PipelineEvents.CANVAS_EDGES_CHANGE,
+		const dispose7 = commands.handle(
+			"pipelines.canvas.edges.change",
 			onChangeEdges,
+			{ instanceId: pipelineId },
 		);
-		const unsubscribe8 = events.on(
-			PipelineEvents.CANVAS_EDGES_REMOVE,
+		const dispose8 = commands.handle(
+			"pipelines.canvas.edges.remove",
 			onRemoveEdge,
+			{ instanceId: pipelineId },
 		);
 
 		return () => {
-			unsubscribe1();
-			unsubscribe2();
-			unsubscribe3();
-			unsubscribe4();
-			unsubscribe5();
-			unsubscribe6();
-			unsubscribe7();
-			unsubscribe8();
+			dispose1();
+			dispose2();
+			dispose3();
+			dispose4();
+			dispose5();
+			dispose6();
+			dispose7();
+			dispose8();
 		};
 	}, [
+		pipelineId,
 		onAddNode,
 		onChangeNodes,
 		onRemoveNode,
