@@ -1,13 +1,18 @@
+import { useSelector } from "@tanstack/react-store";
 import { X } from "lucide-react";
 import { Activity, useCallback, useEffect, useState } from "react";
 import { Clickable } from "#/components/ui/clickable";
 import { ResizablePanel } from "#/components/ui/resizable-panel";
 import { events } from "#/events/index";
+import { actions } from "#/lib/command";
 import { PipelineEvents } from "../../events";
+import { usePipelineContext } from "../../store";
 import { Controls } from "./controls";
 import { RunTable } from "./table";
 
 export function RunPanel() {
+	const { store } = usePipelineContext();
+	const instanceId = useSelector(store, (state) => state.instanceId);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const onOpenPanel = useCallback(() => {
@@ -48,7 +53,11 @@ export function RunPanel() {
 						<Clickable.Button
 							variant="icon"
 							size="icon"
-							onClick={() => events.emit(PipelineEvents.RUN_PANEL_CLOSE)}
+							onClick={() =>
+								actions.pipelines.panel.clear(undefined, {
+									instanceId,
+								})
+							}
 							className="absolute top-2 right-2 z-20"
 						>
 							<X size={16} />

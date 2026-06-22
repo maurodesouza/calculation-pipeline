@@ -1,7 +1,7 @@
 import { useSelector } from "@tanstack/react-store";
 import { Square } from "lucide-react";
 import { Clickable } from "#/components/ui/clickable";
-import { events } from "#/events/index";
+import { actions } from "#/lib/command";
 import { usePipelineContext } from "../../../store";
 
 export function FinalizeButton() {
@@ -10,13 +10,16 @@ export function FinalizeButton() {
 	const runStatus = useSelector(store, (state) => state.run.status);
 	const isRunning = runStatus === "pending" || runStatus === "started";
 	const isPaused = runStatus === "paused";
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	return (
 		<Clickable.Button
 			tone="danger"
 			variant="ghost"
 			size="icon"
-			onClick={() => runId && events.pipelines.run.finalize({ runId })}
+			onClick={() =>
+				runId && actions.pipelines.run.finalize({ runId }, { instanceId })
+			}
 			disabled={!isRunning && !isPaused}
 			title="Finalize run"
 		>

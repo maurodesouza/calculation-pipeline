@@ -1,3 +1,4 @@
+import { useSelector } from "@tanstack/react-store";
 import type { NodeProps } from "@xyflow/react";
 import {
 	Check,
@@ -11,9 +12,10 @@ import {
 } from "lucide-react";
 import { Canvas } from "#/components/ui/canvas";
 import { ContextMenu } from "#/components/ui/context-menu";
-import { events } from "#/events";
 import { EditNodePanel } from "#/features/pipeline/components/panels/edit-node";
+import { usePipelineContext } from "#/features/pipeline/store";
 import type { CanvasOperationNode } from "#/features/pipeline/types/canvas-node";
+import { actions } from "#/lib/command";
 
 const operationIcons = {
 	sum: Plus,
@@ -84,6 +86,8 @@ function getExecutionVisuals(
 
 export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 	const { data, id, selected } = props;
+	const { store } = usePipelineContext();
+	const instanceId = useSelector(store, (state) => state.instanceId);
 
 	const operation = data.props.operation;
 	const Icon = operationIcons[operation];
@@ -101,9 +105,10 @@ export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 					variant={selected ? "brand" : "none"}
 					className={executionClassName}
 					onClick={() =>
-						events.pipelines.panel.show(() => (
-							<EditNodePanel id={id} initialData={data} />
-						))
+						actions.pipelines.panel.show(
+							() => <EditNodePanel id={id} initialData={data} />,
+							{ instanceId },
+						)
 					}
 				>
 					<Canvas.Node.IconWrapper variant={iconVariant as never}>
@@ -121,7 +126,9 @@ export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 			</ContextMenu.Trigger>
 			<ContextMenu.Content>
 				<ContextMenu.Item
-					onClick={() => events.pipelines.canvas.nodes.duplicate(id)}
+					onClick={() =>
+						actions.pipelines.canvas.nodes.duplicate(id, { instanceId })
+					}
 				>
 					<Copy data-icon="inline-start" />
 					Duplicate
@@ -129,7 +136,9 @@ export function OperationNode(props: NodeProps<CanvasOperationNode>) {
 				<ContextMenu.Separator />
 				<ContextMenu.Item
 					tone="danger"
-					onClick={() => events.pipelines.canvas.nodes.remove(id)}
+					onClick={() =>
+						actions.pipelines.canvas.nodes.remove(id, { instanceId })
+					}
 				>
 					<Trash2 data-icon="inline-start" />
 					Delete
