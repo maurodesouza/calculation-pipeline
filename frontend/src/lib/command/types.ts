@@ -43,7 +43,7 @@ export type Action<TPayload = undefined, TResult = void> = [TPayload] extends [
 export type ScopedAction<TPayload = undefined, TResult = void> = [
 	TPayload,
 ] extends [undefined]
-	? (payload: undefined, config: Config) => Promise<TResult>
+	? (payload: TPayload, config: Config) => Promise<TResult>
 	: (payload: TPayload, config: Config) => Promise<TResult>;
 // #endregion
 
@@ -68,10 +68,7 @@ export type ActionReturn<TCommand extends ActionPath> = ReturnFromAction<
 >;
 
 export type IsScopedCommand<TCommand extends ActionPath> =
-	ActionValue<TCommand> extends (
-		payload: any,
-		config: Config,
-	) => Promise<any>
+	ActionValue<TCommand> extends (payload: any, config: Config) => Promise<any>
 		? true
 		: false;
 
