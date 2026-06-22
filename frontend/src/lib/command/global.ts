@@ -1,1 +1,4 @@
-export type Actions = Record<string, never>;
+export interface Actions {
+	// Global commands will be defined here
+	// Feature-specific commands are added via module augmentation in feature folders
+}
