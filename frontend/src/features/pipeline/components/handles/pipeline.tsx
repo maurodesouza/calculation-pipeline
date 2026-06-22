@@ -2,8 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";
 import { z } from "zod";
-import { queryClient } from "#/integrations/tanstack-query/root-provider";
 import { command } from "#/lib/command";
+import { queryClient } from "#/integrations/tanstack-query/root-provider";
 import { getPipelineQueryOptions } from "../../lib/react-query/get-pipeline-query-options";
 import { getPipelinesQueryOptions } from "../../lib/react-query/get-pipelines-query-options";
 import { savePipelineMutationOptions } from "../../lib/react-query/save-pipeline-mutation-options";
@@ -22,8 +22,7 @@ export function PipelineHandle() {
 	const syncStepsMutation = useMutation(syncStepsMutationOptions());
 
 	const onUpdateName = useCallback(
-		async (payload: unknown) => {
-			const name = payload as string;
+		async (name: string) => {
 			const result = nameSchema.safeParse(name);
 
 			if (result.success) {
@@ -37,7 +36,7 @@ export function PipelineHandle() {
 	);
 
 	const savePipeline = useCallback(
-		async (_payload: unknown) => {
+		async (_payload: undefined) => {
 			const state = store.get();
 
 			const result = await savePipelineMutation.mutateAsync({
@@ -84,11 +83,8 @@ export function PipelineHandle() {
 	);
 
 	useEffect(() => {
-		const dispose1 = command.handle(
-			"pipelines.update.name",
-			onUpdateName as never,
-		);
-		const dispose2 = command.handle("pipelines.save", savePipeline as never);
+		const dispose1 = command.handle("pipelines.update.name", onUpdateName as any);
+		const dispose2 = command.handle("pipelines.save", savePipeline as any);
 
 		return () => {
 			dispose1();
