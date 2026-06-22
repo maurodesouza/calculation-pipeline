@@ -43,7 +43,7 @@ export type Action<TPayload = undefined, TResult = void> = [TPayload] extends [
 export type ScopedAction<TPayload = undefined, TResult = void> = [
 	TPayload,
 ] extends [undefined]
-	? (payload: TPayload, config: Config) => Promise<TResult>
+	? (payload: undefined, config: Config) => Promise<TResult>
 	: (payload: TPayload, config: Config) => Promise<TResult>;
 // #endregion
 
