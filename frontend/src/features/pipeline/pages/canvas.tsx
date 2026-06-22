@@ -1,8 +1,10 @@
 import { createRoute } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Page } from "#/components/ui/page";
 import { Panel } from "#/components/ui/panel";
 import { Separator } from "#/components/ui/separator";
+import { Command } from "#/lib/command";
+import { InstanceRegistry } from "#/lib/command/instance-registry";
 import { Route as RootRoute } from "#/routes/__root";
 import { Canvas } from "../components/canvas";
 import { Handles } from "../components/handles";
@@ -27,14 +29,34 @@ function PipelineCanvas() {
 	const pipeline = PipelineCanvasRoute.useLoaderData();
 
 	const storeRef = useRef<ReturnType<typeof createPipelineStore>>(null);
+	const commandRef = useRef<Command | null>(null);
 
 	if (!storeRef.current) {
 		storeRef.current = createPipelineStore(pipeline);
 	}
 
+	if (!commandRef.current) {
+		commandRef.current = new Command();
+	}
+
+	useEffect(() => {
+		const instanceId = storeRef.current?.getState().instanceId;
+		const name = storeRef.current?.getState().name;
+		if (!instanceId) return;
+
+		const registry = InstanceRegistry.getInstance();
+		registry.add("pipeline", { id: instanceId, label: name });
+
+		return () => {
+			registry.remove("pipeline", instanceId);
+		};
+	}, []);
+
 	return (
 		<Page.Container>
-			<PipelineStoreProvider value={{ store: storeRef.current }}>
+			<PipelineStoreProvider
+				value={{ store: storeRef.current, command: commandRef.current }}
+			>
 				<div className="flex flex-col w-full h-full">
 					<Header.Container>
 						<Header.Wrapper>
