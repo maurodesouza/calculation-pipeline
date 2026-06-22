@@ -22,6 +22,7 @@ type RunStatus =
 type PipelineStore = Canvas & {
 	rawPipeline: Record<string, unknown>;
 	id: string;
+	instanceId: string;
 	name: string;
 	description: string;
 	run: {
@@ -54,11 +55,13 @@ export function createPipelineStore(pipeline?: Pipeline) {
 
 	const id = pipeline?.id || "new";
 	const name = pipeline?.name || `new-pipeline-${random.id(5)}`;
+	const instanceId = random.id(16);
 
 	return createStore({
 		rawPipeline: pipeline || {},
 
 		id,
+		instanceId,
 		name,
 		description: pipeline?.description || "",
 		run: { id: null, status: "idle" as const, payload: 0 },
