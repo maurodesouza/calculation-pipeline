@@ -1,15 +1,20 @@
 import { Trash2 } from "lucide-react";
 import { Clickable } from "#/components/ui/clickable";
-import { events } from "#/events/index";
-import { PipelineEvents } from "../../../events";
+import { actions } from "#/lib/command";
+import { usePipelineContext } from "../../../store";
 
 export function ClearButton() {
+	const { store } = usePipelineContext();
+	const instanceId = store.state.instanceId;
+
 	return (
 		<Clickable.Button
 			tone="danger"
 			variant="ghost"
 			size="icon"
-			onClick={() => events.emit(PipelineEvents.EXECUTION_CLEAR)}
+			onClick={() =>
+				actions.pipelines.execution.clear(undefined, { instanceId })
+			}
 			title="Clear execution history"
 		>
 			<Trash2 size={16} />
