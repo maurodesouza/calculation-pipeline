@@ -4,10 +4,11 @@ import (
 	"context"
 
 	runPkg "github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/run"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/run/repository"
 )
 
 type FailRunUseCaseDependencies struct {
-	RunRepository *runPkg.RunRepository
+	RunRepository *repository.RunRepository
 }
 
 type FailRunUseCase struct {

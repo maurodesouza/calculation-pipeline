@@ -1,4 +1,4 @@
-package pipeline
+package repository
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/entities"
 )
 
 type SyncResult struct {
@@ -37,7 +38,7 @@ func NewPipelineRepository(pool *pgxpool.Pool) *PipelineRepository {
 	return &PipelineRepository{pool: pool}
 }
 
-func (r *PipelineRepository) Save(ctx context.Context, pipeline *Pipeline) error {
+func (r *PipelineRepository) Save(ctx context.Context, pipeline *entities.Pipeline) error {
 	query := `
 		INSERT INTO cp.pipelines (id, name, description, initial_step_id, canvas, source, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -63,7 +64,7 @@ func (r *PipelineRepository) Save(ctx context.Context, pipeline *Pipeline) error
 	return nil
 }
 
-func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*Pipeline, error) {
+func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*entities.Pipeline, error) {
 	query := `SELECT id, name, description, initial_step_id, canvas, source, created_at, updated_at FROM cp.pipelines WHERE id = $1`
 
 	var row struct {
@@ -100,7 +101,7 @@ func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*Pipeline,
 		return nil, err
 	}
 
-	pipeline, err := RestorePipeline(RestorePipelinePayload{
+	pipeline, err := entities.RestorePipeline(entities.RestorePipelinePayload{
 		ID:            row.ID,
 		Name:          row.Name,
 		Description:   row.Description,
@@ -119,7 +120,7 @@ func (r *PipelineRepository) GetByID(ctx context.Context, id string) (*Pipeline,
 	return pipeline, nil
 }
 
-func (r *PipelineRepository) Update(ctx context.Context, pipeline *Pipeline) error {
+func (r *PipelineRepository) Update(ctx context.Context, pipeline *entities.Pipeline) error {
 	query := `
 		UPDATE cp.pipelines
 		SET name = $1, description = $2, initial_step_id = $3, canvas = $4, updated_at = $5
@@ -144,7 +145,7 @@ func (r *PipelineRepository) Update(ctx context.Context, pipeline *Pipeline) err
 	return nil
 }
 
-func (r *PipelineRepository) Sync(ctx context.Context, pipeline *Pipeline) (SyncResult, error) {
+func (r *PipelineRepository) Sync(ctx context.Context, pipeline *entities.Pipeline) (SyncResult, error) {
 	existingSteps, err := r.getSteps(ctx, pipeline.GetId())
 	if err != nil {
 		return SyncResult{}, err
@@ -161,7 +162,7 @@ func (r *PipelineRepository) Sync(ctx context.Context, pipeline *Pipeline) (Sync
 		newStepIds[s.GetId()] = true
 	}
 
-	var toCreate, toUpdate, toDelete []Step
+	var toCreate, toUpdate, toDelete []entities.Step
 
 	for _, step := range newSteps {
 		if existingStepIds[step.GetId()] {
@@ -222,7 +223,7 @@ func (r *PipelineRepository) Sync(ctx context.Context, pipeline *Pipeline) (Sync
 	return result, nil
 }
 
-func (r *PipelineRepository) List(ctx context.Context, filters ListFilters) ([]Pipeline, error) {
+func (r *PipelineRepository) List(ctx context.Context, filters ListFilters) ([]entities.Pipeline, error) {
 	allowedSortColumns := map[string]bool{
 		"created_at": true,
 		"updated_at": true,
@@ -304,11 +305,11 @@ func (r *PipelineRepository) List(ctx context.Context, filters ListFilters) ([]P
 		return nil, err
 	}
 
-	var pipelines []Pipeline
+	var pipelines []entities.Pipeline
 	for _, row := range pipelineRows {
 		steps := stepsByPipelineID[row.ID]
 
-		pipeline, err := RestorePipeline(RestorePipelinePayload{
+		pipeline, err := entities.RestorePipeline(entities.RestorePipelinePayload{
 			ID:            row.ID,
 			Name:          row.Name,
 			Description:   row.Description,
@@ -360,7 +361,7 @@ func (r *PipelineRepository) Count(ctx context.Context, filters CountFilters) (i
 	return total, nil
 }
 
-func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([]Step, error) {
+func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([]entities.Step, error) {
 	query := `SELECT id, pipeline_id, name, description, operation, by, next_step_id, source, created_at, updated_at FROM cp.steps WHERE pipeline_id = $1 ORDER BY created_at`
 
 	rows, err := r.pool.Query(ctx, query, pipelineID)
@@ -369,7 +370,7 @@ func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([
 	}
 	defer rows.Close()
 
-	var steps []Step
+	var steps []entities.Step
 	for rows.Next() {
 		var row struct {
 			ID          string
@@ -389,7 +390,7 @@ func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([
 			return nil, err
 		}
 
-		step, err := RestoreStep(RestoreStepPayload{
+		step, err := entities.RestoreStep(entities.RestoreStepPayload{
 			ID:          row.ID,
 			PipelineID:  row.PipelineID,
 			Name:        row.Name,
@@ -415,9 +416,9 @@ func (r *PipelineRepository) getSteps(ctx context.Context, pipelineID string) ([
 	return steps, nil
 }
 
-func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipelineIDs []string) (map[string][]Step, error) {
+func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipelineIDs []string) (map[string][]entities.Step, error) {
 	if len(pipelineIDs) == 0 {
-		return map[string][]Step{}, nil
+		return map[string][]entities.Step{}, nil
 	}
 
 	placeholders := make([]string, len(pipelineIDs))
@@ -435,7 +436,7 @@ func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipeline
 	}
 	defer rows.Close()
 
-	stepsByPipelineID := make(map[string][]Step)
+	stepsByPipelineID := make(map[string][]entities.Step)
 
 	for rows.Next() {
 		var row struct {
@@ -456,7 +457,7 @@ func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipeline
 			return nil, err
 		}
 
-		step, err := RestoreStep(RestoreStepPayload{
+		step, err := entities.RestoreStep(entities.RestoreStepPayload{
 			ID:          row.ID,
 			PipelineID:  row.PipelineID,
 			Name:        row.Name,
@@ -482,7 +483,7 @@ func (r *PipelineRepository) getStepsByPipelineIDs(ctx context.Context, pipeline
 	return stepsByPipelineID, nil
 }
 
-func (r *PipelineRepository) saveStepWithTx(ctx context.Context, tx pgx.Tx, step Step) error {
+func (r *PipelineRepository) saveStepWithTx(ctx context.Context, tx pgx.Tx, step entities.Step) error {
 	query := `
 		INSERT INTO cp.steps (id, pipeline_id, name, description, operation, by, next_step_id, source, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -506,7 +507,7 @@ func (r *PipelineRepository) saveStepWithTx(ctx context.Context, tx pgx.Tx, step
 	return err
 }
 
-func (r *PipelineRepository) updateStepWithTx(ctx context.Context, tx pgx.Tx, step Step) error {
+func (r *PipelineRepository) updateStepWithTx(ctx context.Context, tx pgx.Tx, step entities.Step) error {
 	query := `
 		UPDATE cp.steps
 		SET name = $1, description = $2, operation = $3, by = $4, next_step_id = $5, updated_at = $6
@@ -533,7 +534,7 @@ func (r *PipelineRepository) deleteStepWithTx(ctx context.Context, tx pgx.Tx, id
 	return err
 }
 
-func (r *PipelineRepository) updateWithTx(ctx context.Context, tx pgx.Tx, pipeline *Pipeline) error {
+func (r *PipelineRepository) updateWithTx(ctx context.Context, tx pgx.Tx, pipeline *entities.Pipeline) error {
 	query := `
 		UPDATE cp.pipelines
 		SET name = $1, description = $2, initial_step_id = $3, canvas = $4, updated_at = $5

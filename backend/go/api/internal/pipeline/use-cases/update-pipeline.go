@@ -3,12 +3,12 @@ package usecases
 import (
 	"context"
 
-	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/repository"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
 )
 
 type UpdatePipelineUseCaseDependencies struct {
-	PipelineRepository *pipeline.PipelineRepository
+	PipelineRepository *repository.PipelineRepository
 }
 
 type UpdatePipelineUseCase struct {

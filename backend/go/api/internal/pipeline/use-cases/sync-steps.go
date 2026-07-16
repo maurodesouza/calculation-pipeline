@@ -3,12 +3,13 @@ package usecases
 import (
 	"context"
 
-	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/entities"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/repository"
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/shared/errors"
 )
 
 type SyncStepsUseCaseDependencies struct {
-	PipelineRepository *pipeline.PipelineRepository
+	PipelineRepository *repository.PipelineRepository
 }
 
 type SyncStepsUseCase struct {
@@ -51,9 +52,9 @@ func (u *SyncStepsUseCase) Execute(input SyncStepsInput) (SyncStepsOutput, error
 		return SyncStepsOutput{}, errors.PipelineNotFoundError(input.PipelineId)
 	}
 
-	stepInputs := make([]pipeline.StepInput, len(input.Steps))
+	stepInputs := make([]entities.StepInput, len(input.Steps))
 	for i, s := range input.Steps {
-		stepInputs[i] = pipeline.StepInput{
+		stepInputs[i] = entities.StepInput{
 			ID:          s.ID,
 			Name:        s.Name,
 			Description: s.Description,
@@ -63,7 +64,7 @@ func (u *SyncStepsUseCase) Execute(input SyncStepsInput) (SyncStepsOutput, error
 		}
 	}
 
-	chain, err := pipeline.RestoreSteps(p, stepInputs)
+	chain, err := entities.RestoreSteps(p, stepInputs)
 	if err != nil {
 		return SyncStepsOutput{}, err
 	}

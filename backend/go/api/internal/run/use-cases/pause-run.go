@@ -5,10 +5,11 @@ import (
 
 	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/queue"
 	runPkg "github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/run"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/run/repository"
 )
 
 type PauseRunUseCaseDependencies struct {
-	RunRepository *runPkg.RunRepository
+	RunRepository *repository.RunRepository
 	Queue         *queue.RabbitMQ
 }
 

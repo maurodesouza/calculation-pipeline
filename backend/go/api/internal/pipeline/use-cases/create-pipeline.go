@@ -3,11 +3,12 @@ package usecases
 import (
 	"context"
 
-	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/entities"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/repository"
 )
 
 type CreatePipelineUseCaseDependencies struct {
-	PipelineRepository *pipeline.PipelineRepository
+	PipelineRepository *repository.PipelineRepository
 }
 
 type CreatePipelineUseCase struct {
@@ -31,7 +32,7 @@ type CreatePipelineOutput struct {
 }
 
 func (u *CreatePipelineUseCase) Execute(input CreatePipelineInput) (CreatePipelineOutput, error) {
-	p, err := pipeline.NewPipeline(pipeline.NewPipelinePayload{
+	p, err := entities.NewPipeline(entities.NewPipelinePayload{
 		Name:        input.Name,
 		Description: input.Description,
 		Canvas:      input.Canvas,

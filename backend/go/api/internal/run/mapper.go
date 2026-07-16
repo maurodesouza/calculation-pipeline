@@ -1,6 +1,9 @@
 package run
 
-import "github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline"
+import (
+	pipelineEntities "github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/entities"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/run/entities"
+)
 
 type Steps struct {
 	ID         string `json:"id"`
@@ -15,7 +18,7 @@ type RunCreated struct {
 	Steps   []Steps `json:"steps"`
 }
 
-func RunCreatedMapper(run *Run, pipeline *pipeline.Pipeline) RunCreated {
+func RunCreatedMapper(run *entities.Run, pipeline *pipelineEntities.Pipeline) RunCreated {
 	steps := make([]Steps, 0)
 	for _, step := range pipeline.GetSteps() {
 		steps = append(steps, Steps{
@@ -37,7 +40,7 @@ type RunPauseRequested struct {
 	RunID string `json:"runId"`
 }
 
-func RunPauseRequestedMapper(run *Run) RunPauseRequested {
+func RunPauseRequestedMapper(run *entities.Run) RunPauseRequested {
 	return RunPauseRequested{
 		RunID: run.GetId(),
 	}
@@ -47,7 +50,7 @@ type RunResumeRequested struct {
 	RunID string `json:"runId"`
 }
 
-func RunResumeRequestedMapper(run *Run) RunResumeRequested {
+func RunResumeRequestedMapper(run *entities.Run) RunResumeRequested {
 	return RunResumeRequested{
 		RunID: run.GetId(),
 	}

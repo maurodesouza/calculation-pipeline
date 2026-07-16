@@ -1,4 +1,4 @@
-package run
+package repository
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/run/entities"
 )
 
 type RunRepository struct {
@@ -18,7 +19,7 @@ func NewRunRepository(pool *pgxpool.Pool) *RunRepository {
 	}
 }
 
-func (r *RunRepository) Save(ctx context.Context, run *Run) error {
+func (r *RunRepository) Save(ctx context.Context, run *entities.Run) error {
 	query := `
 		INSERT INTO runs (id, pipeline_id, payload, result, status, error, source, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -45,7 +46,7 @@ func (r *RunRepository) Save(ctx context.Context, run *Run) error {
 	return nil
 }
 
-func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
+func (r *RunRepository) GetById(ctx context.Context, id string) (*entities.Run, error) {
 	query := `
 		SELECT id, pipeline_id, payload, result, status, error, source, created_at, updated_at
 		FROM runs
@@ -83,7 +84,7 @@ func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 		return nil, err
 	}
 
-	run, err := RestoreRun(RestoreRunPayload{
+	run, err := entities.RestoreRun(entities.RestoreRunPayload{
 		ID:         row.ID,
 		PipelineID: row.PipelineID,
 		Payload:    row.Payload,
@@ -101,7 +102,7 @@ func (r *RunRepository) GetById(ctx context.Context, id string) (*Run, error) {
 	return &run, nil
 }
 
-func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) ([]Run, error) {
+func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) ([]entities.Run, error) {
 	query := `
 		SELECT id, pipeline_id, payload, result, status, error, source, created_at, updated_at
 		FROM runs
@@ -115,7 +116,7 @@ func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) 
 	}
 	defer rows.Close()
 
-	var runs []Run
+	var runs []entities.Run
 	for rows.Next() {
 		var row struct {
 			ID         string
@@ -144,7 +145,7 @@ func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) 
 			return nil, err
 		}
 
-		run, err := RestoreRun(RestoreRunPayload{
+		run, err := entities.RestoreRun(entities.RestoreRunPayload{
 			ID:         row.ID,
 			PipelineID: row.PipelineID,
 			Payload:    row.Payload,
@@ -169,7 +170,7 @@ func (r *RunRepository) GetByPipelineID(ctx context.Context, pipelineID string) 
 	return runs, nil
 }
 
-func (r *RunRepository) Update(ctx context.Context, run *Run) error {
+func (r *RunRepository) Update(ctx context.Context, run *entities.Run) error {
 	query := `
 		UPDATE runs
 		SET result = $2, status = $3, error = $4, updated_at = $5

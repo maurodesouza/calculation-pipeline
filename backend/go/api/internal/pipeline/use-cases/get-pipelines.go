@@ -3,11 +3,11 @@ package usecases
 import (
 	"context"
 
-	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline"
+	"github.com/maurodesouza/calculation-pipeline/backend/go/api/internal/pipeline/repository"
 )
 
 type GetPipelinesUseCaseDependencies struct {
-	PipelineRepository *pipeline.PipelineRepository
+	PipelineRepository *repository.PipelineRepository
 }
 
 type GetPipelinesUseCase struct {
@@ -61,7 +61,7 @@ func (u *GetPipelinesUseCase) Execute(input GetPipelinesInput) (GetPipelinesOutp
 		sortBy = "created_at"
 	}
 
-	pipelines, err := u.PipelineRepository.List(context.Background(), pipeline.ListFilters{
+	pipelines, err := u.PipelineRepository.List(context.Background(), repository.ListFilters{
 		Limit:  limit,
 		Offset: offset,
 		Name:   input.Name,
@@ -72,7 +72,7 @@ func (u *GetPipelinesUseCase) Execute(input GetPipelinesInput) (GetPipelinesOutp
 		return GetPipelinesOutput{}, err
 	}
 
-	total, err := u.PipelineRepository.Count(context.Background(), pipeline.CountFilters{
+	total, err := u.PipelineRepository.Count(context.Background(), repository.CountFilters{
 		Name: input.Name,
 		ID:   input.ID,
 	})
